@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useBuilderStore } from "@/store/useBuilderStore";
 import { useVideoAutoplay } from "@/hooks/useVideoAutoplay";
+import { useLangStore } from "@/store/useLangStore";
+import { t } from "@/lib/i18n";
 import type { SponsoredPlace } from "@/lib/config/sponsored";
 
 export default function SponsoredCard({ place }: { place: SponsoredPlace }) {
@@ -10,9 +12,8 @@ export default function SponsoredCard({ place }: { place: SponsoredPlace }) {
   const videoRef = useVideoAutoplay(0.35);
 
   // Rehydrate builder store so any pre-existing stops are loaded before we write.
-  useEffect(() => {
-    useBuilderStore.persist.rehydrate();
-  }, []);
+  useEffect(() => { useBuilderStore.persist.rehydrate(); }, []);
+  const lang = useLangStore((s) => s.lang);
 
   const addStop = useBuilderStore((s) => s.addStop);
   const stops = useBuilderStore((s) => s.draft.stops);
@@ -113,7 +114,7 @@ export default function SponsoredCard({ place }: { place: SponsoredPlace }) {
                 : "bg-amber-400 text-slate-900 hover:bg-amber-300 active:scale-95"
             }`}
           >
-            {added ? "✓ Added to Trip" : "+ Add to Trip"}
+            {added ? t("card.added", lang) : t("card.add", lang)}
           </button>
         </div>
       </div>

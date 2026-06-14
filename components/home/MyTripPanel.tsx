@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 import { useSavedStore } from "@/store/useSavedStore";
 import { typeMeta } from "@/lib/config/constants";
+import { useLangStore } from "@/store/useLangStore";
+import { t } from "@/lib/i18n";
 
 export default function MyTripPanel() {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => { useSavedStore.persist.rehydrate(); }, []);
+  const lang  = useLangStore((s) => s.lang);
   const saved = useSavedStore((s) => s.items);
   const remove = useSavedStore((s) => s.remove);
   const clearAll = useSavedStore((s) => s.clearAll);
@@ -29,7 +32,7 @@ export default function MyTripPanel() {
         className="flex items-center gap-1 transition-colors hover:text-ink"
       >
         <span className="text-amber-400">★</span>
-        My Trip
+        {t("nav.mytrip", lang)}
         {saved.length > 0 && (
           <span className="ml-0.5 grid min-w-[18px] place-items-center rounded-full bg-ink px-1 text-[10px] font-extrabold text-white">
             {saved.length}
@@ -52,7 +55,7 @@ export default function MyTripPanel() {
         }`}
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
-          <h2 className="text-xl font-extrabold text-ink">My Trip</h2>
+          <h2 className="text-xl font-extrabold text-ink">{t("nav.mytrip", lang)}</h2>
           <button
             onClick={() => setOpen(false)}
             className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200"

@@ -32,7 +32,7 @@ export default function CategoryRow({
       </div>
 
       {/* Horizontal scroll strip — snap-x so cards land cleanly on swipe */}
-      <div className="flex gap-4 overflow-x-auto pb-3 pl-5 pr-5 sm:pl-0 sm:pr-0 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex gap-4 overflow-x-auto pb-3 pl-5 pr-5 sm:pl-0 sm:pr-0 snap-x snap-mandatory scroll-smooth scroll-pl-5 sm:scroll-pl-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {children}
       </div>
     </div>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CourseSearch from "@/components/home/CourseSearch";
+import CoursesSectionHeader from "@/components/home/CoursesSectionHeader";
 import MapSection from "@/components/home/MapSection";
 import Navbar from "@/components/home/Navbar";
 import RouteVideoCard from "@/components/home/RouteVideoCard";
@@ -97,17 +98,7 @@ export default async function HomePage() {
 
       {/* ============ COURSES — Netflix-style feed ============ */}
       <section id="courses" className="scroll-mt-20 py-20 sm:py-28">
-        <div className="mb-12 px-5 text-center sm:mx-auto sm:max-w-6xl">
-          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-emerald-600">
-            Curated Routes
-          </p>
-          <h2 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
-            Pick a route. We did the homework.
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-slate-500">
-            Hand-built itineraries with only local-verified stops — swipe to explore.
-          </p>
-        </div>
+        <CoursesSectionHeader />
 
         {routes.length === 0 ? (
           <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center">
@@ -133,6 +124,7 @@ export default async function HomePage() {
                       <RouteVideoCard
                         slug={r.slug}
                         title_en={r.title_en}
+                        title_ko={r.title_ko ?? undefined}
                         thumbnail_url={r.thumbnail_url}
                         video_url={getRouteVideoUrl(r.slug)}
                         meta={getCardMeta(r.slug)}

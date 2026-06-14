@@ -1,17 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useLangStore } from "@/store/useLangStore";
+import type { Lang } from "@/lib/i18n";
 
+// Single hydration point for lang preference.
+// Reads localStorage on mount → pushes to the shared store.
+// All other components just subscribe to useLangStore.
 export default function LangToggle() {
-  const [lang, setLang] = useState<"en" | "ko">("en");
+  const lang    = useLangStore((s) => s.lang);
+  const setLang = useLangStore((s) => s.setLang);
 
   useEffect(() => {
-    if (localStorage.getItem("krt-lang") === "ko") setLang("ko");
-  }, []);
+    const saved = localStorage.getItem("krt-lang") as Lang | null;
+    if (saved === "en" || saved === "ko") setLang(saved);
+  }, [setLang]);
 
-  const pick = (l: "en" | "ko") => {
-    setLang(l);
+  const pick = (l: Lang) => {
     localStorage.setItem("krt-lang", l);
+    setLang(l);
   };
 
   return (
