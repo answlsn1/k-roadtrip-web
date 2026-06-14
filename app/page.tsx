@@ -1,8 +1,7 @@
 import Link from "next/link";
 import CourseSearch from "@/components/home/CourseSearch";
-import LangToggle from "@/components/home/LangToggle";
 import MapSection from "@/components/home/MapSection";
-import MyTripPanel from "@/components/home/MyTripPanel";
+import Navbar from "@/components/home/Navbar";
 import RouteVideoCard from "@/components/home/RouteVideoCard";
 import CategoryRow from "@/components/home/CategoryRow";
 import SponsoredCard from "@/components/home/SponsoredCard";
@@ -52,38 +51,7 @@ export default async function HomePage() {
   return (
     <main>
       {/* ============ NAVBAR ============ */}
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-md">
-        <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-ink"
-          >
-            <span className="grid h-8 w-8 place-items-center rounded-xl bg-ink text-sm text-white">
-              K
-            </span>
-            K-RoadTrip
-          </Link>
-          <div className="flex items-center gap-6 text-sm font-semibold text-slate-600">
-            <a href="#courses" className="transition-colors hover:text-ink">
-              Routes
-            </a>
-            <a href="#map" className="transition-colors hover:text-ink">
-              Map
-            </a>
-            <a href="#why" className="transition-colors hover:text-ink">
-              Why K-RoadTrip
-            </a>
-            <Link
-              href="/builder"
-              className="rounded-full bg-ink px-3.5 py-1.5 text-white transition-colors hover:bg-slate-700"
-            >
-              + Build Route
-            </Link>
-            <MyTripPanel />
-            <LangToggle />
-          </div>
-        </nav>
-      </header>
+      <Navbar />
 
       {/* ============ HERO ============ */}
       <section className="relative flex min-h-[88vh] items-center justify-center">
