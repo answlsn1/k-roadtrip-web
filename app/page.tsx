@@ -1,17 +1,53 @@
 import Link from "next/link";
 import CourseSearch from "@/components/home/CourseSearch";
-import { getPublishedRoutes } from "@/lib/supabase/queries";
+import LangToggle from "@/components/home/LangToggle";
+import MapSection from "@/components/home/MapSection";
+import MyTripPanel from "@/components/home/MyTripPanel";
+import RouteVideoCard from "@/components/home/RouteVideoCard";
+import CategoryRow from "@/components/home/CategoryRow";
+import SponsoredCard from "@/components/home/SponsoredCard";
+import { getPublishedRoutes, getAllWaypointsForMap } from "@/lib/data/queries";
+import { getCardMeta, getRouteVideoUrl } from "@/lib/config/cardMeta";
+import { SPONSORED_PLACES } from "@/lib/config/sponsored";
+import type { Route } from "@/lib/types";
 
 // Render per-request: works with or without Supabase env at build time,
 // and new courses appear without a redeploy. Switch to ISR when traffic grows.
 export const dynamic = "force-dynamic";
+
+// ── Netflix-style feed categories ───────────────────────────────────────────
+const FEED_CATEGORIES = [
+  {
+    id: "trending",
+    title: "🔥 Trending in Korea",
+    slugs: ["jeju-volcanic-loop", "busan-coastal-metropolis", "gangneung-coastal-drive"],
+  },
+  {
+    id: "heritage",
+    title: "🏛 History & Culture",
+    slugs: [
+      "gyeongju-heritage-loop",
+      "andong-scholars-riverside-drive",
+      "gyeongju-ancient-capital-drive",
+      "jeonju-wanju-hanok-drive",
+    ],
+  },
+  {
+    id: "ocean",
+    title: "🌊 Ocean Views",
+    slugs: ["gangneung-coastal-drive", "busan-coastal-metropolis"],
+  },
+] as const;
 
 // Woljeonggyo Bridge, Gyeongju — dancheong colors you can only find in Korea
 const HERO_IMG =
   "https://images.unsplash.com/photo-1653632445006-0ed9bbe32672?auto=format&fit=crop&w=2000&q=80";
 
 export default async function HomePage() {
-  const routes = await getPublishedRoutes();
+  const [routes, mapWaypoints] = await Promise.all([
+    getPublishedRoutes(),
+    getAllWaypointsForMap(),
+  ]);
 
   return (
     <main>
@@ -29,17 +65,28 @@ export default async function HomePage() {
           </Link>
           <div className="flex items-center gap-6 text-sm font-semibold text-slate-600">
             <a href="#courses" className="transition-colors hover:text-ink">
-              Courses
+              Routes
+            </a>
+            <a href="#map" className="transition-colors hover:text-ink">
+              Map
             </a>
             <a href="#why" className="transition-colors hover:text-ink">
               Why K-RoadTrip
             </a>
+            <Link
+              href="/builder"
+              className="rounded-full bg-ink px-3.5 py-1.5 text-white transition-colors hover:bg-slate-700"
+            >
+              + Build Route
+            </Link>
+            <MyTripPanel />
+            <LangToggle />
           </div>
         </nav>
       </header>
 
       {/* ============ HERO ============ */}
-      <section className="relative flex min-h-[88vh] items-center justify-center overflow-hidden">
+      <section className="relative flex min-h-[88vh] items-center justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={HERO_IMG}
@@ -80,9 +127,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ============ COURSES ============ */}
-      <section id="courses" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20 sm:py-28">
-        <div className="mb-12 text-center">
+      {/* ============ COURSES — Netflix-style feed ============ */}
+      <section id="courses" className="scroll-mt-20 py-20 sm:py-28">
+        <div className="mb-12 px-5 text-center sm:mx-auto sm:max-w-6xl">
           <p className="mb-3 text-xs font-bold uppercase tracking-widest text-emerald-600">
             Curated Routes
           </p>
@@ -90,8 +137,7 @@ export default async function HomePage() {
             Pick a route. We did the homework.
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-slate-500">
-            Hand-built itineraries with only local-verified stops — open a
-            course to see every stop on the map.
+            Hand-built itineraries with only local-verified stops — swipe to explore.
           </p>
         </div>
 
@@ -106,44 +152,72 @@ export default async function HomePage() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {routes.map((r) => (
-              <Link
-                key={r.id}
-                href={`/routes/${r.slug}`}
-                className="group relative block h-64 overflow-hidden rounded-3xl bg-slate-800 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
-              >
-                {r.thumbnail_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={r.thumbnail_url}
-                    alt={r.title_en}
-                    loading="lazy"
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-5">
-                  <span className="inline-block rounded-full bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-900">
-                    {r.region_name_en}
-                    {r.region_name_ko ? ` · ${r.region_name_ko}` : ""}
-                  </span>
-                  <h3 className="mt-2 text-lg font-extrabold leading-snug text-white">
-                    {r.title_en}
-                  </h3>
-                  <p className="mt-1 text-xs font-semibold text-white/75">
-                    {r.total_distance != null &&
-                      `🚗 ${Number(r.total_distance).toFixed(1)} km`}
-                    {r.total_duration != null && ` · ⏱ ${r.total_duration} min drive`}
-                  </p>
-                  <p className="mt-3 text-sm font-bold text-amber-300 transition-transform group-hover:translate-x-1">
-                    View course →
-                  </p>
-                </div>
-              </Link>
-            ))}
+          <div className="sm:mx-auto sm:max-w-6xl">
+            {FEED_CATEGORIES.map((cat) => {
+              const cards = cat.slugs
+                .map((slug) => routes.find((r) => r.slug === slug))
+                .filter((r): r is Route => Boolean(r));
+              if (cards.length === 0) return null;
+              return (
+                <CategoryRow key={cat.id} title={cat.title}>
+                  {cards.map((r) => (
+                    <div key={r.id} className="snap-start shrink-0 w-[300px] sm:w-[340px]">
+                      <RouteVideoCard
+                        slug={r.slug}
+                        title_en={r.title_en}
+                        thumbnail_url={r.thumbnail_url}
+                        video_url={getRouteVideoUrl(r.slug)}
+                        meta={getCardMeta(r.slug)}
+                        sizeClass="h-[400px] w-full"
+                      />
+                    </div>
+                  ))}
+                </CategoryRow>
+              );
+            })}
+
+            {/* ⭐ Sponsored Picks row */}
+            <CategoryRow
+              title="⭐ Sponsored Picks"
+              badge="Partner"
+              badgeClass="bg-amber-100 text-amber-700"
+            >
+              {SPONSORED_PLACES.map((place) => (
+                <SponsoredCard key={place.sourceId} place={place} />
+              ))}
+            </CategoryRow>
           </div>
         )}
+      </section>
+
+      {/* ============ MAP ============ */}
+      {mapWaypoints.length > 0 && <MapSection waypoints={mapWaypoints} />}
+
+      {/* ============ ROAD TRIP TIPS ============ */}
+      <section className="mx-auto max-w-6xl px-5 pb-20 sm:pb-28">
+        <div className="rounded-3xl bg-ink px-7 py-8 sm:px-10 sm:py-10">
+          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-emerald-400">
+            Before You Drive
+          </p>
+          <h3 className="mb-6 text-xl font-extrabold text-white sm:text-2xl">
+            What road-trippers wish they&apos;d known
+          </h3>
+          <div className="grid gap-6 sm:grid-cols-3">
+            {[
+              { icon: "🪪", title: "IDP is a must", desc: "Rental companies require an International Driving Permit (1949 convention) along with your home license and passport." },
+              { icon: "🛣", title: "Get a Hi-Pass card", desc: "Expressway tolls are electronic. Rent a Hi-Pass card with your car and settle the balance when you return it." },
+              { icon: "⛽", title: "Don't skip the hyugeso", desc: "Korean highway rest stops (hyugeso) are food destinations in their own right — walnut cakes, udon, full meals." },
+              { icon: "📵", title: "Save offline maps", desc: "Mountain stretches between coastal towns can drop signal. Download offline areas in Naver Map before leaving the city." },
+              { icon: "🌙", title: "Eat dinner early", desc: "Rural kitchens close early — or randomly. Don't count on a late dinner once you're off the highway." },
+              { icon: "📞", title: "Booking? Ask your hotel", desc: "Naver reservations need a Korean phone number. Hotel front desks will happily call for you — most places outside Seoul are walk-in anyway." },
+            ].map((tip) => (
+              <div key={tip.title}>
+                <p className="mb-1.5 text-sm font-bold text-white">{tip.icon} {tip.title}</p>
+                <p className="text-sm leading-relaxed text-slate-400">{tip.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* ============ VALUE PROPS ============ */}

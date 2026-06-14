@@ -5,11 +5,8 @@ import {
   toAndroidIntentUrl,
   buildNaverWebSearchUrl,
   type NaverRoutePoint,
-} from "../utils/naverMapLink";
-import { typeMeta } from "../lib/constants";
-// tripMode reads localStorage at call time (not import time), so a static
-// import is safe — the mock below just has to be installed before calls.
-import { clearTripProgress, getTripProgress, setTripProgress } from "../lib/tripMode";
+} from "../lib/domain/naverMapLink";
+import { typeMeta } from "../lib/config/constants";
 
 let failures = 0;
 function check(name: string, cond: boolean, detail?: string) {
@@ -68,25 +65,6 @@ console.log("[6] type registry");
 check("known tag", typeMeta("hanok_cafe").label_en === "Hanok Cafe" && typeMeta("hanok_cafe").color === "#c2410c");
 check("fallback prettified", typeMeta("night_market").label_en === "Night Market");
 check("fallback color", typeMeta("night_market").color === "#334155");
-
-console.log("[7] trip mode (mocked localStorage)");
-const store = new Map<string, string>();
-(globalThis as Record<string, unknown>).window = globalThis;
-(globalThis as Record<string, unknown>).localStorage = {
-  getItem: (k: string) => store.get(k) ?? null,
-  setItem: (k: string, v: string) => void store.set(k, v),
-  removeItem: (k: string) => void store.delete(k),
-};
-check("initial 0", getTripProgress(1) === 0);
-setTripProgress(1, 3);
-check("set 3", getTripProgress(1) === 3);
-setTripProgress(1, 2);
-check("never regresses (still 3)", getTripProgress(1) === 3);
-setTripProgress(1, 5);
-check("advances to 5", getTripProgress(1) === 5);
-clearTripProgress(1);
-check("cleared", getTripProgress(1) === 0);
-check("corrupt json -> 0", (store.set("krt-trip-progress-9", "{oops"), getTripProgress(9) === 0));
 
 console.log(failures === 0 ? "\nALL CHECKS PASSED" : `\n${failures} CHECK(S) FAILED`);
 process.exit(failures === 0 ? 0 : 1);

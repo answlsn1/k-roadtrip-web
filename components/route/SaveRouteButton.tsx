@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getSupabaseBrowserClient } from "@/lib/data/supabaseClient";
 import AuthModal from "@/components/auth/AuthModal";
 import { trackRouteEvent } from "@/lib/analytics";
 
@@ -26,6 +26,7 @@ export default function SaveRouteButton({ routeId, className = "" }: SaveRouteBu
 
   /* track auth session */
   useEffect(() => {
+    if (!supabase) return;
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => setSession(s));
     return () => sub.subscription.unsubscribe();
@@ -37,6 +38,7 @@ export default function SaveRouteButton({ routeId, className = "" }: SaveRouteBu
       setSaved(false);
       return;
     }
+    if (!supabase) return;
     let cancelled = false;
     (async () => {
       const { data } = await supabase
@@ -74,7 +76,7 @@ export default function SaveRouteButton({ routeId, className = "" }: SaveRouteBu
   }, [session, routeId, supabase]);
 
   const toggle = useCallback(async () => {
-    if (busy) return;
+    if (busy || !supabase) return;
 
     /* --- soft gate: signed out → remember intent, prompt login --- */
     if (!session) {

@@ -1,17 +1,4 @@
-/* ============================================================
- * Naver Map deep-link builder (official nmap:// URL scheme)
- *
- * nmap://route/car
- *   ?slat&slng&sname        — start (omit → user's current location)
- *   &dlat&dlng&dname        — destination
- *   &v1lat&v1lng&v1name …   — via points (scheme supports v1–v5 max)
- *   &appname=kroadtrip
- *
- * `name` params must carry the exact Korean name (place_name_ko),
- * UTF-8 percent-encoded via encodeURIComponent.
- * ============================================================ */
-
-import { isAndroid, isIOS } from "./browserEnv";
+import { isAndroid, isIOS } from "@/lib/browserEnv";
 
 export interface NaverRoutePoint {
   latitude: number;
@@ -21,7 +8,7 @@ export interface NaverRoutePoint {
   address_ko?: string | null;
 }
 
-const MAX_VIA_POINTS = 5; // hard limit of the nmap scheme (v1–v5)
+const MAX_VIA_POINTS = 5;
 const DEFAULT_APPNAME = "kroadtrip";
 
 const enc = encodeURIComponent;
@@ -30,15 +17,12 @@ function sortBySequence<T extends NaverRoutePoint>(points: T[]): T[] {
   return [...points].sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0));
 }
 
-/** Keep driving order; when more vias than the scheme allows,
- *  sample evenly so the route shape is preserved. */
 function pickEvenly<T>(arr: T[], max: number): T[] {
   if (arr.length <= max) return arr;
   const step = (arr.length - 1) / (max - 1);
   return Array.from({ length: max }, (_, i) => arr[Math.round(i * step)]);
 }
 
-/** waypoints[] → nmap://route/car?… (start = first, dest = last, rest = vias) */
 export function buildNaverCarRouteLink(
   points: NaverRoutePoint[],
   opts: { appname?: string; useCurrentLocationAsStart?: boolean } = {}
@@ -79,22 +63,64 @@ export function buildNaverCarRouteLink(
   return `nmap://route/car?${params.join("&")}`;
 }
 
-/** Web fallback — Naver Map web search for the destination. */
 export function buildNaverWebSearchUrl(point: NaverRoutePoint): string {
   return `https://map.naver.com/p/search/${enc(point.place_name_ko)}`;
 }
 
-/** Clipboard fallback — paste-ready Korean name/address list. */
+/** WGS84 decimal degrees → Web Mercator (EPSG:3857) in metres.
+ *  Naver's /p/directions URL requires these projected coordinates,
+ *  not WGS84 decimal degrees (which it silently ignores). */
+function toMercator(lng: number, lat: number): { x: number; y: number } {
+  const x = (lng * 20037508.34) / 180;
+  const y =
+    (Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)) *
+      20037508.34) /
+    Math.PI;
+  return { x, y };
+}
+
+/** Web route URL — opens Naver Map web with the whole route pre-filled.
+ *
+ *  URL structure: /p/directions/{start}/{goal}/{via₁}/…/{viaₙ}/{mode}
+ *    - slot 0   = start, slot 1 = goal, slots 2…n-1 = vias, last = "car"
+ *    - empty slot = literal "-"
+ *
+ *  Each point: `{mercX},{mercY},{name},,`
+ *    Coordinates must be Web Mercator (EPSG:3857), NOT WGS84 degrees —
+ *    Naver silently rejects WGS84 and shows an empty map. */
+export function buildNaverWebRouteUrl(points: NaverRoutePoint[]): string {
+  const sorted = sortBySequence(points);
+  if (sorted.length === 0) return "https://map.naver.com";
+  if (sorted.length === 1) return buildNaverWebSearchUrl(sorted[0]);
+
+  const start = sorted[0];
+  const dest = sorted[sorted.length - 1];
+  const vias = pickEvenly(sorted.slice(1, -1), MAX_VIA_POINTS);
+
+  const pt = (p: NaverRoutePoint) => {
+    const { x, y } = toMercator(p.longitude, p.latitude);
+    return `${x},${y},${enc(p.place_name_ko)},,`;
+  };
+
+  const waypointSlots = vias.length ? vias.map(pt) : ["-"];
+  const segments = [pt(start), pt(dest), ...waypointSlots, "car"];
+
+  return `https://map.naver.com/p/directions/${segments.join("/")}`;
+}
+
 export function buildKoreanAddressList(points: NaverRoutePoint[]): string {
   return sortBySequence(points)
-    .map((p, i) => `${i + 1}. ${p.place_name_ko}${p.address_ko ? ` — ${p.address_ko}` : ""}`)
+    .map(
+      (p, i) =>
+        `${i + 1}. ${p.place_name_ko}${p.address_ko ? ` — ${p.address_ko}` : ""}`
+    )
     .join("\n");
 }
 
-/** Android: wrap the nmap scheme in an intent:// URL — Chrome then
- *  handles "app not installed" itself (Play Store / fallback URL),
- *  which is far more reliable than a bare custom scheme. */
-export function toAndroidIntentUrl(nmapUrl: string, browserFallbackUrl: string): string {
+export function toAndroidIntentUrl(
+  nmapUrl: string,
+  browserFallbackUrl: string
+): string {
   const stripped = nmapUrl.replace(/^nmap:\/\//, "");
   return (
     `intent://${stripped}` +
@@ -103,19 +129,13 @@ export function toAndroidIntentUrl(nmapUrl: string, browserFallbackUrl: string):
   );
 }
 
-/** Pick the most reliable launch URL for the current platform. */
-export function resolveLaunchUrl(nmapUrl: string, webFallbackUrl: string): string {
+export function resolveLaunchUrl(
+  nmapUrl: string,
+  webFallbackUrl: string
+): string {
   return isAndroid() ? toAndroidIntentUrl(nmapUrl, webFallbackUrl) : nmapUrl;
 }
 
-/** Fire the deep link; if the page is still visible after the delay,
- *  the app probably didn't open → run onFallback.
- *
- *  iOS quirk: the system "Open in Naver Map?" dialog can sit on screen
- *  longer than any timer without firing visibilitychange — so on iOS we
- *  wait longer AND treat pagehide/blur as success signals. False
- *  negatives (no fallback shown) are acceptable; false "it failed"
- *  modals are not. Returns a cancel function. */
 export function launchDeepLink(
   url: string,
   opts: { fallbackDelayMs?: number; onFallback: () => void }
@@ -128,7 +148,7 @@ export function launchDeepLink(
     window.removeEventListener("pagehide", onLeave);
     window.removeEventListener("blur", onLeave);
   };
-  const onLeave = () => cleanup(); // app (or system dialog) took over
+  const onLeave = () => cleanup();
   const onVisibility = () => {
     if (document.hidden) cleanup();
   };

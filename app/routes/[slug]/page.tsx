@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import RouteViewer from "@/components/route/RouteViewer";
-import { getRouteWithWaypoints } from "@/lib/supabase/queries";
+import { getRouteWithWaypoints } from "@/lib/data/queries";
 
 export const dynamic = "force-dynamic";
 

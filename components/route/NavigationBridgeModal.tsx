@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Waypoint } from "./RouteViewer";
+import type { Waypoint } from "@/lib/types";
 import {
   buildKoreanAddressList,
   buildNaverCarRouteLink,
   buildNaverWebSearchUrl,
+  buildNaverWebRouteUrl,
   launchDeepLink,
   resolveLaunchUrl,
-} from "@/utils/naverMapLink";
-import { isInAppBrowser } from "@/utils/browserEnv";
+} from "@/lib/domain/naverMapLink";
+import { isInAppBrowser } from "@/lib/browserEnv";
 import { trackRouteEvent } from "@/lib/analytics";
 
 type Phase = "confirm" | "launching" | "fallback";
@@ -187,7 +188,7 @@ export default function NavigationBridgeModal({
                 : "Copy Korean Address"}
             </button>
             <a
-              href={buildNaverWebSearchUrl(last)}
+              href={single ? buildNaverWebSearchUrl(last) : buildNaverWebRouteUrl(ordered)}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-2 block w-full rounded-2xl border border-slate-200 py-3 text-center text-sm font-bold text-slate-600 hover:border-slate-400"

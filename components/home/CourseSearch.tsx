@@ -34,7 +34,7 @@ export default function CourseSearch({ courses }: CourseSearchProps) {
           compact: `${c.title_en}${c.region_name_en}${c.title_ko ?? ""}${c.region_name_ko ?? ""}`
             .toLowerCase()
             .replace(/\s+/g, ""),
-          combined: `${c.region_name_en} ${c.region_name_ko ?? ""} ${c.title_en} ${c.title_ko ?? ""} ${c.theme_tags.join(" ")}`,
+          combined: `${c.region_name_en} ${c.region_name_ko ?? ""} ${c.title_en} ${c.title_ko ?? ""} ${(c.theme_tags ?? []).join(" ")}`,
         })),
         {
           keys: [
@@ -59,7 +59,7 @@ export default function CourseSearch({ courses }: CourseSearchProps) {
       ? fuse
           .search(q.trim())
           .filter((r) => (r.score ?? 1) < 0.55)
-          .slice(0, 5)
+          .slice(0, 7)
       : [];
 
   useEffect(() => {

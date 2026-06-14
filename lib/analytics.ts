@@ -1,4 +1,4 @@
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getSupabaseBrowserClient } from "@/lib/data/supabaseClient";
 
 /* ============================================================
  * B2G analytics — anonymous, fire-and-forget event logging.
@@ -38,7 +38,9 @@ export function trackRouteEvent(
 ): void {
   if (typeof window === "undefined") return;
   try {
-    void getSupabaseBrowserClient()
+    const client = getSupabaseBrowserClient();
+    if (!client) return;
+    void client
       .from("route_events")
       .insert({
         event_type: type,

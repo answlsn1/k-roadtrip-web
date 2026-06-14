@@ -1,9 +1,3 @@
-/* ============================================================
- * Single source of truth for waypoint type_tag vocabulary.
- * Mirrors the DB CHECK constraint in 0003_type_tag_check.sql —
- * add a tag here AND in the migration, never in just one place.
- * ============================================================ */
-
 export interface TypeTagMeta {
   color: string;
   label_en: string;
@@ -27,8 +21,6 @@ export type TypeTag = keyof typeof TYPE_TAGS;
 
 const FALLBACK: TypeTagMeta = { color: "#334155", label_en: "Spot", label_ko: "스팟" };
 
-/** Unknown tags degrade gracefully: slate dot + prettified label
- *  ("hanok_cafe" → "Hanok Cafe"), never a raw underscore string. */
 export function typeMeta(tag: string): TypeTagMeta {
   return (
     (TYPE_TAGS as Record<string, TypeTagMeta>)[tag] ?? {

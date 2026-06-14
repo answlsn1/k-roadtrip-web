@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { isInAppBrowser } from "@/utils/browserEnv";
+import { getSupabaseBrowserClient } from "@/lib/data/supabaseClient";
+import { isInAppBrowser } from "@/lib/browserEnv";
 
 interface AuthModalProps {
   open: boolean;
@@ -34,6 +34,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
   if (!open) return null;
 
   const signInWithGoogle = async () => {
+    if (!supabase) return;
     setLoading(true);
     setError(null);
     const { error } = await supabase.auth.signInWithOAuth({

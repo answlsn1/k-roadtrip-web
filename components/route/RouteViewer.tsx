@@ -1,107 +1,36 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  GoogleMap,
-  MarkerF,
-  PolylineF,
-  useJsApiLoader,
-} from "@react-google-maps/api";
+import dynamic from "next/dynamic";
+import { useEffect, useMemo, useRef, useState } from "react";
 import NavigationBridgeModal from "./NavigationBridgeModal";
 import SaveRouteButton from "./SaveRouteButton";
-import { typeMeta, NAVER_GREEN } from "@/lib/constants";
-import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
+import type { Route, Waypoint } from "@/lib/types";
+import { typeMeta, NAVER_GREEN } from "@/lib/config/constants";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { trackRouteEvent } from "@/lib/analytics";
-import { clearTripProgress, getTripProgress, setTripProgress } from "@/lib/tripMode";
+import { useTripStore } from "@/store/useTripStore";
+import { kmBetween, driveMin } from "@/lib/domain/geo";
 
-/* ============================================================
- * Types — mirror the Task 1 Supabase schema (snake_case rows).
- * numeric columns may arrive as strings from supabase-js.
- * ============================================================ */
-export interface Route {
-  id: number;
-  slug: string;
-  region_name_en: string;
-  region_name_ko: string | null;
-  title_en: string;
-  title_ko: string | null;
-  description_en: string | null;
-  description_ko: string | null;
-  total_distance: number | string | null;
-  total_duration: number | null;
-  theme_tags: string[];
-  thumbnail_url: string | null;
-}
-
-export interface Waypoint {
-  id: number;
-  route_id: number;
-  sequence: number;
-  place_name_en: string;
-  place_name_ko: string;
-  latitude: number;
-  longitude: number;
-  description_en: string | null;
-  description_ko: string | null;
-  type_tag: string;
-  address_en: string | null;
-  address_ko: string | null;
-  rating: number | string | null;
-  review_count: number | null;
-  parking_note_en: string | null;
-  parking_note_ko: string | null;
-  booking_note_en: string | null;
-  booking_note_ko: string | null;
-}
+const RouteLeafletMap = dynamic(() => import("./RouteLeafletMap"), { ssr: false });
 
 interface RouteViewerProps {
   route: Route;
   waypoints: Waypoint[];
 }
 
-const MAP_STYLES: google.maps.MapTypeStyle[] = [
-  { featureType: "poi", stylers: [{ visibility: "off" }] },
-  { featureType: "transit", stylers: [{ visibility: "off" }] },
-  { featureType: "road", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-];
-
-/* Straight-line km × 1.35 road factor; drive time at 50 km/h (5-min steps) */
-function kmBetween(a: Waypoint, b: Waypoint): number {
-  const rad = (d: number) => (d * Math.PI) / 180;
-  const h =
-    Math.sin(rad(b.latitude - a.latitude) / 2) ** 2 +
-    Math.cos(rad(a.latitude)) * Math.cos(rad(b.latitude)) *
-      Math.sin(rad(b.longitude - a.longitude) / 2) ** 2;
-  return 2 * 6371 * Math.asin(Math.sqrt(h)) * 1.35;
-}
-const driveMin = (km: number) => Math.max(5, Math.round((km / 50) * 60 / 5) * 5);
-
 /* ============================================================
  * RouteViewer
  * Mobile : full-screen map + swipeable bottom sheet
  * Desktop: full-screen map + fixed left side panel (md+)
- * The panel renders exactly ONCE (no duplicate mounts of
- * SaveRouteButton / duplicate Supabase queries).
  * ============================================================ */
 export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: "krt-google-maps",
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
-  });
-
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const mapRef = useRef<google.maps.Map | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  /** null = bridge closed; full route or [single stop] (Trip Mode) */
   const [bridgeTarget, setBridgeTarget] = useState<Waypoint[] | null>(null);
 
   const ordered = useMemo(
     () => [...waypoints].sort((a, b) => a.sequence - b.sequence),
     [waypoints]
-  );
-  const path = useMemo(
-    () => ordered.map((w) => ({ lat: w.latitude, lng: w.longitude })),
-    [ordered]
   );
 
   /* ---------- analytics: one view event per route mount ---------- */
@@ -110,19 +39,11 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
   }, [route.id, route.region_name_en]);
 
   /* ---------- Trip Mode progress ---------- */
-  const [progress, setProgressState] = useState(0);
+  useEffect(() => { useTripStore.persist.rehydrate(); }, []);
+  const progress = useTripStore((s) => s.progress[route.id] ?? 0);
+  const advance = useTripStore((s) => s.advance);
+  const resetTrip = useTripStore((s) => s.reset);
   const [bannerDismissed, setBannerDismissed] = useState(false);
-  useEffect(() => {
-    setProgressState(getTripProgress(route.id));
-  }, [route.id]);
-  // refresh when the user comes back from Naver Map
-  useEffect(() => {
-    const onVisible = () => {
-      if (!document.hidden) setProgressState(getTripProgress(route.id));
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
-  }, [route.id]);
 
   const nextStop = useMemo(
     () => (progress > 0 ? ordered.find((w) => w.sequence > progress) ?? null : null),
@@ -131,8 +52,7 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
   const tripComplete = progress > 0 && !nextStop;
 
   const navigateToStop = (w: Waypoint) => {
-    setTripProgress(route.id, w.sequence);
-    setProgressState(getTripProgress(route.id));
+    advance(route.id, w.sequence);
     setBridgeTarget([w]);
   };
 
@@ -164,7 +84,6 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
   const onDragPointerMove = (e: React.PointerEvent) => {
     if (!drag.current.active) return;
     const delta = drag.current.startY - e.clientY;
-    // 4px threshold so taps on buttons inside the header still feel like taps
     if (dragVisible === null && Math.abs(delta) < 4) return;
     setDragVisible(
       Math.min(snaps[2], Math.max(snaps[0], drag.current.startVisible + delta))
@@ -183,60 +102,13 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
     setDragVisible(null);
   };
 
-  /* ---------- map ---------- */
-  const fitToWaypoints = useCallback(
-    (m: google.maps.Map) => {
-      if (ordered.length === 0) return;
-      const bounds = new google.maps.LatLngBounds();
-      ordered.forEach((w) => bounds.extend({ lat: w.latitude, lng: w.longitude }));
-      const desktop = window.matchMedia("(min-width: 768px)").matches;
-      m.fitBounds(
-        bounds,
-        desktop
-          ? { left: 440, top: 64, right: 64, bottom: 64 }
-          : { left: 40, top: 72, right: 40, bottom: Math.round(window.innerHeight * 0.5) }
-      );
-    },
-    [ordered]
-  );
-
-  const onMapLoad = useCallback(
-    (m: google.maps.Map) => {
-      mapRef.current = m;
-      fitToWaypoints(m);
-    },
-    [fitToWaypoints]
-  );
-
-  // refit when the waypoint set changes (client-side route navigation)
-  useEffect(() => {
-    if (mapRef.current) fitToWaypoints(mapRef.current);
-  }, [fitToWaypoints]);
-
-  /* marker icons: cache per (color, n, selected) — no rebuild storms */
-  const iconCache = useRef(new Map<string, google.maps.Icon>());
-  const markerIcon = (color: string, n: number, selected: boolean): google.maps.Icon => {
-    const key = `${color}/${n}/${selected ? 1 : 0}`;
-    const cached = iconCache.current.get(key);
-    if (cached) return cached;
-    const size = selected ? 40 : 32;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 34 34"><circle cx="17" cy="17" r="14" fill="${color}" stroke="#ffffff" stroke-width="3"/><text x="17" y="22" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">${n}</text></svg>`;
-    const icon: google.maps.Icon = {
-      url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg),
-      scaledSize: new google.maps.Size(size, size),
-      anchor: new google.maps.Point(size / 2, size / 2),
-    };
-    iconCache.current.set(key, icon);
-    return icon;
-  };
-
+  /* ---------- waypoint selection ---------- */
   const selectWaypoint = (w: Waypoint) => {
     const opening = selectedId !== w.id;
     if (opening) {
       trackRouteEvent("waypoint_open", { routeId: route.id, region: route.region_name_en });
     }
     setSelectedId(opening ? w.id : null);
-    mapRef.current?.panTo({ lat: w.latitude, lng: w.longitude });
     if (!isDesktop && snapIdx === 0) setSnapIdx(1);
   };
 
@@ -244,14 +116,6 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
     v == null ? null : `${Number(v).toFixed(1)} km`;
   const fmtDur = (min: number | null) =>
     min == null ? null : min >= 60 ? `${Math.floor(min / 60)}h ${min % 60}m` : `${min}m`;
-
-  if (loadError) {
-    return (
-      <div className="grid h-screen place-items-center text-sm text-slate-500">
-        Failed to load the map. Please refresh.
-      </div>
-    );
-  }
 
   /* ---------- panel pieces (rendered exactly once) ---------- */
   const summary = (
@@ -345,7 +209,6 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
               </svg>
             </button>
 
-            {/* Inline detail: description + local intel + per-stop navigation */}
             {selected && (
               <div className="mb-2 ml-10 rounded-xl border border-slate-200/70 bg-slate-50 p-3 text-sm text-slate-600">
                 {w.description_en && <p className="leading-relaxed">{w.description_en}</p>}
@@ -360,7 +223,10 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
                   className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-extrabold text-white transition-transform active:scale-[0.99]"
                   style={{ background: NAVER_GREEN }}
                 >
-                  <span className="grid h-4 w-4 place-items-center rounded bg-white text-[10px] font-black" style={{ color: NAVER_GREEN }}>
+                  <span
+                    className="grid h-4 w-4 place-items-center rounded bg-white text-[10px] font-black"
+                    style={{ color: NAVER_GREEN }}
+                  >
                     N
                   </span>
                   Navigate to this stop
@@ -380,7 +246,10 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
         className="flex w-full items-center justify-center gap-2.5 rounded-2xl py-4 text-base font-extrabold text-white shadow-lg shadow-green-500/30 transition-transform active:scale-[0.99]"
         style={{ background: NAVER_GREEN }}
       >
-        <span className="grid h-6 w-6 place-items-center rounded-md bg-white text-sm font-black" style={{ color: NAVER_GREEN }}>
+        <span
+          className="grid h-6 w-6 place-items-center rounded-md bg-white text-sm font-black"
+          style={{ color: NAVER_GREEN }}
+        >
           N
         </span>
         Start Navigation with Naver Map
@@ -390,39 +259,13 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-slate-100">
-      {/* ---------- full-screen map ---------- */}
-      {isLoaded ? (
-        <GoogleMap
-          mapContainerStyle={{ position: "absolute", inset: 0 }}
-          onLoad={onMapLoad}
-          options={{
-            disableDefaultUI: true,
-            zoomControl: true,
-            gestureHandling: "greedy",
-            styles: MAP_STYLES,
-            clickableIcons: false,
-          }}
-        >
-          <PolylineF
-            path={path}
-            options={{ strokeColor: "#0f172a", strokeOpacity: 0.65, strokeWeight: 3 }}
-          />
-          {ordered.map((w) => (
-            <MarkerF
-              key={w.id}
-              position={{ lat: w.latitude, lng: w.longitude }}
-              icon={markerIcon(typeMeta(w.type_tag).color, w.sequence, selectedId === w.id)}
-              zIndex={selectedId === w.id ? 1000 : w.sequence}
-              title={`${w.sequence}. ${w.place_name_en}`}
-              onClick={() => selectWaypoint(w)}
-            />
-          ))}
-        </GoogleMap>
-      ) : (
-        <div className="grid h-full place-items-center text-sm text-slate-400">
-          Loading map…
-        </div>
-      )}
+      {/* ---------- full-screen Leaflet map ---------- */}
+      <RouteLeafletMap
+        waypoints={ordered}
+        selectedId={selectedId}
+        onSelect={selectWaypoint}
+        progress={progress}
+      />
 
       {/* ---------- Trip Mode resume banner ---------- */}
       {!bannerDismissed && (nextStop || tripComplete) && (
@@ -439,8 +282,7 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
               <span className="text-sm font-bold">Trip complete 🎉</span>
               <button
                 onClick={() => {
-                  clearTripProgress(route.id);
-                  setProgressState(0);
+                  resetTrip(route.id);
                 }}
                 className="ml-1 rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold hover:bg-white/25"
               >
@@ -475,9 +317,6 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
               dragVisible === null ? "transform 280ms cubic-bezier(0.22,1,0.36,1)" : "none",
           }}
         >
-          {/* drag surface = handle + whole summary header (44px+ friendly);
-              touch-action none lives HERE, not on the sheet, so the
-              waypoint list below stays touch-scrollable */}
           <div
             className="touch-none"
             onPointerDown={onDragPointerDown}
