@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import NavigationBridgeModal from "./NavigationBridgeModal";
 import SaveRouteButton from "./SaveRouteButton";
@@ -24,9 +25,16 @@ interface RouteViewerProps {
  * Desktop: full-screen map + fixed left side panel (md+)
  * ============================================================ */
 export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
+  const router = useRouter();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [bridgeTarget, setBridgeTarget] = useState<Waypoint[] | null>(null);
+
+  // Go back to the previous page; fall back to home if opened directly (no history).
+  const goBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) router.back();
+    else router.push("/");
+  };
 
   const ordered = useMemo(
     () => [...waypoints].sort((a, b) => a.sequence - b.sequence),
@@ -267,6 +275,17 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
         progress={progress}
       />
 
+      {/* ---------- Back button (floating over map on mobile) ---------- */}
+      <button
+        onClick={goBack}
+        aria-label="Back"
+        className="absolute left-3 top-3 z-30 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-slate-700 shadow-lg ring-1 ring-slate-900/5 backdrop-blur transition active:scale-95 md:hidden"
+      >
+        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
       {/* ---------- Trip Mode resume banner ---------- */}
       {!bannerDismissed && (nextStop || tripComplete) && (
         <div className="absolute left-1/2 top-4 z-20 flex max-w-[92%] -translate-x-1/2 items-center gap-1 rounded-full bg-slate-900/90 py-1.5 pl-4 pr-1.5 text-white shadow-xl backdrop-blur">
@@ -302,7 +321,18 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
 
       {/* ---------- panel: ONE mount, repositioned per breakpoint ---------- */}
       {isDesktop ? (
-        <aside className="absolute bottom-0 left-0 top-0 z-10 flex w-[400px] flex-col bg-white pt-5 shadow-2xl">
+        <aside className="absolute bottom-0 left-0 top-0 z-10 flex w-[400px] flex-col bg-white pt-4 shadow-2xl">
+          <div className="px-5 pb-2">
+            <button
+              onClick={goBack}
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500 transition-colors hover:text-slate-900"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+          </div>
           {summary}
           {list}
           {cta}
