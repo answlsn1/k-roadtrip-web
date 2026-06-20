@@ -92,7 +92,10 @@ export default function Navbar() {
               </a>
               <div className="my-2 border-t border-slate-100" />
               <div className="flex items-center justify-between px-4 py-3">
-                <MyTripPanel />
+                {/* Close the hamburger menu when the My Trip drawer opens. */}
+                <span onClick={close}>
+                  <MyTripPanel />
+                </span>
                 <LangToggle />
               </div>
             </nav>

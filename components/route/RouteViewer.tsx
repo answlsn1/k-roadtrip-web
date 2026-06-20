@@ -8,9 +8,11 @@ import SaveRouteButton from "./SaveRouteButton";
 import type { Route, Waypoint } from "@/lib/types";
 import { typeMeta, NAVER_GREEN } from "@/lib/config/constants";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { trackRouteEvent } from "@/lib/analytics";
+import { trackEvent } from "@/lib/analytics/events";
 import { useTripStore } from "@/store/useTripStore";
 import { kmBetween, driveMin } from "@/lib/domain/geo";
+import { useLangStore } from "@/store/useLangStore";
+import { t, tf } from "@/lib/i18n";
 
 const RouteLeafletMap = dynamic(() => import("./RouteLeafletMap"), { ssr: false });
 
@@ -26,6 +28,7 @@ interface RouteViewerProps {
  * ============================================================ */
 export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
   const router = useRouter();
+  const lang = useLangStore((s) => s.lang);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [bridgeTarget, setBridgeTarget] = useState<Waypoint[] | null>(null);
@@ -43,8 +46,8 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
 
   /* ---------- analytics: one view event per route mount ---------- */
   useEffect(() => {
-    trackRouteEvent("route_view", { routeId: route.id, region: route.region_name_en });
-  }, [route.id, route.region_name_en]);
+    trackEvent("route_view", { routeId: route.slug, region: route.region_name_en });
+  }, [route.slug, route.region_name_en]);
 
   /* ---------- Trip Mode progress ---------- */
   useEffect(() => { useTripStore.persist.rehydrate(); }, []);
@@ -65,11 +68,12 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
   };
 
   /* ---------- bottom sheet (mobile only) ---------- */
-  const [vh, setVh] = useState(() =>
-    typeof window !== "undefined" ? window.innerHeight : 800
-  );
+  // SSR-safe: start from a fixed value (matches the server render) then sync to
+  // the real viewport on mount, so the inline sheet style doesn't mismatch.
+  const [vh, setVh] = useState(800);
   useEffect(() => {
     const onResize = () => setVh(window.innerHeight);
+    onResize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -113,9 +117,6 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
   /* ---------- waypoint selection ---------- */
   const selectWaypoint = (w: Waypoint) => {
     const opening = selectedId !== w.id;
-    if (opening) {
-      trackRouteEvent("waypoint_open", { routeId: route.id, region: route.region_name_en });
-    }
     setSelectedId(opening ? w.id : null);
     if (!isDesktop && snapIdx === 0) setSnapIdx(1);
   };
@@ -144,9 +145,11 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
         <SaveRouteButton routeId={route.id} className="mt-1" />
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-slate-500">
-        <span>{ordered.length} stops</span>
+        <span>{tf("route.stops", lang, { n: ordered.length })}</span>
         {fmtKm(route.total_distance) && <span>🚗 {fmtKm(route.total_distance)}</span>}
-        {fmtDur(route.total_duration) && <span>⏱ {fmtDur(route.total_duration)} drive</span>}
+        {fmtDur(route.total_duration) && (
+          <span>⏱ {fmtDur(route.total_duration)} {t("route.driveSuffix", lang)}</span>
+        )}
       </div>
       {route.theme_tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -177,7 +180,8 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
               <div className="my-1 flex items-center gap-2 pl-[15px]">
                 <span className="h-4 w-px bg-slate-300" />
                 <span className="text-[11px] font-semibold text-slate-400">
-                  🚗 ≈ {km.toFixed(1)} km · {driveMin(km)} min drive
+                  🚗 ≈ {tf("route.kmDrive", lang, { km: km.toFixed(1), min: driveMin(km) })}{" "}
+                  {t("route.driveSuffix", lang)}
                 </span>
               </div>
             )}
@@ -198,10 +202,10 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
                   {w.place_name_en}
                 </span>
                 <span className="block truncate text-[11px] text-slate-400">
-                  {w.place_name_ko} · {meta.label_en}
+                  {w.place_name_ko} · {lang === "ko" ? meta.label_ko : meta.label_en}
                   {w.rating != null && ` · ★ ${Number(w.rating).toFixed(1)}`}
                   {w.review_count != null &&
-                    ` (${w.review_count.toLocaleString()} reviews)`}
+                    ` (${tf("route.reviews", lang, { n: w.review_count.toLocaleString() })})`}
                 </span>
               </span>
               <svg
@@ -237,7 +241,7 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
                   >
                     N
                   </span>
-                  Navigate to this stop
+                  {t("route.navigateStop", lang)}
                 </button>
               </div>
             )}
@@ -260,7 +264,7 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
         >
           N
         </span>
-        Start Navigation with Naver Map
+        {t("route.startNav", lang)}
       </button>
     </div>
   );
@@ -278,7 +282,7 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
       {/* ---------- Back button (floating over map on mobile) ---------- */}
       <button
         onClick={goBack}
-        aria-label="Back"
+        aria-label={t("nav.back", lang)}
         className="absolute left-3 top-3 z-30 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-slate-700 shadow-lg ring-1 ring-slate-900/5 backdrop-blur transition active:scale-95 md:hidden"
       >
         <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
@@ -294,24 +298,24 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
               onClick={() => setBridgeTarget([nextStop])}
               className="truncate text-sm font-bold"
             >
-              Next stop: {nextStop.sequence}. {nextStop.place_name_en} →
+              {t("route.nextStop", lang)}: {nextStop.sequence}. {nextStop.place_name_en} →
             </button>
           ) : (
             <>
-              <span className="text-sm font-bold">Trip complete 🎉</span>
+              <span className="text-sm font-bold">{t("route.tripComplete", lang)}</span>
               <button
                 onClick={() => {
                   resetTrip(route.id);
                 }}
                 className="ml-1 rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold hover:bg-white/25"
               >
-                Reset
+                {t("common.reset", lang)}
               </button>
             </>
           )}
           <button
             onClick={() => setBannerDismissed(true)}
-            aria-label="Dismiss"
+            aria-label={t("common.dismiss", lang)}
             className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-white/60 hover:bg-white/15 hover:text-white"
           >
             ✕
@@ -330,7 +334,7 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
               <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
-              Back
+              {t("nav.back", lang)}
             </button>
           </div>
           {summary}

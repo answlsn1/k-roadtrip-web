@@ -32,6 +32,7 @@ interface BuilderState {
   reorderStops: (stops: BuilderStop[]) => void;
   renameDraft: (title: string) => void;
   resetDraft: () => void;
+  loadDraft: (draft: RouteDraft) => void;
   setHydrated: (v: boolean) => void;
 }
 
@@ -82,6 +83,9 @@ export const useBuilderStore = create<BuilderState>()(
       },
 
       resetDraft: () => set({ draft: emptyDraft() }),
+
+      // Replace the working draft (e.g. when opening a saved trip from My Trip).
+      loadDraft: (draft) => set({ draft: { ...draft, updatedAt: Date.now() } }),
 
       setHydrated: (v) => set({ hydrated: v }),
     }),

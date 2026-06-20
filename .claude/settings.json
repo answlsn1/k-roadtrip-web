@@ -1,0 +1,69 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build *)",
+      "Bash(npm run lint *)",
+      "Bash(npm run test *)",
+      "Bash(npm run typecheck *)",
+      "Bash(npm run smoke *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(vercel *)",
+      "Bash(npx vercel *)",
+      "Bash(supabase db push *)",
+      "Bash(supabase migration *)",
+      "Bash(npx supabase db push *)",
+      "Bash(npx supabase migration *)",
+      "Edit(.env*)",
+      "Edit(**/.env*)",
+      "Write(.env*)",
+      "Write(**/.env*)",
+      "Edit(**/affiliate*)",
+      "Edit(**/partner*)",
+      "Edit(**/sponsor*)",
+      "Edit(**/payment*)",
+      "Write(**/affiliate*)",
+      "Write(**/partner*)",
+      "Write(**/sponsor*)",
+      "Write(**/payment*)",
+      "Edit(lib/config/sponsored.ts)",
+      "Write(lib/config/sponsored.ts)",
+      "Edit(lib/analytics.ts)",
+      "Write(lib/analytics.ts)",
+      "Edit(supabase/migrations/**)",
+      "Write(supabase/migrations/**)",
+      "Edit(supabase/seed*.sql)",
+      "Write(supabase/seed*.sql)"
+    ],
+    "deny": [
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(rm -rf *)",
+      "Bash(supabase db reset *)",
+      "Bash(vercel --prod*)",
+      "Bash(vercel deploy --prod*)",
+      "Bash(vercel promote*)",
+      "Bash(npx vercel --prod*)",
+      "Bash(npx vercel deploy --prod*)",
+      "Bash(npx vercel promote*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guard-launch.cjs"
+          }
+        ]
+      }
+    ]
+  }
+}

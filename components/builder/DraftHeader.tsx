@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useBuilderStore } from "@/store/useBuilderStore";
+import { useLangStore } from "@/store/useLangStore";
+import { t } from "@/lib/i18n";
 
 export default function DraftHeader() {
   const title = useBuilderStore((s) => s.draft.title);
@@ -10,6 +12,7 @@ export default function DraftHeader() {
   const renameDraft = useBuilderStore((s) => s.renameDraft);
   const resetDraft = useBuilderStore((s) => s.resetDraft);
   const [confirming, setConfirming] = useState(false);
+  const lang = useLangStore((s) => s.lang);
 
   return (
     <div className="px-4 pb-3 pt-1">
@@ -30,13 +33,13 @@ export default function DraftHeader() {
                 }}
                 className="font-bold text-rose-500 hover:text-rose-600"
               >
-                Clear all?
+                {t("builder.clearConfirm", lang)}
               </button>
               <button
                 onClick={() => setConfirming(false)}
                 className="font-semibold text-slate-400 hover:text-slate-600"
               >
-                Cancel
+                {t("common.cancel", lang)}
               </button>
             </span>
           ) : (
@@ -44,7 +47,7 @@ export default function DraftHeader() {
               onClick={() => setConfirming(true)}
               className="text-xs font-semibold text-slate-400 hover:text-slate-600"
             >
-              Reset
+              {t("common.reset", lang)}
             </button>
           ))}
       </div>
@@ -52,11 +55,11 @@ export default function DraftHeader() {
       <input
         value={title}
         onChange={(e) => renameDraft(e.target.value)}
-        placeholder="Name your route"
+        placeholder={t("builder.namePlaceholder", lang)}
         className="mt-2 w-full bg-transparent text-xl font-extrabold tracking-tight text-slate-900 outline-none placeholder:text-slate-300"
       />
       <p className="mt-0.5 text-xs font-semibold text-emerald-600">
-        Build your own road trip · saved on this device
+        {t("builder.savedHint", lang)}
       </p>
     </div>
   );

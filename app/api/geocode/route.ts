@@ -52,7 +52,9 @@ function toTypeTag(item: NominatimItem): string {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const q = searchParams.get("q")?.trim() ?? "";
+  // Cap length so an oversized query can't be forwarded to Nominatim or bloat
+  // the in-memory cache key.
+  const q = (searchParams.get("q")?.trim() ?? "").slice(0, 80);
 
   if (q.length < 2) {
     return NextResponse.json({ results: [] });
@@ -90,22 +92,27 @@ export async function GET(request: Request) {
     }
 
     const items = (await res.json()) as NominatimItem[];
-    const results: GeocodeResult[] = items.map((item) => {
-      const primary = item.name || item.display_name.split(",")[0];
-      const name_ko = item.namedetails?.["name:ko"] ?? primary;
-      const subtitle = item.display_name.split(",").slice(1, 3).join(",").trim();
-      return {
-        sourceId: `osm-${item.osm_id}`,
-        source: "osm",
-        name_en: primary,
-        name_ko,
-        latitude: Number(item.lat),
-        longitude: Number(item.lon),
-        subtitle: subtitle || undefined,
-        type_tag: toTypeTag(item),
-      };
-    });
+    const results: GeocodeResult[] = items
+      .map((item) => {
+        const primary = item.name || item.display_name.split(",")[0];
+        const name_ko = item.namedetails?.["name:ko"] ?? primary;
+        const subtitle = item.display_name.split(",").slice(1, 3).join(",").trim();
+        return {
+          sourceId: `osm-${item.osm_id}`,
+          source: "osm" as const,
+          name_en: primary,
+          name_ko,
+          latitude: Number(item.lat),
+          longitude: Number(item.lon),
+          subtitle: subtitle || undefined,
+          type_tag: toTypeTag(item),
+        };
+      })
+      // Drop any row with non-finite coordinates so the map never gets NaN pins.
+      .filter((r) => Number.isFinite(r.latitude) && Number.isFinite(r.longitude));
 
+    // Bound the in-memory cache so distinct queries can't grow it without limit.
+    if (cache.size > 500) cache.clear();
     cache.set(key, { at: Date.now(), data: results });
     return NextResponse.json({ results });
   } catch {

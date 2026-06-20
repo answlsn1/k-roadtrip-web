@@ -6,6 +6,8 @@ import { buildCuratedFuse, searchCurated, searchOsm } from "@/lib/domain/search"
 import { useBuilderStore } from "@/store/useBuilderStore";
 import { typeMeta } from "@/lib/config/constants";
 import type { SponsoredPlace } from "@/lib/config/sponsored";
+import { useLangStore } from "@/store/useLangStore";
+import { t } from "@/lib/i18n";
 
 interface PlaceSearchProps {
   curatedData: MapWaypoint[];
@@ -27,6 +29,7 @@ export default function PlaceSearch({
 
   const addStop = useBuilderStore((s) => s.addStop);
   const stops = useBuilderStore((s) => s.draft.stops);
+  const lang = useLangStore((s) => s.lang);
 
   const fuse = useMemo(() => buildCuratedFuse(curatedData), [curatedData]);
 
@@ -45,14 +48,21 @@ export default function PlaceSearch({
       return;
     }
     setOsmLoading(true);
+    // Abort any in-flight request on cleanup so a slow earlier response can't
+    // land out of order and overwrite the results for the current query.
+    const ac = new AbortController();
+    abortRef.current = ac;
     const timer = setTimeout(async () => {
-      abortRef.current?.abort();
-      abortRef.current = new AbortController();
-      const results = await searchOsm(q, abortRef.current.signal);
-      setOsm(results);
-      setOsmLoading(false);
+      const results = await searchOsm(q, ac.signal);
+      if (!ac.signal.aborted) {
+        setOsm(results);
+        setOsmLoading(false);
+      }
     }, 350);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      ac.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q]);
 
@@ -68,7 +78,7 @@ export default function PlaceSearch({
   const handleAdd = (p: PlaceResult) => {
     const res = addStop(p);
     if (!res.ok && res.reason) {
-      setFlash(res.reason);
+      setFlash(res.reason === "Already added." ? t("search.alreadyAdded", lang) : res.reason);
       setTimeout(() => setFlash(null), 1800);
     }
   };
@@ -97,14 +107,14 @@ export default function PlaceSearch({
           onChange={(e) => setQ(e.target.value)}
           type="text"
           autoComplete="off"
-          placeholder="Search — e.g. Gyeongbokgung, 해운대"
+          placeholder={t("search.placeholder", lang)}
           className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
         />
         {q && (
           <button
             onClick={() => setQ("")}
-            className="shrink-0 text-slate-300 hover:text-slate-500"
-            aria-label="Clear"
+            className="grid h-8 w-8 shrink-0 place-items-center text-slate-300 hover:text-slate-500"
+            aria-label={t("search.clear", lang)}
           >
             ✕
           </button>
@@ -123,7 +133,7 @@ export default function PlaceSearch({
           {sponsoredPlaces.length > 0 && (
             <>
               <p className="bg-amber-50 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-600">
-                ⭐ Partner Picks · Sponsored
+                {t("search.partnerPicks", lang)}
               </p>
               {sponsoredPlaces.map((p) => {
                 const added = isAdded(p);
@@ -172,7 +182,7 @@ export default function PlaceSearch({
           {curated.length > 0 && (
             <>
               <p className="bg-emerald-50 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-                ✓ Local-verified picks
+                {t("search.verifiedPicks", lang)}
               </p>
               {curated.map((p) => (
                 <ResultRow
@@ -189,13 +199,13 @@ export default function PlaceSearch({
           <p
             className={`${curated.length > 0 ? "border-t border-slate-100" : ""} bg-slate-50 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400`}
           >
-            {osmLoading ? "Searching all of Korea…" : "All of Korea · Powered by OSM"}
+            {osmLoading ? t("search.searchingKorea", lang) : t("search.allKorea", lang)}
           </p>
 
           {osmLoading ? (
             <div className="flex items-center justify-center gap-2 px-4 py-4 text-xs text-slate-400">
               <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-200 border-t-slate-400" />
-              Searching…
+              {t("search.searching", lang)}
             </div>
           ) : osm.length > 0 ? (
             osm.map((p) => (
@@ -209,8 +219,8 @@ export default function PlaceSearch({
           ) : (
             <p className="px-4 py-4 text-center text-xs text-slate-400">
               {curated.length === 0
-                ? "No results — try another keyword."
-                : "No additional places found."}
+                ? t("search.noResults", lang)
+                : t("search.noMore", lang)}
             </p>
           )}
         </div>

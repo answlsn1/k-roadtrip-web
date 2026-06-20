@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Fuse from "fuse.js";
+import { useLangStore } from "@/store/useLangStore";
+import { t } from "@/lib/i18n";
 
 /* Serializable subset of Route — passed from the server component. */
 export interface SearchableCourse {
@@ -23,6 +25,7 @@ export default function CourseSearch({ courses }: CourseSearchProps) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
+  const lang = useLangStore((s) => s.lang);
 
   /* compact / combined virtual fields → "gyeongjuheritage", "안동 드라이브"
      and rough romanization all resolve (same trick as the MVP) */
@@ -102,7 +105,7 @@ export default function CourseSearch({ courses }: CourseSearchProps) {
           onFocus={() => setOpen(true)}
           type="text"
           autoComplete="off"
-          placeholder='Try "andong" or "gyeongju heritage" — typos welcome!'
+          placeholder={t("home.searchPlaceholder", lang)}
           className="w-full bg-transparent py-2 text-[15px] text-slate-800 outline-none placeholder:text-slate-400"
         />
       </div>
@@ -111,9 +114,9 @@ export default function CourseSearch({ courses }: CourseSearchProps) {
         <div className="absolute inset-x-0 top-full z-20 mt-3 max-h-80 overflow-y-auto rounded-2xl bg-white shadow-2xl shadow-slate-900/30">
           {results.length === 0 ? (
             <div className="px-5 py-6 text-center">
-              <p className="text-sm font-semibold text-slate-600">No matches found</p>
+              <p className="text-sm font-semibold text-slate-600">{t("home.noMatches", lang)}</p>
               <p className="mt-1 text-xs text-slate-400">
-                Try a region (Andong, Gyeongju, Jeju…) or a theme (heritage, coastal…)
+                {t("home.noMatchesHint", lang)}
               </p>
             </div>
           ) : (

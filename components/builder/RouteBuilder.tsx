@@ -9,6 +9,8 @@ import PlaceSearch from "./PlaceSearch";
 import StopList from "./StopList";
 import BuilderCTA from "./BuilderCTA";
 import { SPONSORED_PLACES } from "@/lib/config/sponsored";
+import { trackEvent } from "@/lib/analytics/events";
+import { useSavedTripsStore } from "@/store/useSavedTripsStore";
 
 const BuilderMap = dynamic(() => import("./BuilderMap"), {
   ssr: false,
@@ -32,8 +34,20 @@ export default function RouteBuilder({ curatedData }: RouteBuilderProps) {
   // Read localStorage on the client only (store uses skipHydration).
   useEffect(() => {
     useBuilderStore.persist.rehydrate();
+    // Hydrate saved trips too, so "Save to My Trip" upserts onto the real list
+    // instead of overwriting it with an empty in-memory array.
+    useSavedTripsStore.persist.rehydrate();
     setHydrated(true);
   }, []);
+
+  // Funnel: a usable plan exists once the draft reaches 2+ stops (once per mount).
+  const planFired = useRef(false);
+  useEffect(() => {
+    if (!planFired.current && stops.length >= 2) {
+      planFired.current = true;
+      trackEvent("plan_created");
+    }
+  }, [stops.length]);
 
   /* ---------- drag-resizable bottom sheet (mobile only) ---------- */
   // SSR-safe height: start from a fixed value, then sync to the real viewport.

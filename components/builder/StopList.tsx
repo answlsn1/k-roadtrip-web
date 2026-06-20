@@ -20,6 +20,8 @@ import type { BuilderStop } from "@/lib/types";
 import { useBuilderStore } from "@/store/useBuilderStore";
 import { typeMeta } from "@/lib/config/constants";
 import { kmBetween, driveMin } from "@/lib/domain/geo";
+import { useLangStore } from "@/store/useLangStore";
+import { t } from "@/lib/i18n";
 
 function SortableStop({
   stop,
@@ -36,6 +38,7 @@ function SortableStop({
     useSortable({ id: stop.tempId });
   const meta = typeMeta(stop.type_tag);
   const km = prev ? kmBetween(prev, stop) : null;
+  const lang = useLangStore((s) => s.lang);
 
   return (
     <div>
@@ -43,7 +46,7 @@ function SortableStop({
         <div className="my-1 flex items-center gap-2 pl-[19px]">
           <span className="h-4 w-px bg-slate-300" />
           <span className="text-[11px] font-semibold text-slate-400">
-            🚗 ≈ {km.toFixed(1)} km · {driveMin(km)} min
+            🚗 ≈ {km.toFixed(1)} km · {driveMin(km)} {t("builder.minSuffix", lang)}
           </span>
         </div>
       )}
@@ -60,8 +63,8 @@ function SortableStop({
         <button
           {...attributes}
           {...listeners}
-          className="shrink-0 cursor-grab touch-none px-1 text-slate-300 hover:text-slate-500 active:cursor-grabbing"
-          aria-label="Drag to reorder"
+          className="grid h-9 w-9 shrink-0 cursor-grab touch-none place-items-center text-slate-300 hover:text-slate-500 active:cursor-grabbing"
+          aria-label={t("builder.dragReorder", lang)}
         >
           <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
             <circle cx="7" cy="5" r="1.4" />
@@ -87,15 +90,15 @@ function SortableStop({
           <span className="block truncate text-[11px] text-slate-400">
             {stop.name_ko}
             {stop.source === "curated" && (
-              <span className="ml-1 text-emerald-600">· verified</span>
+              <span className="ml-1 text-emerald-600">· {t("builder.verified", lang)}</span>
             )}
           </span>
         </span>
 
         <button
           onClick={() => onRemove(stop.tempId)}
-          className="shrink-0 px-1 text-slate-300 transition-colors hover:text-rose-400"
-          aria-label="Remove"
+          className="grid h-9 w-9 shrink-0 place-items-center text-slate-300 transition-colors hover:text-rose-400"
+          aria-label={t("common.remove", lang)}
         >
           ✕
         </button>
@@ -108,6 +111,7 @@ export default function StopList() {
   const stops = useBuilderStore((s) => s.draft.stops);
   const reorderStops = useBuilderStore((s) => s.reorderStops);
   const removeStop = useBuilderStore((s) => s.removeStop);
+  const lang = useLangStore((s) => s.lang);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -127,9 +131,9 @@ export default function StopList() {
     return (
       <div className="mx-4 mt-3 flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-200 px-6 py-8 text-center">
         <span className="text-3xl">🗺️</span>
-        <p className="text-sm font-bold text-slate-600">No stops yet</p>
+        <p className="text-sm font-bold text-slate-600">{t("builder.noStops", lang)}</p>
         <p className="text-xs leading-relaxed text-slate-400">
-          Search above or tap a pin on the map to start building your route.
+          {t("builder.noStopsHint", lang)}
         </p>
       </div>
     );

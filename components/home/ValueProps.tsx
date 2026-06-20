@@ -20,12 +20,12 @@ const PROPS = [
     icon: "🧭",
     iconClass: "bg-green-100 text-naver",
     en: {
-      title: "1-Click Naver Sync",
-      desc: "One tap sends exact coordinates straight into Naver Map — the navigation app Korea runs on. No typing, no copy-paste.",
+      title: "One-Tap Navigation",
+      desc: "Built your route? Hand it off to Naver Map in one tap — every stop pre-set, no typing or copy-paste.",
     },
     ko: {
-      title: "원클릭 네이버 연동",
-      desc: "한 번의 탭으로 정확한 좌표를 네이버 지도에 바로 보냅니다 — 한국이 쓰는 내비게이션 앱으로. 타이핑도, 복사·붙여넣기도 필요 없습니다.",
+      title: "원탭 길안내",
+      desc: "일정을 다 짰다면 네이버 지도로 한 번에 넘기세요 — 모든 장소가 미리 입력돼 타이핑이 필요 없습니다.",
     },
   },
   {
@@ -33,11 +33,11 @@ const PROPS = [
     iconClass: "bg-rose-100 text-rose-500",
     en: {
       title: "Local-Verified Only",
-      desc: "Every place is chosen by local review volume — the signal residents themselves trust. No ads, no paid placements.",
+      desc: "Every place is chosen by local review volume — the signal residents themselves trust. Sponsored spots are always clearly labeled ⭐.",
     },
     ko: {
       title: "현지 검증 장소만",
-      desc: "모든 장소는 현지 리뷰 수를 기준으로 선정됩니다 — 주민들이 직접 신뢰하는 신호로. 광고도, 돈 받은 노출도 없습니다.",
+      desc: "모든 장소는 현지 리뷰 수를 기준으로 선정됩니다 — 주민들이 직접 신뢰하는 신호로. 스폰서 장소는 항상 ⭐로 명확히 표시됩니다.",
     },
   },
 ] as const;

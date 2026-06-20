@@ -14,6 +14,7 @@ export async function getPublishedRoutes(): Promise<Route[]> {
   const { data, error } = await supabase
     .from("routes")
     .select("*")
+    .eq("is_published", true) // defensive: don't rely on RLS alone for "published"
     .order("region_name_en", { ascending: true })
     .order("id", { ascending: true });
   if (error || !data) return [];
@@ -31,18 +32,26 @@ export async function getAllWaypointsForMap(): Promise<MapWaypoint[]> {
     .order("route_id")
     .order("sequence");
   if (error || !data) return [];
-  return (data as any[]).map((w) => ({
-    id: w.id,
-    place_name_en: w.place_name_en,
-    place_name_ko: w.place_name_ko,
-    latitude: w.latitude,
-    longitude: w.longitude,
-    type_tag: w.type_tag,
-    sequence: w.sequence,
-    route_slug: w.routes.slug,
-    route_title_en: w.routes.title_en,
-    region_name_en: w.routes.region_name_en,
-  }));
+  return (data as any[])
+    .map((w) => {
+      // Supabase serializes a many-to-one join as an object, but guard for an
+      // array/null shape so a malformed row can't crash the whole map.
+      const r = Array.isArray(w.routes) ? w.routes[0] : w.routes;
+      if (!r) return null;
+      return {
+        id: w.id,
+        place_name_en: w.place_name_en,
+        place_name_ko: w.place_name_ko,
+        latitude: w.latitude,
+        longitude: w.longitude,
+        type_tag: w.type_tag,
+        sequence: w.sequence,
+        route_slug: r.slug,
+        route_title_en: r.title_en,
+        region_name_en: r.region_name_en,
+      };
+    })
+    .filter((w): w is MapWaypoint => w !== null);
 }
 
 export async function getRouteWithWaypoints(
@@ -54,6 +63,7 @@ export async function getRouteWithWaypoints(
     .from("routes")
     .select("*, waypoints(*)")
     .eq("slug", slug)
+    .eq("is_published", true) // defensive: mirror the "published only" contract
     .maybeSingle();
   if (error || !data) return null;
   const { waypoints, ...route } = data as Route & { waypoints: Waypoint[] };

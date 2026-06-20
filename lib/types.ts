@@ -92,6 +92,14 @@ export interface RouteDraft {
   updatedAt: number;
 }
 
+/** A custom route the user explicitly saved to "My Trip" (localStorage). */
+export interface SavedTrip {
+  id: string;
+  title: string;
+  stops: BuilderStop[];
+  savedAt: number;
+}
+
 export function placeToStop(p: PlaceResult): BuilderStop {
   return {
     tempId:

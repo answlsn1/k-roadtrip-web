@@ -58,6 +58,16 @@ export const CARD_META: Record<string, CardMeta> = {
   },
 };
 
+// Course-length badge ("2-Day Course") localized for the KOR toggle.
+const BADGE_KO: Record<string, string> = {
+  "1-Day Course": "1일 코스",
+  "2-Day Course": "2일 코스",
+  "3-Day Course": "3일 코스",
+};
+export function badgeLabel(badge: string, lang: "en" | "ko"): string {
+  return lang === "ko" ? BADGE_KO[badge] ?? "코스" : badge;
+}
+
 export function getCardMeta(slug: string): CardMeta {
   return (
     CARD_META[slug] ?? {
@@ -70,33 +80,23 @@ export function getCardMeta(slug: string): CardMeta {
   );
 }
 
-// ── Video URLs for route cards ──────────────────────────────────────────────
-// DEV: CC0 public-domain videos (no auth required) for local verification.
-// PROD: replace with Pexels API responses:
-//   GET https://api.pexels.com/videos/videos/{id}  →  video_files[].link
-//   Free tier: 200 req/hr — cache signed links server-side (they expire).
-const MDN = (f: string) =>
-  `https://interactive-examples.mdn.mozilla.net/media/cc0-videos/${f}`;
-const WM = (path: string) =>
-  `https://upload.wikimedia.org/wikipedia/commons/transcoded/${path}`;
-
+// ── Route hero videos ────────────────────────────────────────────────────────
+// HARD RULE (CLAUDE.md §5): NO external sample/placeholder media in production.
+// All sample URLs (MDN cc0 / Big Buck Bunny / learningcontainer) were removed.
+// Fill each slug with a real, self-hosted Korean road-trip clip. Empty "" → the
+// card shows the poster (thumbnail) only — a sample clip never ships.
+//   Long-term: move to a Supabase `routes.video_url` column (migration + approval).
+// See CONTENT-TODO.md.
 export const ROUTE_VIDEO_URLS: Record<string, string> = {
-  "gangneung-coastal-drive":
-    MDN("flower.mp4"),
-  "gyeongju-heritage-loop":
-    MDN("friday.mp4"),
-  "jeju-volcanic-loop":
-    WM("c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.360p.webm"),
-  "busan-coastal-metropolis":
-    "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
-  "andong-scholars-riverside-drive":
-    MDN("flower.mp4"),
-  "gyeongju-ancient-capital-drive":
-    MDN("friday.mp4"),
-  "jeonju-wanju-hanok-drive":
-    WM("c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.360p.webm"),
+  "gangneung-coastal-drive": "",          // TODO(content): self-hosted KR clip
+  "gyeongju-heritage-loop": "",           // TODO(content): self-hosted KR clip
+  "jeju-volcanic-loop": "",               // TODO(content): self-hosted KR clip
+  "busan-coastal-metropolis": "",         // TODO(content): self-hosted KR clip
+  "andong-scholars-riverside-drive": "",  // TODO(content): self-hosted KR clip
+  "gyeongju-ancient-capital-drive": "",   // TODO(content): self-hosted KR clip
+  "jeonju-wanju-hanok-drive": "",         // TODO(content): self-hosted KR clip
 };
 
 export function getRouteVideoUrl(slug: string): string {
-  return ROUTE_VIDEO_URLS[slug] ?? MDN("flower.mp4");
+  return ROUTE_VIDEO_URLS[slug] ?? "";
 }

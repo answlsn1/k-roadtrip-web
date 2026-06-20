@@ -5,6 +5,7 @@ import { useBuilderStore } from "@/store/useBuilderStore";
 import { useVideoAutoplay } from "@/hooks/useVideoAutoplay";
 import { useLangStore } from "@/store/useLangStore";
 import { t } from "@/lib/i18n";
+import { trackEvent } from "@/lib/analytics/events";
 import type { SponsoredPlace } from "@/lib/config/sponsored";
 
 export default function SponsoredCard({ place }: { place: SponsoredPlace }) {
@@ -26,6 +27,19 @@ export default function SponsoredCard({ place }: { place: SponsoredPlace }) {
     addStop(place);
   };
 
+  const handleBook = () => {
+    // Record the affiliate-click conversion (the money step) — the outbound
+    // <a> navigation and partner link are untouched, we only add tracking.
+    trackEvent("affiliate_click", {
+      affiliatePartner: place.sourceId,
+      region: place.region_en,
+      routeId: place.sourceId,
+    });
+  };
+
+  const ctaLabel =
+    (lang === "ko" ? place.cta_label_ko : place.cta_label_en) ?? t("card.book", lang);
+
   return (
     <div className="snap-start shrink-0 w-[300px] sm:w-[340px]">
       <div className="relative h-[400px] overflow-hidden rounded-3xl border-2 border-amber-400 bg-slate-900 shadow-lg shadow-amber-200/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-300/40">
@@ -38,26 +52,29 @@ export default function SponsoredCard({ place }: { place: SponsoredPlace }) {
           <img
             src={place.thumbnail_url}
             alt=""
-            className="h-full w-full scale-105 object-cover blur-sm"
+            className={`h-full w-full object-cover ${place.video_url ? "scale-105 blur-sm" : ""}`}
           />
           <div className="absolute inset-0 bg-slate-900/40" />
         </div>
 
-        {/* Video */}
-        <video
-          ref={videoRef}
-          src={place.video_url}
-          poster={place.thumbnail_url}
-          playsInline
-          muted
-          loop
-          preload="none"
-          onPlaying={() => setPlaying(true)}
-          onError={() => setPlaying(false)}
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
-            playing ? "opacity-100" : "opacity-0"
-          }`}
-        />
+        {/* Video — only when a real (self-hosted) clip exists; otherwise the poster shows. */}
+        {place.video_url && (
+          <video
+            ref={videoRef}
+            src={place.video_url}
+            poster={place.thumbnail_url}
+            playsInline
+            muted
+            loop
+            preload="none"
+            onPlaying={() => setPlaying(true)}
+            onPause={() => setPlaying(false)}
+            onError={() => setPlaying(false)}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
+              playing ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        )}
 
         {/* Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/95 via-slate-900/25 to-transparent" />
@@ -105,17 +122,43 @@ export default function SponsoredCard({ place }: { place: SponsoredPlace }) {
             </div>
           )}
 
-          <button
-            onClick={handleAdd}
-            disabled={added}
-            className={`mt-3 w-full rounded-full py-2.5 text-sm font-extrabold transition-all duration-200 ${
-              added
-                ? "bg-emerald-500 text-white"
-                : "bg-amber-400 text-slate-900 hover:bg-amber-300 active:scale-95"
-            }`}
-          >
-            {added ? t("card.added", lang) : t("card.add", lang)}
-          </button>
+          {place.affiliate_url ? (
+            <>
+              {/* Primary money action: outbound partner booking (the revenue funnel) */}
+              <a
+                href={place.affiliate_url}
+                target="_blank"
+                rel="noopener noreferrer sponsored"
+                onClick={handleBook}
+                className="mt-3 block w-full rounded-full bg-amber-400 py-2.5 text-center text-sm font-extrabold text-slate-900 transition-all duration-200 hover:bg-amber-300 active:scale-95"
+              >
+                {ctaLabel}
+              </a>
+              {/* Secondary: keep the place in the user's trip */}
+              <button
+                onClick={handleAdd}
+                disabled={added}
+                className={`mt-2 w-full rounded-full py-2 text-xs font-bold transition-colors duration-200 ${
+                  added ? "text-emerald-300" : "text-white/70 hover:text-white"
+                }`}
+              >
+                {added ? t("card.added", lang) : t("card.add", lang)}
+              </button>
+            </>
+          ) : (
+            // No affiliate link yet → no dead link; fall back to "Add to Trip".
+            <button
+              onClick={handleAdd}
+              disabled={added}
+              className={`mt-3 w-full rounded-full py-2.5 text-sm font-extrabold transition-all duration-200 ${
+                added
+                  ? "bg-emerald-500 text-white"
+                  : "bg-amber-400 text-slate-900 hover:bg-amber-300 active:scale-95"
+              }`}
+            >
+              {added ? t("card.added", lang) : t("card.add", lang)}
+            </button>
+          )}
         </div>
       </div>
     </div>

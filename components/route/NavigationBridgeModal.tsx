@@ -11,7 +11,10 @@ import {
   resolveLaunchUrl,
 } from "@/lib/domain/naverMapLink";
 import { isInAppBrowser } from "@/lib/browserEnv";
-import { trackRouteEvent } from "@/lib/analytics";
+import { trackEvent } from "@/lib/analytics/events";
+import { useLangStore } from "@/store/useLangStore";
+import { t, tf } from "@/lib/i18n";
+import { useModalA11y } from "@/hooks/useModalA11y";
 
 type Phase = "confirm" | "launching" | "fallback";
 
@@ -33,6 +36,8 @@ export default function NavigationBridgeModal({
 }: NavigationBridgeModalProps) {
   const [phase, setPhase] = useState<Phase>("confirm");
   const [copied, setCopied] = useState<"none" | "address" | "link">("none");
+  const lang = useLangStore((s) => s.lang);
+  const dialogRef = useModalA11y<HTMLDivElement>(open);
 
   useEffect(() => {
     if (open) {
@@ -59,7 +64,7 @@ export default function NavigationBridgeModal({
 
   const handleOpenApp = () => {
     setPhase("launching");
-    trackRouteEvent("deeplink_launch", { routeId, region: regionNameEn });
+    trackEvent("naver_handoff", { routeId, region: regionNameEn });
     const nmapUrl = buildNaverCarRouteLink(ordered, {
       // single stop → navigate from wherever the user is right now
       useCurrentLocationAsStart: single,
@@ -80,7 +85,13 @@ export default function NavigationBridgeModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4">
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("bridge.title", lang)}
+      className="fixed inset-0 z-[1200] flex items-center justify-center p-4"
+    >
       <div
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
         onClick={onClose}
@@ -93,15 +104,13 @@ export default function NavigationBridgeModal({
         </div>
 
         <h2 className="mt-4 text-center text-lg font-extrabold text-slate-900">
-          Opening Naver Map
+          {t("bridge.title", lang)}
         </h2>
         <p className="mt-2 text-center text-sm leading-relaxed text-slate-500">
-          Since Google Maps navigation doesn&apos;t work in Korea, we are
-          transferring your route to Naver Map.
+          {t("bridge.body", lang)}
         </p>
         <p className="mt-1.5 text-center text-xs leading-relaxed text-slate-400">
-          Your stops are already set with exact Korean names — no typing
-          needed. Tip: Naver Map has an English mode (Settings → Language).
+          {t("bridge.tip", lang)}
         </p>
 
         {/* Route / stop summary */}
@@ -112,7 +121,7 @@ export default function NavigationBridgeModal({
                 {first.sequence}. {first.place_name_en}
               </p>
               <p className="mt-0.5 text-xs text-slate-400">
-                From your current location
+                {t("bridge.fromCurrent", lang)}
               </p>
             </>
           ) : (
@@ -121,9 +130,13 @@ export default function NavigationBridgeModal({
                 {first.place_name_en} → {last.place_name_en}
               </p>
               <p className="mt-0.5 text-xs text-slate-400">
-                {ordered.length} stops
+                {tf("bridge.stopsCount", lang, { n: ordered.length })}
                 {ordered.length > 2 &&
-                  ` · ${ordered.length - 2} via point${ordered.length > 3 ? "s" : ""}`}
+                  ` · ${tf(
+                    ordered.length - 2 === 1 ? "bridge.viaOne" : "bridge.viaMany",
+                    lang,
+                    { n: ordered.length - 2 }
+                  )}`}
               </p>
             </>
           )}
@@ -133,18 +146,16 @@ export default function NavigationBridgeModal({
         {inApp && (
           <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left">
             <p className="text-xs font-bold text-amber-700">
-              You seem to be in an in-app browser
+              {t("bridge.inAppTitle", lang)}
             </p>
             <p className="mt-1 text-xs leading-relaxed text-amber-700/80">
-              If the app doesn&apos;t open, tap the ⋯ menu and choose
-              &quot;Open in browser&quot;, or copy this page link into
-              Safari/Chrome.
+              {t("bridge.inAppBody", lang)}
             </p>
             <button
               onClick={() => copyText(window.location.href, "link")}
               className="mt-2 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-200"
             >
-              {copied === "link" ? "Link copied ✓" : "Copy page link"}
+              {copied === "link" ? t("common.linkCopied", lang) : t("common.copyLink", lang)}
             </button>
           </div>
         )}
@@ -156,14 +167,14 @@ export default function NavigationBridgeModal({
               disabled={phase === "launching"}
               className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#03C75A] py-3.5 text-base font-extrabold text-white transition-transform active:scale-[0.99] disabled:opacity-70"
             >
-              {phase === "launching" ? "Opening…" : "Open App"}
+              {phase === "launching" ? t("bridge.opening", lang) : t("bridge.openApp", lang)}
             </button>
             {phase === "launching" && (
               <button
                 onClick={() => setPhase("fallback")}
                 className="mt-2 w-full py-1 text-center text-xs font-semibold text-slate-400 hover:text-slate-600"
               >
-                App didn&apos;t open? See other options
+                {t("bridge.openFailed", lang)}
               </button>
             )}
           </>
@@ -171,21 +182,21 @@ export default function NavigationBridgeModal({
           <>
             {/* Softened fallback — suggest, don't assert failure */}
             <p className="mt-4 text-center text-xs font-semibold text-slate-500">
-              If the app didn&apos;t open, try one of these:
+              {t("bridge.fallbackIntro", lang)}
             </p>
             <button
               onClick={handleOpenApp}
               className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#03C75A] py-3 text-sm font-extrabold text-white transition-transform active:scale-[0.99]"
             >
-              Try Open App again
+              {t("bridge.retryOpen", lang)}
             </button>
             <button
               onClick={() => copyText(buildKoreanAddressList(ordered), "address")}
               className="mt-2 w-full rounded-2xl bg-slate-900 py-3 text-sm font-extrabold text-white transition-transform active:scale-[0.99]"
             >
               {copied === "address"
-                ? "Copied! ✓ Paste into any map app"
-                : "Copy Korean Address"}
+                ? t("bridge.addrCopied", lang)
+                : t("bridge.copyAddr", lang)}
             </button>
             <a
               href={single ? buildNaverWebSearchUrl(last) : buildNaverWebRouteUrl(ordered)}
@@ -193,7 +204,7 @@ export default function NavigationBridgeModal({
               rel="noopener noreferrer"
               className="mt-2 block w-full rounded-2xl border border-slate-200 py-3 text-center text-sm font-bold text-slate-600 hover:border-slate-400"
             >
-              Open Naver Map on the web
+              {t("bridge.openWeb", lang)}
             </a>
           </>
         )}
@@ -202,7 +213,7 @@ export default function NavigationBridgeModal({
           onClick={onClose}
           className="mt-3 w-full py-1.5 text-center text-sm font-semibold text-slate-400 hover:text-slate-600"
         >
-          Cancel
+          {t("common.cancel", lang)}
         </button>
       </div>
     </div>

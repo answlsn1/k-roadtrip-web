@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useVideoAutoplay } from "@/hooks/useVideoAutoplay";
-import type { CardMeta } from "@/lib/config/cardMeta";
+import { badgeLabel, type CardMeta } from "@/lib/config/cardMeta";
 import { useLangStore } from "@/store/useLangStore";
 import { t } from "@/lib/i18n";
 
@@ -46,24 +46,33 @@ export default function RouteVideoCard({
         aria-hidden
       >
         {thumbnail_url ? (
+          // Blur only while acting as a loading skeleton behind a video; with no
+          // video the thumbnail IS the final poster, so render it crisp.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={thumbnail_url} alt="" className="h-full w-full object-cover blur-sm scale-105" />
+          <img
+            src={thumbnail_url}
+            alt={title}
+            className={`h-full w-full object-cover ${video_url ? "blur-sm scale-105" : ""}`}
+          />
         ) : (
           <div className="h-full w-full animate-pulse bg-slate-800" />
         )}
         <div className="absolute inset-0 bg-slate-900/40" />
       </div>
 
-      {/* Video */}
-      <video
-        ref={videoRef}
-        src={video_url}
-        poster={thumbnail_url ?? undefined}
-        playsInline muted loop preload="none"
-        onPlaying={() => setPlaying(true)}
-        onError={() => setPlaying(false)}
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${playing ? "opacity-100" : "opacity-0"}`}
-      />
+      {/* Video — only when a real (self-hosted) clip exists; otherwise the poster shows. */}
+      {video_url && (
+        <video
+          ref={videoRef}
+          src={video_url}
+          poster={thumbnail_url ?? undefined}
+          playsInline muted loop preload="none"
+          onPlaying={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onError={() => setPlaying(false)}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${playing ? "opacity-100" : "opacity-0"}`}
+        />
+      )}
 
       {/* Gradient */}
       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/95 via-slate-900/20 to-transparent" />
@@ -71,7 +80,7 @@ export default function RouteVideoCard({
       {/* Badge */}
       <div className="absolute left-5 top-5">
         <span className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-900 backdrop-blur-sm">
-          {meta.badge}
+          {badgeLabel(meta.badge, lang)}
         </span>
       </div>
 

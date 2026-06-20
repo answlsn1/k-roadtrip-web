@@ -7,6 +7,7 @@ import RouteVideoCard from "@/components/home/RouteVideoCard";
 import CategoryRow from "@/components/home/CategoryRow";
 import SiteFooter from "@/components/home/SiteFooter";
 import SponsoredCard from "@/components/home/SponsoredCard";
+import AffiliateDisclosure from "@/components/home/AffiliateDisclosure";
 import ValueProps from "@/components/home/ValueProps";
 import { getPublishedRoutes, getAllWaypointsForMap } from "@/lib/data/queries";
 import { getCardMeta, getRouteVideoUrl } from "@/lib/config/cardMeta";
@@ -86,12 +87,10 @@ export default async function HomePage() {
 
         {routes.length === 0 ? (
           <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center">
-            <p className="text-sm font-bold text-slate-700">No courses yet</p>
+            <p className="text-sm font-bold text-slate-700">Routes are coming soon</p>
             <p className="mt-2 text-xs leading-relaxed text-slate-500">
-              Connect Supabase (set <code>NEXT_PUBLIC_SUPABASE_URL</code> /{" "}
-              <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>), run the SQL in{" "}
-              <code>supabase/migrations</code> + <code>supabase/seed*.sql</code>,
-              then redeploy.
+              We&apos;re curating new local-verified road trips across Korea.
+              Check back shortly!
             </p>
           </div>
         ) : (
@@ -120,16 +119,21 @@ export default async function HomePage() {
               );
             })}
 
-            {/* ⭐ Sponsored Picks row */}
-            <CategoryRow
-              titleKey="feed.sponsored"
-              badgeKey="feed.partner"
-              badgeClass="bg-amber-100 text-amber-700"
-            >
-              {SPONSORED_PLACES.map((place) => (
-                <SponsoredCard key={place.sourceId} place={place} />
-              ))}
-            </CategoryRow>
+            {/* ⭐ Sponsored Picks row — hidden until real partners are added */}
+            {SPONSORED_PLACES.length > 0 && (
+              <>
+                <CategoryRow
+                  titleKey="feed.sponsored"
+                  badgeKey="feed.partner"
+                  badgeClass="bg-amber-100 text-amber-700"
+                >
+                  {SPONSORED_PLACES.map((place) => (
+                    <SponsoredCard key={place.sourceId} place={place} />
+                  ))}
+                </CategoryRow>
+                <AffiliateDisclosure className="-mt-6 mb-10 px-5 text-xs text-slate-400 sm:px-0" />
+              </>
+            )}
           </div>
         )}
       </section>

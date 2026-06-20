@@ -3,6 +3,9 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import type { MapWaypoint } from "@/lib/types";
+import { useLangStore } from "@/store/useLangStore";
+import { t } from "@/lib/i18n";
+import { trackEvent } from "@/lib/analytics/events";
 
 const LeafletMap = dynamic(() => import("./LeafletMap"), {
   ssr: false,
@@ -20,16 +23,17 @@ interface MapSectionProps {
 export default function MapSection({ waypoints }: MapSectionProps) {
   const regions = Array.from(new Set(waypoints.map((w) => w.region_name_en))).sort();
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
+  const lang = useLangStore((s) => s.lang);
 
   return (
     <section id="map" className="mx-auto max-w-6xl scroll-mt-20 px-5 pb-20 sm:pb-28">
       <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="mb-2 text-xs font-bold uppercase tracking-widest text-emerald-600">
-            Live Map
+            {t("map.label", lang)}
           </p>
           <h2 className="text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
-            Every stop, local-verified
+            {t("map.heading", lang)}
           </h2>
         </div>
 
@@ -43,12 +47,16 @@ export default function MapSection({ waypoints }: MapSectionProps) {
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
-            All
+            {t("map.all", lang)}
           </button>
           {regions.map((r) => (
             <button
               key={r}
-              onClick={() => setActiveRegion(activeRegion === r ? null : r)}
+              onClick={() => {
+                const next = activeRegion === r ? null : r;
+                setActiveRegion(next);
+                if (next) trackEvent("region_view", { region: r });
+              }}
               className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors ${
                 activeRegion === r
                   ? "bg-ink text-white"
@@ -68,7 +76,7 @@ export default function MapSection({ waypoints }: MapSectionProps) {
       </div>
 
       <p className="mt-3 text-right text-xs font-semibold text-slate-400">
-        Tap a marker for details & Naver Map navigation
+        {t("map.hint", lang)}
       </p>
     </section>
   );
