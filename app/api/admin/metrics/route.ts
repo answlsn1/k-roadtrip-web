@@ -1,14 +1,12 @@
 /* ============================================================
  * 어드민 집계 API (창업자 전용).
- * 1) Bearer 토큰으로 로그인 사용자 검증 → 이메일 허용목록 확인
+ * 1) 공유 관리자 토큰(ADMIN_DASHBOARD_TOKEN)으로 게이트 — 구글 로그인 불필요
  * 2) service_role 키로 events/routes/waypoints 집계 (RLS 우회, 서버에서만)
- * 서비스롤 키는 클라이언트로 절대 나가지 않는다.
+ * 토큰·서비스롤 키는 클라이언트로 절대 나가지 않는다.
  * ============================================================ */
 
 import { NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/data/supabaseServer";
 import { getSupabaseAdminClient } from "@/lib/data/supabaseAdmin";
-import { ADMIN_EMAILS } from "@/lib/config/admin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,18 +24,15 @@ const FUNNEL = [
 const METRO = new Set(["Seoul", "Gyeonggi", "Incheon"]);
 
 export async function GET(request: Request) {
-  // ── 1. founder identity ──────────────────────────────────
-  const authz = request.headers.get("authorization") ?? "";
-  const token = authz.startsWith("Bearer ") ? authz.slice(7) : null;
-  if (!token) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
-  const anon = getSupabaseServerClient();
-  if (!anon) return NextResponse.json({ error: "supabase_unconfigured" }, { status: 503 });
-
-  const { data: userData } = await anon.auth.getUser(token);
-  const email = userData.user?.email?.toLowerCase();
-  if (!email || !ADMIN_EMAILS.includes(email)) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  // ── 1. founder gate: shared admin token ──────────────────
+  const expected = process.env.ADMIN_DASHBOARD_TOKEN;
+  if (!expected) {
+    // Fail closed: no token configured → never serve data.
+    return NextResponse.json({ error: "admin_token_not_configured" }, { status: 503 });
+  }
+  const token = request.headers.get("x-admin-token");
+  if (!token || token !== expected) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   // ── 2. service-role reads ────────────────────────────────

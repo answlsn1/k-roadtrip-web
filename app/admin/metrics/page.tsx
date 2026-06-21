@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSupabaseBrowserClient } from "@/lib/data/supabaseClient";
 
 interface Metrics {
   coverage: { regions: number; routes: number; places: number };
@@ -17,7 +16,9 @@ interface Metrics {
   generatedAt: string;
 }
 
-type View = "loading" | "signedout" | "forbidden" | "unconfigured" | "ready" | "error";
+type View = "locked" | "loading" | "ready" | "error" | "unconfigured";
+
+const TOKEN_KEY = "krt-admin-token";
 
 const FUNNEL_LABEL: Record<string, string> = {
   region_view: "지역 발견",
@@ -32,61 +33,65 @@ function pct(n: number, d: number): string {
 }
 
 export default function AdminMetricsPage() {
-  const [view, setView] = useState<View>("loading");
+  const [view, setView] = useState<View>("locked");
   const [data, setData] = useState<Metrics | null>(null);
-  const [email, setEmail] = useState<string | null>(null);
+  const [tokenInput, setTokenInput] = useState("");
   const [detail, setDetail] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      const supabase = getSupabaseBrowserClient();
-      if (!supabase) {
-        setDetail("Supabase 환경변수가 설정되지 않았습니다.");
+  const load = async (token: string) => {
+    setView("loading");
+    setDetail(null);
+    try {
+      const res = await fetch("/api/admin/metrics", {
+        headers: { "x-admin-token": token },
+        cache: "no-store",
+      });
+      if (res.status === 401) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        setDetail("토큰이 올바르지 않습니다. 다시 입력해 주세요.");
+        setView("locked");
+        return;
+      }
+      if (res.status === 503) {
+        const j = await res.json().catch(() => ({}));
+        setDetail(
+          j.error === "service_role_key_missing"
+            ? "서버에 SUPABASE_SERVICE_ROLE_KEY 가 설정되지 않았습니다 (Vercel 환경변수 + 재배포)."
+            : "서버에 ADMIN_DASHBOARD_TOKEN 이 설정되지 않았습니다 (Vercel 환경변수 + 재배포)."
+        );
         setView("unconfigured");
         return;
       }
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        setView("signedout");
+      if (!res.ok) {
+        setView("error");
         return;
       }
-      setEmail(session.user.email ?? null);
-      try {
-        const res = await fetch("/api/admin/metrics", {
-          headers: { authorization: `Bearer ${session.access_token}` },
-          cache: "no-store",
-        });
-        if (res.status === 403) return setView("forbidden");
-        if (res.status === 503) {
-          const j = await res.json().catch(() => ({}));
-          setDetail(
-            j.error === "service_role_key_missing"
-              ? "SUPABASE_SERVICE_ROLE_KEY 가 서버에 설정되지 않았습니다 (Vercel 환경변수)."
-              : "Supabase 환경변수가 설정되지 않았습니다."
-          );
-          return setView("unconfigured");
-        }
-        if (!res.ok) return setView("error");
-        setData((await res.json()) as Metrics);
-        setView("ready");
-      } catch {
-        setView("error");
-      }
-    })();
+      sessionStorage.setItem(TOKEN_KEY, token);
+      setData((await res.json()) as Metrics);
+      setView("ready");
+    } catch {
+      setView("error");
+    }
+  };
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem(TOKEN_KEY);
+    if (saved) load(saved);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const signIn = async () => {
-    const supabase = getSupabaseBrowserClient();
-    await supabase?.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.href },
-    });
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const t = tokenInput.trim();
+    if (t) load(t);
   };
-  const signOut = async () => {
-    await getSupabaseBrowserClient()?.auth.signOut();
-    window.location.reload();
+
+  const lock = () => {
+    sessionStorage.removeItem(TOKEN_KEY);
+    setTokenInput("");
+    setData(null);
+    setDetail(null);
+    setView("locked");
   };
 
   return (
@@ -98,51 +103,50 @@ export default function AdminMetricsPage() {
           </p>
           <h1 className="text-2xl font-extrabold text-slate-900">지역 가치 증거 대시보드</h1>
         </div>
-        {email && (
-          <button onClick={signOut} className="text-xs font-semibold text-slate-400 hover:text-slate-700">
-            {email} · 로그아웃
+        {view === "ready" && (
+          <button onClick={lock} className="text-xs font-semibold text-slate-400 hover:text-slate-700">
+            잠그기
           </button>
         )}
       </div>
 
-      {view === "loading" && <p className="mt-16 text-center text-sm text-slate-400">불러오는 중…</p>}
-
-      {view === "signedout" && (
+      {(view === "locked" || view === "unconfigured" || view === "error") && (
         <Card className="mt-10">
-          <p className="font-bold text-slate-800">창업자 로그인이 필요합니다</p>
-          <p className="mt-1 text-sm text-slate-500">허용된 계정으로 로그인하세요.</p>
-          <button
-            onClick={signIn}
-            className="mt-4 rounded-2xl bg-ink px-5 py-3 text-sm font-extrabold text-white active:scale-[0.99]"
-          >
-            구글로 로그인
-          </button>
+          {view === "unconfigured" ? (
+            <>
+              <p className="font-bold text-slate-800">설정이 필요합니다</p>
+              <p className="mt-1 text-sm leading-relaxed text-slate-500">{detail}</p>
+            </>
+          ) : view === "error" ? (
+            <p className="font-bold text-slate-800">데이터를 불러오지 못했습니다</p>
+          ) : (
+            <>
+              <p className="font-bold text-slate-800">관리자 토큰 입력</p>
+              <p className="mt-1 text-sm text-slate-500">창업자 전용 대시보드입니다.</p>
+              <form onSubmit={submit} className="mt-4 flex gap-2">
+                <input
+                  type="password"
+                  value={tokenInput}
+                  onChange={(e) => setTokenInput(e.target.value)}
+                  placeholder="ADMIN_DASHBOARD_TOKEN"
+                  autoFocus
+                  className="flex-1 rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400"
+                />
+                <button
+                  type="submit"
+                  className="rounded-2xl bg-ink px-5 py-3 text-sm font-extrabold text-white active:scale-[0.99]"
+                >
+                  열기
+                </button>
+              </form>
+              {detail && <p className="mt-2 text-xs font-semibold text-rose-500">{detail}</p>}
+            </>
+          )}
         </Card>
       )}
 
-      {view === "forbidden" && (
-        <Card className="mt-10">
-          <p className="font-bold text-slate-800">접근 권한이 없습니다</p>
-          <p className="mt-1 text-sm text-slate-500">
-            이 대시보드는 창업자 전용입니다{email ? ` (${email})` : ""}.
-          </p>
-          <button onClick={signOut} className="mt-4 text-sm font-semibold text-emerald-600">
-            다른 계정으로 로그인
-          </button>
-        </Card>
-      )}
-
-      {view === "unconfigured" && (
-        <Card className="mt-10">
-          <p className="font-bold text-slate-800">설정이 필요합니다</p>
-          <p className="mt-1 text-sm leading-relaxed text-slate-500">{detail}</p>
-        </Card>
-      )}
-
-      {view === "error" && (
-        <Card className="mt-10">
-          <p className="font-bold text-slate-800">데이터를 불러오지 못했습니다</p>
-        </Card>
+      {view === "loading" && (
+        <p className="mt-16 text-center text-sm text-slate-400">불러오는 중…</p>
       )}
 
       {view === "ready" && data && (
@@ -237,9 +241,7 @@ export default function AdminMetricsPage() {
                 );
               })}
             </div>
-            <p className="mt-2 text-[11px] text-slate-400">
-              우측 %는 직전 단계 대비 전환율입니다.
-            </p>
+            <p className="mt-2 text-[11px] text-slate-400">우측 %는 직전 단계 대비 전환율입니다.</p>
           </Section>
         </div>
       )}
@@ -283,10 +285,7 @@ function Bars({ rows }: { rows: { label: string; value: number }[] }) {
         <div key={r.label} className="flex items-center gap-3">
           <span className="w-24 shrink-0 truncate text-xs font-semibold text-slate-600">{r.label}</span>
           <div className="h-5 flex-1 overflow-hidden rounded bg-slate-100">
-            <div
-              className="h-full rounded bg-sky-500"
-              style={{ width: `${(r.value / max) * 100}%` }}
-            />
+            <div className="h-full rounded bg-sky-500" style={{ width: `${(r.value / max) * 100}%` }} />
           </div>
           <span className="w-10 shrink-0 text-right text-[11px] text-slate-400">{r.value}</span>
         </div>
