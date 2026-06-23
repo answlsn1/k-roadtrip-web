@@ -56,6 +56,41 @@ export const CARD_META: Record<string, CardMeta> = {
     chips_en: ["🏘 Hanok village", "⛪ Cathedral", "🍵 250-yr hanok"],
     chips_ko: ["🏘 한옥마을", "⛪ 전동성당", "🍵 아원고택"],
   },
+  "misty-tea-roads": {
+    badge: "3-Day Course",
+    sub_en: "Tea terraces, wetlands & bamboo.",
+    sub_ko: "차밭과 습지, 대숲을 잇는 남도 길.",
+    chips_en: ["🍵 Boseong tea fields", "🌾 Suncheon Bay", "🎍 Damyang bamboo"],
+    chips_ko: ["🍵 보성 차밭", "🌾 순천만", "🎍 담양 대숲"],
+  },
+  "south-sea-island-hop": {
+    badge: "3-Day Course",
+    sub_en: "Island to island, across the south sea.",
+    sub_ko: "섬에서 섬으로, 한려수도를 따라.",
+    chips_en: ["🏝 Namhae terraces", "🚡 Mireuksan view", "🌬 Geoje coast"],
+    chips_ko: ["🏝 남해 다랭이", "🚡 미륵산 전망", "🌬 거제 해안"],
+  },
+  "danyang-river-cliffs": {
+    badge: "2-Day Course",
+    sub_en: "Where rivers carve and cliffs rise.",
+    sub_ko: "강은 깎고, 절벽은 솟는 곳.",
+    chips_en: ["🪨 Dodamsambong", "🌉 Mancheonha skywalk", "⛰ Sobaeksan"],
+    chips_ko: ["🪨 도담삼봉", "🌉 만천하 스카이워크", "⛰ 소백산"],
+  },
+  "west-coast-sunset-line": {
+    badge: "2-Day Course",
+    sub_en: "Chasing the West Sea sunset.",
+    sub_ko: "하루의 끝을 보러 가는 길.",
+    chips_en: ["🌅 Kkotji sunset", "🏖 Sinduri dunes", "🌿 Cheollipo"],
+    chips_ko: ["🌅 꽃지 노을", "🏖 신두리 사구", "🌿 천리포수목원"],
+  },
+  "jeongseon-snow-highlands": {
+    badge: "3-Day Course",
+    sub_en: "Highlands of snow and steel rails.",
+    sub_ko: "가장 높은 곳에서 천천히.",
+    chips_en: ["🪂 Byeongbangchi", "🚲 Rail bike", "🚂 Chujeon station"],
+    chips_ko: ["🪂 병방치 전망", "🚲 레일바이크", "🚂 추전역"],
+  },
 };
 
 // Course-length badge ("2-Day Course") localized for the KOR toggle.
@@ -95,6 +130,11 @@ export const ROUTE_VIDEO_URLS: Record<string, string> = {
   "andong-scholars-riverside-drive": "",  // TODO(content): self-hosted KR clip
   "gyeongju-ancient-capital-drive": "",   // TODO(content): self-hosted KR clip
   "jeonju-wanju-hanok-drive": "",         // TODO(content): self-hosted KR clip
+  "misty-tea-roads": "",                  // TODO(content): self-hosted KR clip
+  "south-sea-island-hop": "",             // TODO(content): self-hosted KR clip
+  "danyang-river-cliffs": "",             // TODO(content): self-hosted KR clip
+  "west-coast-sunset-line": "",           // TODO(content): self-hosted KR clip
+  "jeongseon-snow-highlands": "",         // TODO(content): self-hosted KR clip
 };
 
 export function getRouteVideoUrl(slug: string): string {

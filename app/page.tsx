@@ -26,6 +26,17 @@ const FEED_CATEGORIES = [
     slugs: ["jeju-volcanic-loop", "busan-coastal-metropolis", "gangneung-coastal-drive"],
   },
   {
+    id: "beyond",
+    titleKey: "feed.beyond",
+    slugs: [
+      "misty-tea-roads",
+      "south-sea-island-hop",
+      "danyang-river-cliffs",
+      "west-coast-sunset-line",
+      "jeongseon-snow-highlands",
+    ],
+  },
+  {
     id: "heritage",
     titleKey: "feed.heritage",
     slugs: [
