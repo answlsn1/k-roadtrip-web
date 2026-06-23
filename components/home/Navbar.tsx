@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import LangToggle from "@/components/home/LangToggle";
+import MyTripButton from "@/components/home/MyTripButton";
 import MyTripPanel from "@/components/home/MyTripPanel";
 import { useLangStore } from "@/store/useLangStore";
 import { t } from "@/lib/i18n";
@@ -41,7 +42,7 @@ export default function Navbar() {
             >
               {t("nav.build", lang)}
             </Link>
-            <MyTripPanel />
+            <MyTripButton />
             <LangToggle />
           </div>
 
@@ -92,16 +93,18 @@ export default function Navbar() {
               </a>
               <div className="my-2 border-t border-slate-100" />
               <div className="flex items-center justify-between px-4 py-3">
-                {/* Close the hamburger menu when the My Trip drawer opens. */}
-                <span onClick={close}>
-                  <MyTripPanel />
-                </span>
+                {/* Opens the shared drawer + closes the hamburger. */}
+                <MyTripButton onOpen={close} />
                 <LangToggle />
               </div>
             </nav>
           </div>
         </div>
       )}
+
+      {/* My Trip drawer — single instance, outside the hamburger so closing the
+          menu can't unmount it. Opened via useMyTripStore from either trigger. */}
+      <MyTripPanel />
     </>
   );
 }
