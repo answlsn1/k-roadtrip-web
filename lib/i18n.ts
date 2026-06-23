@@ -27,7 +27,7 @@ export const dict = {
   },
 
   // ── Courses section ─────────────────────────────────────────
-  "home.label":   { en: "Curated Routes",  ko: "전문가 추천 코스" },
+  "home.label":   { en: "Curated Routes",  ko: "현지가 검증한 코스" },
   "home.heading": {
     en: "Pick a route. We did the homework.",
     ko: "루트만 고르세요. 검증은 저희가 마쳤습니다.",
@@ -79,8 +79,8 @@ export const dict = {
     ko: "© 2026 K-RoadTrip · 서울 너머를 여행하는 사람들을 위해",
   },
   "footer.attribution": {
-    en: "Map data © Google · Navigation by Naver Map",
-    ko: "지도 데이터 © Google · 내비게이션 by 네이버 지도",
+    en: "Map data © OpenStreetMap contributors · Navigation by Naver Map",
+    ko: "지도 데이터 © OpenStreetMap 기여자 · 내비게이션 by 네이버 지도",
   },
 
   // ── Affiliate / sponsor disclosure ──────────────────────────
