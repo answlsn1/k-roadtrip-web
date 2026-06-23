@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useRef } from "react";
 import { useLangStore } from "@/store/useLangStore";
 import { t, type DictKey } from "@/lib/i18n";
 
@@ -25,6 +26,43 @@ export default function CategoryRow({
 }: CategoryRowProps) {
   const lang = useLangStore((s) => s.lang);
 
+  // Mouse drag-to-scroll (PC) — refs only, no re-render
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+  const hasDragged = useRef(false);
+
+  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    isDragging.current = true;
+    hasDragged.current = false;
+    startX.current = e.pageX - el.getBoundingClientRect().left;
+    scrollLeft.current = el.scrollLeft;
+  };
+
+  const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging.current || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.getBoundingClientRect().left;
+    const walk = x - startX.current;
+    if (Math.abs(walk) > 4) hasDragged.current = true;
+    scrollRef.current.scrollLeft = scrollLeft.current - walk;
+  };
+
+  const onMouseUpOrLeave = () => {
+    isDragging.current = false;
+  };
+
+  // Prevent card click after a real drag (threshold already exceeded above)
+  const onClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (hasDragged.current) {
+      e.stopPropagation();
+      hasDragged.current = false;
+    }
+  };
+
   return (
     <div className="mb-10">
       {/* Row heading */}
@@ -41,8 +79,16 @@ export default function CategoryRow({
         )}
       </div>
 
-      {/* Horizontal scroll strip — snap-x so cards land cleanly on swipe */}
-      <div className="flex gap-4 overflow-x-auto pb-3 pl-5 pr-5 sm:pl-0 sm:pr-0 snap-x snap-mandatory scroll-smooth scroll-pl-5 sm:scroll-pl-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* Horizontal scroll strip — touch: native scroll, mouse: drag handlers */}
+      <div
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-auto pb-3 pl-5 pr-5 sm:pl-0 sm:pr-0 snap-x snap-mandatory scroll-smooth scroll-pl-5 sm:scroll-pl-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden select-none cursor-grab active:cursor-grabbing"
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUpOrLeave}
+        onMouseLeave={onMouseUpOrLeave}
+        onClickCapture={onClickCapture}
+      >
         {children}
       </div>
     </div>
