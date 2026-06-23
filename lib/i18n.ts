@@ -14,7 +14,8 @@ export const dict = {
     en: "🚗 Local-verified road trips · Sokcho → Busan + Jeju",
     ko: "🚗 현지 검증 로드트립 · 속초 → 부산 + 제주",
   },
-  "hero.titlePre":    { en: "Take it slow. See ",  ko: "천천히, " },
+  "hero.titlePre":    { en: "Take it slow.",  ko: "천천히," },
+  "hero.titleLine2":  { en: "See ", ko: "" },
   "hero.titleAccent": { en: "the real Korea",      ko: "진짜 한국" },
   "hero.titlePost":   { en: ".",                   ko: "을 보다." },
   "hero.sub": {
