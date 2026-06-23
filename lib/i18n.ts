@@ -14,12 +14,12 @@ export const dict = {
     en: "🚗 Local-verified road trips · Sokcho → Busan + Jeju",
     ko: "🚗 현지 검증 로드트립 · 속초 → 부산 + 제주",
   },
-  "hero.titlePre":    { en: "Plan & book your ",       ko: "서울 너머, " },
-  "hero.titleAccent": { en: "perfect Korea roadtrip",  ko: "완벽한 한국 로드트립" },
-  "hero.titlePost":   { en: " — beyond Seoul.",        ko: "을 계획하고 예약하세요." },
+  "hero.titlePre":    { en: "Take it slow. See ",  ko: "천천히, " },
+  "hero.titleAccent": { en: "the real Korea",      ko: "진짜 한국" },
+  "hero.titlePost":   { en: ".",                   ko: "을 보다." },
   "hero.sub": {
-    en: "Discover curated drives, trusted local food and hidden gems — plan your whole trip, then navigate in one tap.",
-    ko: "현지 검증 드라이브 코스와 맛집, 숨은 명소를 발견하고 — 일정을 짠 뒤 원탭으로 길안내까지.",
+    en: "Discover the Korea that begins where the city ends.",
+    ko: "도시가 끝나는 곳에서, 진짜 한국이 시작됩니다.",
   },
   "hero.note": {
     en: "No login · Free to use · Locally curated",
