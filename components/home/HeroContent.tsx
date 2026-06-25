@@ -19,8 +19,6 @@ export default function HeroContent({ courses }: HeroContentProps) {
       </p>
       <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-6xl">
         {t("hero.titlePre", lang)}
-        <br />
-        {t("hero.titleLine2", lang)}
         <span className="text-amber-300">{t("hero.titleAccent", lang)}</span>
         {t("hero.titlePost", lang)}
       </h1>
