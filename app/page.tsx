@@ -1,5 +1,6 @@
 import CoursesSectionHeader from "@/components/home/CoursesSectionHeader";
 import HeroContent from "@/components/home/HeroContent";
+import HeroSlideshow from "@/components/home/HeroSlideshow";
 import MapSection from "@/components/home/MapSection";
 import Navbar from "@/components/home/Navbar";
 import RoadTripTips from "@/components/home/RoadTripTips";
@@ -53,10 +54,6 @@ const FEED_CATEGORIES = [
   },
 ] as const;
 
-// Woljeonggyo Bridge, Gyeongju — dancheong colors you can only find in Korea
-const HERO_IMG =
-  "https://images.unsplash.com/photo-1653632445006-0ed9bbe32672?auto=format&fit=crop&w=2000&q=80";
-
 export default async function HomePage() {
   const [routes, mapWaypoints] = await Promise.all([
     getPublishedRoutes(),
@@ -69,15 +66,9 @@ export default async function HomePage() {
       <Navbar />
 
       {/* ============ HERO ============ */}
-      {/* dvh (not vh) so the mobile address bar collapsing won't make the hero jump. */}
-      <section className="relative flex min-h-[88dvh] items-center justify-center">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={HERO_IMG}
-          alt="Woljeonggyo Bridge illuminated at night in Gyeongju, Korea"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/25 to-slate-950/75" />
+      {/* Full viewport height. svh handles mobile browser chrome; screen is the fallback. */}
+      <section className="relative flex min-h-screen min-h-[100svh] items-center justify-center overflow-hidden">
+        <HeroSlideshow />
 
         <HeroContent
           courses={routes.map((r) => ({
