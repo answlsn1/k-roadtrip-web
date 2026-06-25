@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 /**
- * Hero background slideshow — Korea-only imagery, cross-fading every 6s.
+ * Hero background slideshow — Korea-only imagery, cross-fading every 3s.
  *
  * Layering (z-index): images z-0 < single overlay z-[5] < dots z-[15].
  * HeroContent (z-10) is a sibling rendered above this in app/page.tsx.
@@ -45,7 +45,7 @@ const SLIDES: Slide[] = [
   },
 ];
 
-const ROTATE_MS = 6000;
+const ROTATE_MS = 3000;
 
 export default function HeroSlideshow() {
   const [index, setIndex] = useState(0);
