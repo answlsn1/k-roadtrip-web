@@ -13,6 +13,7 @@ import { t, tf } from "@/lib/i18n";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { buildNaverWebRouteUrl, type NaverRoutePoint } from "@/lib/domain/naverMapLink";
 import { trackEvent } from "@/lib/analytics/events";
+import TripLedgerSheet from "@/components/home/TripLedgerSheet";
 import type { SavedTrip } from "@/lib/types";
 
 /**
@@ -27,6 +28,9 @@ export default function MyTripPanel() {
   const setOpen = useMyTripStore((s) => s.setOpen);
   const [copied, setCopied] = useState(false);
   const [mounted, setMounted] = useState(false);
+  // Which trip (if any) has its expense ledger open. Sheet stacks ABOVE this
+  // panel — the panel stays mounted behind it.
+  const [ledgerTrip, setLedgerTrip] = useState<SavedTrip | null>(null);
   useEffect(() => setMounted(true), []);
 
   // Re-read localStorage whenever the drawer opens, so a trip just saved on the
@@ -164,6 +168,14 @@ export default function MyTripPanel() {
                         </span>
                       </button>
                       <button
+                        onClick={() => setLedgerTrip(trip)}
+                        aria-label={t("ledger.openLabel", lang)}
+                        title={t("ledger.openLabel", lang)}
+                        className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-700 transition-transform active:scale-90"
+                      >
+                        💰
+                      </button>
+                      <button
                         onClick={() => openInNaver(trip)}
                         aria-label={t("trip.openInNaver", lang)}
                         title={t("trip.openInNaver", lang)}
@@ -242,6 +254,15 @@ export default function MyTripPanel() {
           </div>
         )}
       </aside>
+
+      {/* Expense ledger — stacks above this panel (its own portal + z-[1100]). */}
+      {ledgerTrip && (
+        <TripLedgerSheet
+          trip={ledgerTrip}
+          open={!!ledgerTrip}
+          onClose={() => setLedgerTrip(null)}
+        />
+      )}
     </>,
     document.body
   );

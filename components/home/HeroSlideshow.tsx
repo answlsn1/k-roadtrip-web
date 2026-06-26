@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /**
  * Hero background slideshow — Korea-only imagery, cross-fading every 3s.
@@ -49,16 +50,7 @@ const ROTATE_MS = 3000;
 
 export default function HeroSlideshow() {
   const [index, setIndex] = useState(0);
-  const [reducedMotion, setReducedMotion] = useState(false);
-
-  // Track reduced-motion preference (and react to live changes).
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
+  const reducedMotion = useReducedMotion();
 
   // Auto-rotate, unless reduced motion is requested. `index` in the deps so a
   // manual dot click resets the timer (effect re-runs → fresh interval).

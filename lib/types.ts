@@ -100,6 +100,48 @@ export interface SavedTrip {
   savedAt: number;
 }
 
+// ── Travel Expense Ledger ─────────────────────────────────────
+// Headless data layer for the per-trip expense ledger. Pure client state
+// (localStorage); no server/DB/analytics. UI (bottom sheet etc.) comes later.
+
+export type ExpenseCategory =
+  | "car" // rental car
+  | "fuel" // fuel + tolls
+  | "lodging"
+  | "food"
+  | "entrance" // admission / entry fees
+  | "other";
+
+/** Ordered list of categories — single source of truth for iteration/UI order. */
+export const EXPENSE_CATEGORIES: readonly ExpenseCategory[] = [
+  "car",
+  "fuel",
+  "lodging",
+  "food",
+  "entrance",
+  "other",
+] as const;
+
+/** A single logged expense. `amountKrw` is the normalized value the app sums on;
+ *  `inputCurrency`/`inputAmount` preserve what the user actually typed. */
+export interface ExpenseEntry {
+  id: string;
+  category: ExpenseCategory;
+  amountKrw: number;
+  inputCurrency: string;
+  inputAmount: number;
+  note?: string;
+  loggedAt: string; // ISO timestamp
+}
+
+/** Per-trip ledger: pre-filled estimates + the user's actual logged entries. */
+export interface TripLedger {
+  tripId: string;
+  estimates: Record<ExpenseCategory, number>; // KRW, auto pre-filled, editable
+  entries: ExpenseEntry[];
+  displayCurrency: string; // currency the UI renders approximations in
+}
+
 export function placeToStop(p: PlaceResult): BuilderStop {
   return {
     tempId:

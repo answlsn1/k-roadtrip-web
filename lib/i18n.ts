@@ -176,6 +176,44 @@ export const dict = {
   },
   "trip.copyAll":   { en: "Copy all Korean names", ko: "한국어 이름 모두 복사" },
 
+  // ── Travel Expense Ledger ───────────────────────────────────
+  "ledger.openLabel": { en: "Open expense ledger", ko: "여행경비 기록부 열기" },
+  "ledger.title":     { en: "Trip Expenses",       ko: "여행 경비" },
+  "ledger.summaryExpected": { en: "Expected",  ko: "예상" },
+  "ledger.summaryActual":   { en: "Actual",    ko: "실제" },
+  "ledger.cat.rental": { en: "Rental car",   ko: "렌터카" },
+  "ledger.cat.fuel":   { en: "Fuel & tolls", ko: "주유·통행료" },
+  "ledger.cat.stay":   { en: "Lodging",      ko: "숙박" },
+  "ledger.cat.food":   { en: "Food",         ko: "식비" },
+  "ledger.cat.entry":  { en: "Entry fees",   ko: "입장료" },
+  "ledger.cat.other":  { en: "Other",        ko: "기타" },
+  "ledger.approxBadge": { en: "est.", ko: "추정" },
+  "ledger.approxHint": {
+    en: "Estimates are rough nationwide averages — edit anytime.",
+    ko: "예상치는 전국 평균 추정값입니다 — 언제든 수정하세요.",
+  },
+  "ledger.overwriteHint": {
+    en: "Saving here replaces this category's logged total.",
+    ko: "여기에 저장하면 이 항목의 기록 합계를 대체합니다.",
+  },
+  "ledger.withinBudget": { en: "Within budget · {pct}", ko: "예산 내 · {pct}" },
+  "ledger.overBy":       { en: "Over by {amt} · {pct}",  ko: "{amt} 초과 · {pct}" },
+  "ledger.notLogged":    { en: "Not logged yet",          ko: "아직 기록 없음" },
+  "ledger.rateLabel":    { en: "approx · rates as of {date}", ko: "추정 · {date} 기준 환율" },
+  "ledger.todaySoFar":   { en: "Logged so far: {amt}",    ko: "지금까지 기록: {amt}" },
+  "ledger.amountPlaceholder": { en: "Amount", ko: "금액" },
+  "ledger.save":      { en: "Save",            ko: "저장" },
+  "ledger.logCta":    { en: "+ Log an expense", ko: "+ 경비 기록하기" },
+  "ledger.empty":     { en: "No expenses logged", ko: "기록된 경비가 없습니다" },
+  "ledger.emptyHint": {
+    en: "Tap a category and enter what you spent — we'll compare it to the estimate.",
+    ko: "항목을 누르고 지출한 금액을 입력하세요 — 예상치와 비교해 드립니다.",
+  },
+  "ledger.phase2Note": {
+    en: "Figures stay on this device. Currency conversions are approximate.",
+    ko: "기록은 이 기기에만 저장됩니다. 환율 환산은 근사치입니다.",
+  },
+
   // ── Builder ─────────────────────────────────────────────────
   "builder.savedHint":       { en: "Build your own road trip · saved on this device", ko: "나만의 로드트립 만들기 · 이 기기에 저장됨" },
   "builder.namePlaceholder": { en: "Name your route", ko: "코스 이름을 입력하세요" },
