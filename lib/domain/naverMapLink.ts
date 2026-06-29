@@ -142,11 +142,14 @@ export function launchDeepLink(
 ): () => void {
   const delay = opts.fallbackDelayMs ?? (isIOS() ? 2500 : 1600);
 
+  // NOTE: we intentionally do NOT treat a bare `blur` as "the app opened".
+  // On some browsers a spurious blur (devtools focus, OS dialog) would cancel
+  // the fallback timer and strand the modal on "opening…". visibilitychange
+  // (document.hidden) and pagehide are the reliable app-switch signals.
   const cleanup = () => {
     window.clearTimeout(timer);
     document.removeEventListener("visibilitychange", onVisibility);
     window.removeEventListener("pagehide", onLeave);
-    window.removeEventListener("blur", onLeave);
   };
   const onLeave = () => cleanup();
   const onVisibility = () => {
@@ -160,7 +163,6 @@ export function launchDeepLink(
 
   document.addEventListener("visibilitychange", onVisibility);
   window.addEventListener("pagehide", onLeave);
-  window.addEventListener("blur", onLeave);
 
   window.location.href = url;
   return cleanup;

@@ -10,7 +10,7 @@ import {
   launchDeepLink,
   resolveLaunchUrl,
 } from "@/lib/domain/naverMapLink";
-import { isInAppBrowser } from "@/lib/browserEnv";
+import { isAndroid, isIOS, isInAppBrowser } from "@/lib/browserEnv";
 import { trackEvent } from "@/lib/analytics/events";
 import { useLangStore } from "@/store/useLangStore";
 import { t, tf } from "@/lib/i18n";
@@ -63,13 +63,31 @@ export default function NavigationBridgeModal({
   const inApp = isInAppBrowser();
 
   const handleOpenApp = () => {
-    setPhase("launching");
     trackEvent("naver_handoff", { routeId, region: regionNameEn });
+    const webUrl = single
+      ? buildNaverWebSearchUrl(last)
+      : buildNaverWebRouteUrl(ordered);
+
+    // Desktop has no Naver Map app. Attempting the nmap:// scheme there only
+    // throws "scheme has no registered handler" and strands the modal on
+    // "opening…" (the blur/visibility heuristics never resolve), so off mobile
+    // we go straight to Naver Map on the web in a new tab.
+    if (!isAndroid() && !isIOS()) {
+      const win = window.open(webUrl, "_blank", "noopener,noreferrer");
+      // If a popup blocker swallowed it, surface the explicit web link instead
+      // of silently doing nothing.
+      if (win) onClose();
+      else setPhase("fallback");
+      return;
+    }
+
+    // Mobile: try the Naver Map app deep link, fall back to web on failure.
+    setPhase("launching");
     const nmapUrl = buildNaverCarRouteLink(ordered, {
       // single stop → navigate from wherever the user is right now
       useCurrentLocationAsStart: single,
     });
-    launchDeepLink(resolveLaunchUrl(nmapUrl, buildNaverWebSearchUrl(last)), {
+    launchDeepLink(resolveLaunchUrl(nmapUrl, webUrl), {
       onFallback: () => setPhase("fallback"),
     });
   };
