@@ -109,11 +109,14 @@ export default function TripLedgerSheet({ trip, open, onClose }: Props) {
   const panelMotion = reduced
     ? "transition-colors"
     : "transition-transform duration-300 ease-out";
+  // On mobile the panel slides on the Y axis (translate-y). On desktop (sm+) it
+  // is centered via the base sm:-translate-y-1/2 and must NOT get a translate-y
+  // override here, or it slips below the viewport and clips the footer CTA.
   const sheetTranslate = reduced
     ? ""
     : open
-    ? "translate-y-0 sm:scale-100 sm:translate-y-0"
-    : "translate-y-full sm:scale-95 sm:translate-y-0";
+    ? "translate-y-0 sm:scale-100"
+    : "translate-y-full sm:scale-95";
 
   return createPortal(
     <>
