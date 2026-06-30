@@ -20,6 +20,7 @@ export default function Hero({
     appName,
     appUrl,
     mission,
+    heroTeaser,
     founderName,
     founderTagline,
     founderInitial,
@@ -61,8 +62,10 @@ export default function Hero({
         진짜 만들고 있어요 · 실제 앱 보기
       </a>
 
+      <div className="join-merit-teaser">{heroTeaser}</div>
+
       <button type="button" className="join-cta" onClick={onStart}>
-        30초만, 당신 도움이 필요해요 →
+        잠깐만, 도와줄래요? →
       </button>
 
       <p className="join-micro" style={{ textAlign: "center" }}>

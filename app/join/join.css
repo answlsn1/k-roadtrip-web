@@ -296,6 +296,18 @@
   color: var(--ink2);
 }
 
+/* ── 히어로 보상 티저(CTA 위) ── */
+.join-scope .join-merit-teaser {
+  background: var(--coral-soft);
+  color: #993c1d;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: center;
+}
+
 /* ── text input ── */
 .join-scope .join-input {
   width: 100%;

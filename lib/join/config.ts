@@ -14,6 +14,8 @@ export interface JoinConfig {
   mission: string;
   /** 참여 보상 안내 */
   reward: string;
+  /** 히어로 CTA 위 보상 티저 한 줄(이탈 방지) */
+  heroTeaser: string;
   /** 추천 스팟을 '본인 별명'으로 실제 앱 루트에 등록해 준다는 메리트 한 줄 */
   aliasCredit: string;
   /** 연락을 어떻게/언제 줄지 안내 */
@@ -34,6 +36,7 @@ export const joinConfig: JoinConfig = {
   mission:
     '서울 너머, 한국 지방을 제대로 여행하는 길을 만들고 있어요. 당신의 진짜 경험이 그 지도를 채웁니다.',
   reward: '커피 한 잔(제대로 된 이야기엔 식사까지)',
+  heroTeaser: '☕ 커피는 제가 살게요 · 퀴즈로 내 여행유형도 받고',
   aliasCredit:
     '알려준 그 스팟이 ‘당신 별명’을 단 추천 코스로 실제 앱에 올라갈 수 있어요. ‘이거 내가 추천했어’ 하고 자랑할 수 있게.',
   contactBack:
