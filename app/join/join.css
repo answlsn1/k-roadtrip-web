@@ -1,0 +1,675 @@
+/* ============================================================
+ * 동행단 초대(Join Companion) — Phase 2 공개 플로우 스타일
+ *   §7 디자인 토큰 + 키프레임 + 두 시그니처(RouteBar / 보딩패스).
+ *   ⚠️ 모든 셀렉터는 `.join-scope` 하위로 스코프 → 본 앱(slate/emerald)에
+ *      새지 않게 한다. 전역 globals/Tailwind 토큰은 건드리지 않는다.
+ *   한글 본문은 기존 Noto Sans KR(--font-noto-kr) 사용. mono(라벨/스텝/
+ *   카운터/티켓 메타)는 시스템 mono 스택.
+ * ============================================================ */
+
+.join-scope {
+  /* ── §7 팔레트 ── */
+  --bg: #f6f4f0;
+  --card: #ffffff;
+  --ink: #16181d;
+  --ink2: #5c616c;
+  --ink3: #8b909b;
+  --line: #e8e4dd;
+  --line2: #f0ede7;
+  --c1: #ff6b4a;
+  --c2: #ffa63d;
+  --grad: linear-gradient(135deg, #ff6b4a, #ffa63d);
+  --mint: #10b981;
+  --mint-soft: #e4f6ef;
+  --coral-soft: #ffede7;
+
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-noto-kr), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 중앙 정렬 컨테이너 — 모바일 우선, 데스크톱에서도 안 깨지게 480px 캡 */
+.join-scope .join-container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 18px 64px;
+  box-sizing: border-box;
+}
+
+/* 화면/스텝 전환 래퍼 — key 변경 시 slideIn 재생 */
+.join-scope .join-screen {
+  animation: join-slideIn 0.34s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+
+/* ── 공통 타이포 ── */
+.join-scope .join-kicker {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c1);
+  font-weight: 600;
+}
+.join-scope .join-h1 {
+  font-size: 26px;
+  line-height: 1.3;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 10px 0;
+}
+.join-scope .join-h2 {
+  font-size: 22px;
+  line-height: 1.35;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 8px 0;
+}
+.join-scope .join-lead {
+  color: var(--ink2);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.join-scope .join-grad-text {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.join-scope .join-micro {
+  color: var(--ink3);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ── CTA 버튼(시그니처 코랄) ── */
+.join-scope .join-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  border-radius: 15px;
+  padding: 16px 20px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--grad);
+  box-shadow: 0 10px 24px rgba(255, 107, 74, 0.3);
+  cursor: pointer;
+  transition: box-shadow 0.18s ease, transform 0.06s ease;
+}
+.join-scope .join-cta:hover {
+  box-shadow: 0 12px 28px rgba(255, 107, 74, 0.36);
+}
+.join-scope .join-cta:active {
+  box-shadow: 0 4px 12px rgba(255, 107, 74, 0.24);
+  transform: translateY(1px);
+}
+.join-scope .join-cta:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* 보조 버튼(고스트) */
+.join-scope .join-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink2);
+  border-radius: 15px;
+  padding: 12px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.join-scope .join-btn-ghost:hover {
+  border-color: var(--c1);
+}
+
+/* 뒤로가기(스텝 좌상단) */
+.join-scope .join-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 6px 4px;
+  margin: 0 0 6px -4px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink3);
+  cursor: pointer;
+}
+.join-scope .join-back:hover {
+  color: var(--ink2);
+}
+
+/* ── 카드 ── */
+.join-scope .join-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+/* ── 앱 라이브 링크 버튼 ── */
+.join-scope .join-applink {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  box-sizing: border-box;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 14px;
+  padding: 13px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+.join-scope .join-applink:hover {
+  border-color: var(--mint);
+}
+.join-scope .join-applink--slim {
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink2);
+}
+.join-scope .join-livedot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--mint);
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+  animation: join-pulse 2s ease-out infinite;
+  flex: 0 0 auto;
+}
+
+/* ── 신뢰 스트립 ── */
+.join-scope .join-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 12.5px;
+  color: var(--ink2);
+}
+.join-scope .join-trust span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── 운영자 아바타 ── */
+.join-scope .join-founder {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.join-scope .join-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 19px;
+  color: #fff;
+  background: var(--grad);
+  flex: 0 0 auto;
+}
+
+/* ── chips / 알약 ── */
+.join-scope .join-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.join-scope .join-chip {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 9px 15px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.join-scope .join-chip:hover {
+  border-color: var(--c1);
+}
+.join-scope .join-chip[aria-pressed="true"] {
+  border-color: var(--c1);
+  background: var(--coral-soft);
+  color: var(--c1);
+  font-weight: 600;
+}
+
+/* ── 큰 선택 카드(quiz step1/2) ── */
+.join-scope .join-optcard {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 16px;
+  padding: 18px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.06s ease;
+}
+.join-scope .join-optcard:hover {
+  border-color: var(--c1);
+  box-shadow: 0 6px 18px rgba(255, 107, 74, 0.12);
+}
+.join-scope .join-optcard:active {
+  transform: translateY(1px);
+}
+.join-scope .join-optcard-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+.join-scope .join-optcard-sub {
+  margin-top: 4px;
+  font-size: 13.5px;
+  color: var(--ink2);
+}
+
+/* ── text input ── */
+.join-scope .join-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 13px;
+  padding: 13px 14px;
+  font-family: inherit;
+  font-size: 15px;
+  transition: border-color 0.15s ease;
+}
+.join-scope .join-input::placeholder {
+  color: var(--ink3);
+}
+.join-scope .join-input:focus {
+  outline: 2px solid var(--c1);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.join-scope .join-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink2);
+  margin: 16px 0 7px;
+}
+
+/* 칩/옵션 focus 강조(전역 focus-visible 외에 코랄로 통일) */
+.join-scope .join-chip:focus-visible,
+.join-scope .join-optcard:focus-visible,
+.join-scope .join-cta:focus-visible,
+.join-scope .join-toggle:focus-visible {
+  outline: 2px solid var(--c1);
+  outline-offset: 2px;
+}
+
+/* 허니팟 — 시각·스크린리더 모두 숨김 */
+.join-scope .join-honeypot {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ============================================================
+ * 시그니처 1 — RouteBar(점선 라인 + 역 점 5개)
+ * ============================================================ */
+.join-scope .routebar {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin: 4px 0 24px;
+  padding: 0 6px;
+}
+/* 점선 라인 — 첫 역 중앙에서 마지막 역 중앙까지 */
+.join-scope .routebar::before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 6%;
+  right: 6%;
+  height: 0;
+  border-top: 2px dashed var(--line);
+  z-index: 0;
+}
+.join-scope .routebar-station {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+.join-scope .routebar-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 2px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  line-height: 1;
+  color: #fff;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.join-scope .routebar-station--done .routebar-dot {
+  background: var(--mint);
+  border-color: var(--mint);
+}
+.join-scope .routebar-station--current .routebar-dot {
+  background: var(--c1);
+  border-color: var(--c1);
+  box-shadow: 0 0 0 5px var(--coral-soft);
+}
+.join-scope .routebar-label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  color: var(--ink3);
+  white-space: nowrap;
+}
+.join-scope .routebar-station--current .routebar-label {
+  color: var(--c1);
+  font-weight: 600;
+}
+.join-scope .routebar-station--done .routebar-label {
+  color: var(--mint);
+}
+
+/* ============================================================
+ * 시그니처 2 — 보딩패스 티켓
+ * ============================================================ */
+.join-scope .ticket {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(22, 24, 29, 0.1);
+}
+.join-scope .ticket--pop {
+  animation: join-pop 0.42s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+.join-scope .ticket-header {
+  position: relative;
+  background: var(--grad);
+  color: #fff;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.join-scope .ticket-brand {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.join-scope .ticket-stamp {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  border-radius: 6px;
+  padding: 4px 8px;
+  transform: rotate(-7deg);
+  color: #fff;
+}
+.join-scope .ticket-body {
+  padding: 24px 20px 18px;
+  text-align: center;
+}
+.join-scope .ticket-emoji {
+  font-size: 52px;
+  line-height: 1;
+}
+.join-scope .ticket-type {
+  margin-top: 12px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.join-scope .ticket-desc {
+  margin-top: 6px;
+  color: var(--ink2);
+  font-size: 14px;
+  line-height: 1.6;
+}
+/* 점선 절취선 + 좌우 반원 노치(컨테이너 배경색으로 뚫린 느낌) */
+.join-scope .ticket-perforation {
+  position: relative;
+  height: 0;
+  margin: 6px 0;
+  border-top: 2px dashed var(--line);
+}
+.join-scope .ticket-notch {
+  position: absolute;
+  top: -11px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--bg);
+}
+.join-scope .ticket-notch--left {
+  left: -11px;
+}
+.join-scope .ticket-notch--right {
+  right: -11px;
+}
+.join-scope .ticket-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px 20px 22px;
+}
+.join-scope .ticket-meta-item {
+  text-align: left;
+}
+.join-scope .ticket-meta-k {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+.join-scope .ticket-meta-v {
+  margin-top: 3px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ── why: 메리트 카드 ── */
+.join-scope .merit-grid {
+  display: grid;
+  gap: 12px;
+}
+.join-scope .merit {
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+}
+.join-scope .merit--mint {
+  border-color: var(--mint);
+  background: var(--mint-soft);
+}
+.join-scope .merit-emoji {
+  font-size: 24px;
+  line-height: 1.2;
+  flex: 0 0 auto;
+}
+.join-scope .merit-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+.join-scope .merit-body {
+  margin-top: 3px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink2);
+}
+
+/* ── join: 토글 카드 ── */
+.join-scope .join-toggle {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.join-scope .join-toggle[aria-pressed="true"] {
+  border-color: var(--c1);
+  background: var(--coral-soft);
+}
+.join-scope .join-toggle-emoji {
+  font-size: 22px;
+  line-height: 1.2;
+  flex: 0 0 auto;
+}
+.join-scope .join-toggle-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+.join-scope .join-toggle-body {
+  margin-top: 3px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink2);
+}
+.join-scope .join-toggle-check {
+  margin-left: auto;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 2px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: #fff;
+}
+.join-scope .join-toggle[aria-pressed="true"] .join-toggle-check {
+  background: var(--c1);
+  border-color: var(--c1);
+}
+
+/* ── 인라인 에러/토스트 ── */
+.join-scope .join-error {
+  margin-top: 12px;
+  border: 1px solid #f3c4b8;
+  background: #fdeee9;
+  color: #b23b1d;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+/* ── done: 연락 박스 ── */
+.join-scope .join-contactback {
+  border: 1px dashed var(--line);
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink2);
+}
+
+/* spacing utilities (scoped) */
+.join-scope .join-stack > * + * {
+  margin-top: 14px;
+}
+.join-scope .join-stack-sm > * + * {
+  margin-top: 8px;
+}
+
+/* ── 키프레임 ── */
+@keyframes join-slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes join-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes join-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* reduced-motion: 애니메이션·트랜지션 전부 off */
+@media (prefers-reduced-motion: reduce) {
+  .join-scope .join-screen,
+  .join-scope .ticket--pop,
+  .join-scope .join-livedot {
+    animation: none !important;
+  }
+  .join-scope * {
+    transition: none !important;
+  }
+}
