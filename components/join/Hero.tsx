@@ -72,7 +72,7 @@ export default function Hero({
       <div className="join-trust">
         <span>👤 1인 개발</span>
         <span>🏛 {govLine}</span>
-        <span>🙌 {count}명 참여</span>
+        <span>🙌 {count > 0 ? `${count}명 참여` : "0기 동행단 모집 중"}</span>
       </div>
     </div>
   );

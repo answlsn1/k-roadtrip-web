@@ -285,10 +285,12 @@
   transform: translateY(1px);
 }
 .join-scope .join-optcard-title {
+  display: block;
   font-size: 18px;
   font-weight: 700;
 }
 .join-scope .join-optcard-sub {
+  display: block;
   margin-top: 4px;
   font-size: 13.5px;
   color: var(--ink2);
