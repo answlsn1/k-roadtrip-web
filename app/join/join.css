@@ -327,9 +327,32 @@
 .join-scope .join-chip:focus-visible,
 .join-scope .join-optcard:focus-visible,
 .join-scope .join-cta:focus-visible,
-.join-scope .join-toggle:focus-visible {
+.join-scope .join-toggle:focus-visible,
+.join-scope .join-back:focus-visible,
+.join-scope .join-btn-ghost:focus-visible,
+.join-scope .join-applink:focus-visible {
   outline: 2px solid var(--c1);
   outline-offset: 2px;
+}
+
+/* 화면 전환 시 제목/컨테이너로 프로그램적 포커스(a11y) — 사용자가 키보드로
+   이동한 게 아니므로 시각적 outline 은 띄우지 않는다(:focus-visible 가 아닌
+   :focus 만 매칭되게 두고 outline 제거). 키보드 포커스링은 위 규칙이 담당. */
+.join-scope [tabindex="-1"]:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* 시각적으로만 숨기고 스크린리더엔 노출(상태 라벨 등) */
+.join-scope .join-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* 허니팟 — 시각·스크린리더 모두 숨김 */

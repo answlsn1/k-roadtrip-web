@@ -47,8 +47,10 @@ export default function QuizStep({
 
       {step === 1 && (
         <div className="join-stack">
-          <h2 className="join-h2">여행 갈 때 나는…</h2>
-          <div className="join-stack-sm">
+          <h2 className="join-h2" id="join-q-plan">
+            여행 갈 때 나는…
+          </h2>
+          <div className="join-stack-sm" role="group" aria-labelledby="join-q-plan">
             {PLAN.map((p) => (
               <OptionCard
                 key={p}
@@ -64,8 +66,10 @@ export default function QuizStep({
 
       {step === 2 && (
         <div className="join-stack">
-          <h2 className="join-h2">더 끌리는 여행지는…</h2>
-          <div className="join-stack-sm">
+          <h2 className="join-h2" id="join-q-spot">
+            더 끌리는 여행지는…
+          </h2>
+          <div className="join-stack-sm" role="group" aria-labelledby="join-q-spot">
             {SPOT_PREF.map((s) => (
               <OptionCard
                 key={s}

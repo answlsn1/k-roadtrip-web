@@ -9,8 +9,9 @@
  *   - error 는 코드값 → 사용자에겐 일반 메시지로 매핑(코드 노출 금지).
  * ============================================================ */
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { submitJoin } from "@/app/actions/submit-join";
+import { trackEvent, type AppEventType } from "@/lib/analytics/events";
 import { resolveTravelerType } from "@/lib/join/constants";
 import type { Stage, QuizStepIndex, JoinAnswers } from "./join.flow.types";
 import RouteBar from "./RouteBar";
@@ -89,6 +90,44 @@ export default function JoinFlow({
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const topRef = useRef<HTMLDivElement>(null);
+
+  // ── 퍼널 계측(Phase 4a) ──
+  // 각 이벤트는 정확히 1번만 발화. useRef 기반 "발화 완료" 집합으로
+  // StrictMode 이중 호출·재마운트·재렌더에 모두 안전(중복 발화 가드).
+  // join_submit 은 여기서 발화하지 않는다 — 성공 insert 시 Server Action 이
+  // 서버에서 1회 기록한다(실패 제출은 세지 않기 위함).
+  const firedRef = useRef<Set<AppEventType>>(new Set());
+  const fireOnce = useCallback(
+    (type: AppEventType, payload?: { region?: string }) => {
+      if (firedRef.current.has(type)) return;
+      firedRef.current.add(type);
+      trackEvent(type, payload); // trackEvent 는 절대 throw/블로킹하지 않음
+    },
+    [],
+  );
+
+  // stage 가 각 화면에 도달하는 순간 해당 view 이벤트를 1회 발화.
+  // ticket 도달 = quiz 4스텝 완료를 함의 → quiz_complete 도 여기서 1회.
+  useEffect(() => {
+    switch (stage) {
+      case "hero":
+        // 세션 출처 귀속용: source 를 region 슬롯에 인코딩(없으면 미첨부).
+        fireOnce("join_view", source ? { region: source } : undefined);
+        break;
+      case "quiz":
+        fireOnce("join_quiz_start");
+        break;
+      case "ticket":
+        fireOnce("join_quiz_complete");
+        fireOnce("join_ticket_view");
+        break;
+      case "why":
+        fireOnce("join_why_view");
+        break;
+      default:
+        break;
+    }
+  }, [stage, source, fireOnce]);
 
   const scrollTop = useCallback(() => {
     // 화면 상단으로(부드럽게, reduced-motion 은 브라우저가 존중).
@@ -194,11 +233,35 @@ export default function JoinFlow({
   // key: 화면/스텝 전환마다 바뀌어 slideIn 을 재생.
   const screenKey = stage === "quiz" ? `quiz-${quizStep}` : stage;
 
+  // ── 포커스 이동(a11y) ──
+  // 화면/스텝 전환 시 새 화면의 제목(heading)으로 포커스를 옮겨
+  // 스크린리더 사용자가 변화를 인지하게 한다. 최초 진입(hero)에서는
+  // 포커스를 가로채지 않는다(초기 로드 포커스 탈취는 안티패턴).
+  const screenRef = useRef<HTMLDivElement>(null);
+  const firstRenderRef = useRef(true);
+  useEffect(() => {
+    if (firstRenderRef.current) {
+      firstRenderRef.current = false;
+      return;
+    }
+    const root = screenRef.current;
+    if (!root) return;
+    // 제목 우선, 없으면 화면 컨테이너(ticket 처럼 heading 이 없는 경우) 사용.
+    // heading/컨테이너는 기본 비포커스 → 프로그램적 포커스를 위해 tabindex=-1 부여.
+    const target = root.querySelector<HTMLElement>("h1, h2") ?? root;
+    target.setAttribute("tabindex", "-1");
+    try {
+      target.focus({ preventScroll: true });
+    } catch {
+      /* 포커스 실패는 무시 — UX 를 막지 않는다 */
+    }
+  }, [screenKey]);
+
   return (
     <div className="join-container" ref={topRef}>
       {showRouteBar && <RouteBar current={routeIndex(stage, quizStep)} />}
 
-      <div className="join-screen" key={screenKey}>
+      <div className="join-screen" key={screenKey} ref={screenRef}>
         {stage === "hero" && (
           <Hero count={initialCount} onStart={() => goStage("quiz")} />
         )}
