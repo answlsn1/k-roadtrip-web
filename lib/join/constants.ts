@@ -60,19 +60,19 @@ export const TRAVELER_TYPES: Record<TravelerTypeKey, TravelerType> = {
     desc: '정보력으로 완벽한 코스를 짜는 타입',
   },
   '계획+로컬': {
-    emoji: '📓',
-    name: '꼼꼼한 로컬 탐험가',
-    desc: '미리 조사해 숨은 동네까지 챙기는 타입',
+    emoji: '🧭',
+    name: '치밀한 로컬 탐험가',
+    desc: '숨은 명소를 미리 다 찾아두는 타입',
   },
   '즉흥+핫플': {
     emoji: '✨',
-    name: '발길 닿는 핫플 헌터',
-    desc: '끌리는 곳으로 즉흥에 떠나는 트렌드세터',
+    name: '감성 핫플 유랑러',
+    desc: '끌리는 핫플로 즉흥 여행 떠나는 타입',
   },
   '즉흥+로컬': {
-    emoji: '🧭',
-    name: '자유로운 로컬 방랑자',
-    desc: '계획 없이 골목을 누비는 진짜 여행가',
+    emoji: '🏕️',
+    name: '즉흥 로컬 모험가',
+    desc: '발길 닿는 대로 로컬을 누비는 타입',
   },
 };
 
