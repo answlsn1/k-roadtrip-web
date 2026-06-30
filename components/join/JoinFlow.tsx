@@ -35,7 +35,9 @@ const INITIAL_ANSWERS: JoinAnswers = {
   contactType: "카톡",
   contact: "",
   word: "",
-  wantInterview: false,
+  // 1차 카페 만남은 기본 ON — 여기까지 온 사람에게 만남을 기본값으로 제안(끌 수도 있음).
+  wantInterview: true,
+  // ⚠️ 2차(프로토타입)는 길거리 비노출 — street 제출 시 항상 false 유지(운영자가 1차 만남 후 따로 관리).
   wantPrototype: false,
 };
 

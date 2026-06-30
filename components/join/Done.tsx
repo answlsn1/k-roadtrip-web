@@ -52,7 +52,8 @@ export default function Done({
         고마워요, {name}! 이제 0기 동행단이에요.
       </h2>
       <p className="join-lead" style={{ textAlign: "center" }}>
-        곧 {contactType}으로 연락드릴게요. 궁금한 건 언제든 저한테 편하게요.
+        곧 {contactType}으로 약속 잡으러 연락드릴게요. 커피 한 잔 하면서 편하게
+        이야기해요 ☕
       </p>
 
       <div className="join-contactback">{contactBack}</div>

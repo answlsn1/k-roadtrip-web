@@ -14,6 +14,8 @@ export interface JoinConfig {
   mission: string;
   /** 참여 보상 안내 */
   reward: string;
+  /** 추천 스팟을 '본인 별명'으로 실제 앱 루트에 등록해 준다는 메리트 한 줄 */
+  aliasCredit: string;
   /** 연락을 어떻게/언제 줄지 안내 */
   contactBack: string;
   /** 창업자 이름 */
@@ -32,6 +34,8 @@ export const joinConfig: JoinConfig = {
   mission:
     '서울 너머, 한국 지방을 제대로 여행하는 길을 만들고 있어요. 당신의 진짜 경험이 그 지도를 채웁니다.',
   reward: '커피 한 잔, 제대로 된 이야기엔 식사',
+  aliasCredit:
+    "알려준 그 스팟이 \"[별명]의 추천 코스\"로 실제 앱에 등록될 수 있어요. \"이거 내가 추천했어\" 할 수 있게.",
   contactBack:
     '남겨주신 연락처로 며칠 안에 가볍게 연락드릴게요. 부담 없이 편한 시간에 만나요.',
   founderName: '안지수',

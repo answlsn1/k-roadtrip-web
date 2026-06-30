@@ -70,8 +70,9 @@ export default function Ticket({
       </div>
 
       <p className="join-micro" style={{ textAlign: "center" }}>
-        이 추천, 실제 {joinConfig.appName}에 반영될 수도 있어요.
-        <br />📸 캡처해서 친구한테 자랑하기
+        당신이 알려준 이 스팟, 실제 {joinConfig.appName}에 <strong>‘내 별명’으로
+        등록</strong>될 수도 있어요.
+        <br />📸 캡처해서 자랑하기
       </p>
 
       <button type="button" className="join-cta" onClick={onNext}>

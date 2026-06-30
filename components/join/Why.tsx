@@ -9,25 +9,25 @@
 import { joinConfig } from "@/lib/join/config";
 
 export default function Why({ onNext }: { onNext: () => void }) {
-  const { appUrl, reward } = joinConfig;
+  const { appUrl, reward, aliasCredit } = joinConfig;
 
   const merits = [
     {
       emoji: "☕",
-      title: "시간엔 보답을 드려요",
-      body: `제대로 된 이야기엔 ${reward}. 공짜로 안 써요.`,
+      title: "커피는 제가 살게요",
+      body: `카페에서 30분, 편하게. ${reward} 대접할게요.`,
       mint: true,
+    },
+    {
+      emoji: "🗺️",
+      title: "추천이 ‘당신 별명’으로 앱에",
+      body: aliasCredit,
+      mint: false,
     },
     {
       emoji: "🏅",
       title: "‘0기 동행단’ 기록",
       body: "활동 증명·추천서. 스펙·포트폴리오에 써요.",
-      mint: false,
-    },
-    {
-      emoji: "🚀",
-      title: "시작되는 순간의 멤버",
-      body: "베타 제일 먼저, 기능에 의견 반영.",
       mint: false,
     },
     {

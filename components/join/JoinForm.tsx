@@ -1,15 +1,17 @@
 "use client";
 
 /* ============================================================
- * (5) join — 2회 옵트인 + 연락처
- *   토글카드 2개(독립 선택) + 폼(이름·연락방법 chip·연락처·한마디) +
+ * (5) join — 1차 카페 만남 약속 + 연락처
+ *   단일 만남 토글카드(기본 ON) + 폼(이름·연락방법 chip·연락처·한마디) +
  *   숨김 허니팟(company) + 제출 버튼(name & contact 모두 입력 시 활성).
  *   실제 submitJoin 호출/세션ID는 JoinFlow 가 owns → 여기선 onSubmit 콜백.
+ *   ⚠️ 2차(프로토타입)는 길거리에서 비노출 — 운영자가 1차 만남 후 앱 밖에서 잇는다.
  * ============================================================ */
 
 import { useState } from "react";
 import { CONTACT_TYPES } from "@/lib/join/constants";
 import type { ContactType } from "@/lib/join/constants";
+import { joinConfig } from "@/lib/join/config";
 import type { JoinAnswers } from "./join.flow.types";
 
 const PLACEHOLDER: Record<ContactType, string> = {
@@ -49,11 +51,11 @@ export default function JoinForm({
 
   return (
     <div className="join-stack">
-      <span className="join-kicker">다음 단계</span>
-      <h2 className="join-h2">부담 갖지 마세요. 여기까지도 진짜 감사해요.</h2>
-      <p className="join-lead">관심 있는 만큼만 골라주세요.</p>
+      <span className="join-kicker">거의 다 왔어요</span>
+      <h2 className="join-h2">그럼, 커피 한 잔 하면서 더 들려주세요.</h2>
+      <p className="join-lead">딱 30분, 카페에서 편하게요. 커피는 제가 살게요.</p>
 
-      {/* 옵트인 토글 2개 — 독립 선택 */}
+      {/* 단일 카페-만남 토글 — 기본 ON, 끌 수도 있음 */}
       <button
         type="button"
         className="join-toggle"
@@ -64,33 +66,13 @@ export default function JoinForm({
           ☕
         </span>
         <div>
-          <div className="join-toggle-title">1차 · 30분 제대로 이야기</div>
+          <div className="join-toggle-title">카페에서 30분 · 커피 한 잔</div>
           <div className="join-toggle-body">
-            여행 경험 제대로 듣고 싶어요. 커피·식사 드려요.
+            여행 경험 제대로 듣고 싶어요. {joinConfig.reward} 대접할게요.
           </div>
         </div>
         <span className="join-toggle-check" aria-hidden="true">
           {answers.wantInterview ? "✓" : ""}
-        </span>
-      </button>
-
-      <button
-        type="button"
-        className="join-toggle"
-        aria-pressed={answers.wantPrototype}
-        onClick={() => onChange({ wantPrototype: !answers.wantPrototype })}
-      >
-        <span className="join-toggle-emoji" aria-hidden="true">
-          🧪
-        </span>
-        <div>
-          <div className="join-toggle-title">2차 · 프로토타입 같이 써보기</div>
-          <div className="join-toggle-body">
-            0기 동행단으로, 만들어지는 걸 같이 다듬어요.
-          </div>
-        </div>
-        <span className="join-toggle-check" aria-hidden="true">
-          {answers.wantPrototype ? "✓" : ""}
         </span>
       </button>
 
@@ -115,7 +97,7 @@ export default function JoinForm({
         </div>
 
         <label className="join-label" htmlFor="join-name">
-          이름 / 닉네임
+          이름 또는 별명
         </label>
         <input
           id="join-name"
@@ -127,7 +109,11 @@ export default function JoinForm({
           placeholder="뭐라고 부르면 될까요?"
           maxLength={80}
           autoComplete="name"
+          aria-describedby="join-name-help"
         />
+        <p id="join-name-help" className="join-micro" style={{ marginTop: 6 }}>
+          추천 루트에 이 별명으로 크레딧을 남겨드려요. (실명 아니어도 좋아요)
+        </p>
 
         <label className="join-label" id="join-contacttype-label">
           연락 방법
@@ -191,7 +177,7 @@ export default function JoinForm({
             className="join-cta"
             disabled={!canSubmit || submitting}
           >
-            {submitting ? "보내는 중…" : "보내기 · 0기 동행단 되기"}
+            {submitting ? "보내는 중…" : "네, 좋아요 · 약속 잡기"}
           </button>
         </div>
 
