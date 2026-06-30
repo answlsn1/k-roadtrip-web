@@ -16,6 +16,13 @@ const ALLOWED = new Set([
   "plan_created",
   "naver_handoff",
   "affiliate_click",
+  // 동행단 초대(Join Companion) 퍼널 6종
+  "join_view",
+  "join_quiz_start",
+  "join_quiz_complete",
+  "join_ticket_view",
+  "join_why_view",
+  "join_submit",
 ]);
 
 const str = (v: unknown, max: number): string | null =>

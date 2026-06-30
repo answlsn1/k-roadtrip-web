@@ -10,7 +10,14 @@ export type AppEventType =
   | "route_view"
   | "plan_created"
   | "naver_handoff"
-  | "affiliate_click";
+  | "affiliate_click"
+  // 동행단 초대(Join Companion) 퍼널 6종 — 클라 계측은 Phase 4
+  | "join_view"
+  | "join_quiz_start"
+  | "join_quiz_complete"
+  | "join_ticket_view"
+  | "join_why_view"
+  | "join_submit";
 
 const SESSION_STORAGE_KEY = "krt-session";
 
