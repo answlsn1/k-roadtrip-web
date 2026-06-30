@@ -33,9 +33,14 @@ type View = "locked" | "loading" | "ready" | "error" | "unconfigured";
 
 const TOKEN_KEY = "krt-admin-token";
 
-/** CSV 한 필드 escape — 큰따옴표로 감싸고 내부 " 는 "" 로 (RFC 4180). */
+/**
+ * CSV 한 필드 escape — RFC 4180(큰따옴표로 감싸고 내부 " 는 "" 로)
+ * + 수식 인젝션 방어: =,+,-,@ 또는 제어문자로 시작하면 앞에 ' 를 붙여
+ *   Excel/Sheets 가 자유 입력(이름·한마디 등)을 수식으로 실행하지 못하게 한다.
+ */
 function csvField(v: string): string {
-  return `"${v.replace(/"/g, '""')}"`;
+  const guarded = /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
+  return `"${guarded.replace(/"/g, '""')}"`;
 }
 
 const CSV_HEADER = [

@@ -130,9 +130,12 @@ export default function JoinFlow({
   }, [stage, source, fireOnce]);
 
   const scrollTop = useCallback(() => {
-    // 화면 상단으로(부드럽게, reduced-motion 은 브라우저가 존중).
+    // 화면 상단으로. 부드러운 스크롤도 모션이므로 reduced-motion 사용자는 즉시 이동.
     try {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      const reduce =
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
     } catch {
       window.scrollTo(0, 0);
     }

@@ -124,11 +124,10 @@ export async function submitJoin(input: SubmitJoinInput): Promise<Result> {
         const { count } = await admin
           .from('join_submissions')
           .select('id', { count: 'exact', head: true })
-          .eq('source', sessionId)
+          .eq('session_id', sessionId)
           .gte('created_at', since);
-        // NOTE: session_id 전용 컬럼이 없어 정밀 throttle 은 불가(스키마 최소화).
-        //       위 비교는 source 가 session 으로 쓰일 때만 의미 있는 best-effort.
-        //       남용이 보이면 Phase 후속에서 session_id 컬럼 추가를 검토.
+        // session_id 컬럼(마이그레이션)으로 같은 세션의 최근 60초 제출을 카운트.
+        // serverless 무상태라 DB 기반 best-effort(완벽한 동시성 보장은 아님).
         if (typeof count === 'number' && count >= 5) {
           return { ok: true }; // 과다 → 조용히 드롭(봇/연타 방어)
         }
@@ -160,6 +159,7 @@ export async function submitJoin(input: SubmitJoinInput): Promise<Result> {
     pain,
     pain_text: painText,
     source,
+    session_id: sessionId,
     user_agent: userAgent,
     referrer,
   });

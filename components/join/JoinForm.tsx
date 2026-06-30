@@ -19,6 +19,14 @@ const PLACEHOLDER: Record<ContactType, string> = {
   전화: "휴대폰 번호",
 };
 
+// 모바일 키보드 최적화: 이메일·전화는 전용 키보드를 띄운다(type 은 text 유지).
+const INPUT_MODE: Record<ContactType, "text" | "email" | "tel"> = {
+  카톡: "text",
+  인스타: "text",
+  이메일: "email",
+  전화: "tel",
+};
+
 export default function JoinForm({
   answers,
   onChange,
@@ -153,6 +161,7 @@ export default function JoinForm({
           value={answers.contact}
           onChange={(e) => onChange({ contact: e.target.value })}
           placeholder={PLACEHOLDER[answers.contactType]}
+          inputMode={INPUT_MODE[answers.contactType]}
           maxLength={120}
           autoComplete="off"
         />

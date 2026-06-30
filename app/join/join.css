@@ -304,7 +304,9 @@
   border-radius: 13px;
   padding: 13px 14px;
   font-family: inherit;
-  font-size: 15px;
+  /* 16px: iOS Safari 는 16px 미만 입력 포커스 시 페이지를 자동 확대한다.
+     길거리에서 폰으로 입력받는 화면이라 zoom 을 막기 위해 16px 유지. */
+  font-size: 16px;
   transition: border-color 0.15s ease;
 }
 .join-scope .join-input::placeholder {
