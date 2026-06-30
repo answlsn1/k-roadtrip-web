@@ -33,7 +33,7 @@ export const joinConfig: JoinConfig = {
   appUrl: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://k-roadtrip.app',
   mission:
     '서울 너머, 한국 지방을 제대로 여행하는 길을 만들고 있어요. 당신의 진짜 경험이 그 지도를 채웁니다.',
-  reward: '커피 한 잔, 제대로 된 이야기엔 식사',
+  reward: '커피 한 잔(제대로 된 이야기엔 식사까지)',
   aliasCredit:
     "알려준 그 스팟이 \"[별명]의 추천 코스\"로 실제 앱에 등록될 수 있어요. \"이거 내가 추천했어\" 할 수 있게.",
   contactBack:
