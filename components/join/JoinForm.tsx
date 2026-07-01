@@ -1,11 +1,15 @@
 "use client";
 
 /* ============================================================
- * (5) join — 1차 카페 만남 약속 + 연락처
- *   단일 만남 토글카드(기본 ON) + 폼(이름·연락방법 chip·연락처·한마디) +
+ * (5) join — 1차 카페 만남 약속(선택) + 연락처
+ *   단일 만남 토글카드 + 폼(이름·연락방법 chip·연락처·한마디) +
  *   숨김 허니팟(company) + 제출 버튼(name & contact 모두 입력 시 활성).
  *   실제 submitJoin 호출/세션ID는 JoinFlow 가 owns → 여기선 onSubmit 콜백.
  *   ⚠️ 2차(프로토타입)는 길거리에서 비노출 — 운영자가 1차 만남 후 앱 밖에서 잇는다.
+ *
+ *   variant="offline"(/join, 기본값) — 카페 만남이 기본 전제. 토글 기본 ON.
+ *   variant="online"(/recommend)   — 온라인 제출이 기본. 카페 만남은 완전
+ *   선택 사항으로 토글 기본 OFF(JoinFlow 가 초기값을 결정), 카피도 그에 맞춤.
  * ============================================================ */
 
 import { useState } from "react";
@@ -35,6 +39,7 @@ export default function JoinForm({
   onSubmit,
   submitting,
   errorMessage,
+  variant = "offline",
 }: {
   answers: JoinAnswers;
   onChange: (patch: Partial<JoinAnswers>) => void;
@@ -42,6 +47,7 @@ export default function JoinForm({
   onSubmit: (company: string) => void;
   submitting: boolean;
   errorMessage: string | null;
+  variant?: "offline" | "online";
 }) {
   // 허니팟은 폼 로컬 상태(제출 시 콜백으로만 전달, answers 오염 방지).
   const [company, setCompany] = useState("");
@@ -49,13 +55,21 @@ export default function JoinForm({
   const canSubmit =
     answers.name.trim().length > 0 && answers.contact.trim().length > 0;
 
+  const isOnline = variant === "online";
+
   return (
     <div className="join-stack">
       <span className="join-kicker">거의 다 왔어요</span>
-      <h2 className="join-h2">그럼, 커피 한 잔 하면서 더 들려주세요.</h2>
-      <p className="join-lead">딱 30분, 카페에서 편하게요. 커피는 제가 살게요.</p>
+      <h2 className="join-h2">
+        {isOnline
+          ? "이제 마지막! 어디로 연락드리면 될지 알려주세요."
+          : "그럼, 커피 한 잔 하면서 더 들려주세요."}
+      </h2>
+      {!isOnline && (
+        <p className="join-lead">딱 30분, 카페에서 편하게요. 커피는 제가 살게요.</p>
+      )}
 
-      {/* 단일 카페-만남 토글 — 기본 ON, 끌 수도 있음 */}
+      {/* 단일 카페-만남 토글 — offline 은 기본 ON, online 은 완전 선택사항(기본 OFF) */}
       <button
         type="button"
         className="join-toggle"
@@ -66,9 +80,13 @@ export default function JoinForm({
           ☕
         </span>
         <div>
-          <div className="join-toggle-title">카페에서 30분 · 커피 한 잔</div>
+          <div className="join-toggle-title">
+            {isOnline ? "카페에서 직접 만나 이야기하고 싶어요" : "카페에서 30분 · 커피 한 잔"}
+          </div>
           <div className="join-toggle-body">
-            여행 경험 제대로 듣고 싶어요. {joinConfig.reward} 대접할게요.
+            {isOnline
+              ? `온라인 제출도 완전 좋지만, 혹시 만나서 더 들려주고 싶으면 체크해주세요. ${joinConfig.reward} 대접할게요.`
+              : `여행 경험 제대로 듣고 싶어요. ${joinConfig.reward} 대접할게요.`}
           </div>
         </div>
         <span className="join-toggle-check" aria-hidden="true">
@@ -177,7 +195,7 @@ export default function JoinForm({
             className="join-cta"
             disabled={!canSubmit || submitting}
           >
-            {submitting ? "보내는 중…" : "네, 좋아요 · 약속 잡기"}
+            {submitting ? "보내는 중…" : isOnline ? "네, 좋아요 · 보내기" : "네, 좋아요 · 약속 잡기"}
           </button>
         </div>
 

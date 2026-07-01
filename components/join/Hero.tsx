@@ -4,17 +4,21 @@
  * (1) hero — 신뢰 + 후크
  *   운영자 아바타/이름/태그라인 · 진심 헤드라인(그라데이션) · 미션 ·
  *   실제 앱 라이브 링크 · CTA · 마이크로카피 · 신뢰 스트립.
- *   운영자 노출 문구는 전부 joinConfig 에서 가져온다(하드코딩 금지).
+ *   운영자 노출 문구는 전부 config prop 에서 가져온다(하드코딩 금지).
+ *   /join(오프라인 인터뷰)과 /recommend(온라인) 가 joinConfig/recommendConfig
+ *   를 각각 넘겨 재사용한다 — 이 컴포넌트 자체는 두 화면 모두 동일.
  * ============================================================ */
 
-import { joinConfig } from "@/lib/join/config";
+import { joinConfig, type JoinConfig } from "@/lib/join/config";
 
 export default function Hero({
   count,
   onStart,
+  config = joinConfig,
 }: {
   count: number;
   onStart: () => void;
+  config?: JoinConfig;
 }) {
   const {
     appName,
@@ -25,7 +29,7 @@ export default function Hero({
     founderTagline,
     founderInitial,
     govLine,
-  } = joinConfig;
+  } = config;
 
   return (
     <div className="join-stack">

@@ -10,6 +10,7 @@ import SiteFooter from "@/components/home/SiteFooter";
 import SponsoredCard from "@/components/home/SponsoredCard";
 import AffiliateDisclosure from "@/components/home/AffiliateDisclosure";
 import ValueProps from "@/components/home/ValueProps";
+import RecommendBanner from "@/components/home/RecommendBanner";
 import { getPublishedRoutes, getAllWaypointsForMap } from "@/lib/data/queries";
 import { getCardMeta, getRouteVideoUrl } from "@/lib/config/cardMeta";
 import { SPONSORED_PLACES } from "@/lib/config/sponsored";
@@ -148,6 +149,9 @@ export default async function HomePage() {
 
       {/* ============ VALUE PROPS ============ */}
       <ValueProps />
+
+      {/* ============ RECOMMEND (KO only) ============ */}
+      <RecommendBanner />
 
       {/* ============ FOOTER ============ */}
       <SiteFooter />

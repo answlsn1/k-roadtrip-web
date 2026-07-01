@@ -46,3 +46,16 @@ export const joinConfig: JoinConfig = {
   founderInitial: 'K',
   govLine: '지방 여행 활성화 — 지자체와도 함께 이야기하고 있어요.',
 };
+
+/* ============================================================
+ * 온라인 추천(Recommend) — /recommend 페이지 전용 설정.
+ *   joinConfig 와 거의 동일하지만, 카페 인터뷰가 기본 전제가 아니라
+ *   "온라인에서 바로 끝나는" 흐름이라 그 부분 문구만 다르다.
+ *   (카페 만남은 JoinForm 의 wantInterview 토글로 여전히 선택 가능.)
+ * ============================================================ */
+export const recommendConfig: JoinConfig = {
+  ...joinConfig,
+  heroTeaser: '🎫 30초 퀴즈로 내 여행 유형 받고 · 내 최애 스팟도 자랑하기',
+  contactBack:
+    '알려주신 스팟은 실제 코스 기획에 참고할게요. 궁금한 점 있으면 남겨주신 연락처로 편하게 연락드릴 수도 있어요.',
+};

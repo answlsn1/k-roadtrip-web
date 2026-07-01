@@ -7,12 +7,18 @@
  *   - quiz 답·연락처·옵트인 상태 보유(JoinAnswers).
  *   - 제출 시 submitJoin 호출(세션ID = localStorage 'krt-session' 재사용).
  *   - error 는 코드값 → 사용자에겐 일반 메시지로 매핑(코드 노출 금지).
+ *
+ *   variant="offline"(/join, 기본값) — 길거리 인터뷰 대상, 카페 만남 기본 ON.
+ *   variant="online"(/recommend)   — 홈페이지에서 바로 오는 온라인 방문자용,
+ *   카페 만남은 완전 선택사항(기본 OFF)이고 config 도 recommendConfig 를 쓴다.
+ *   두 화면 모두 같은 컴포넌트/로직을 재사용 — 텍스트만 variant/config 로 분기.
  * ============================================================ */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { submitJoin } from "@/app/actions/submit-join";
 import { trackEvent, type AppEventType } from "@/lib/analytics/events";
 import { resolveTravelerType } from "@/lib/join/constants";
+import { joinConfig, recommendConfig } from "@/lib/join/config";
 import type { Stage, QuizStepIndex, JoinAnswers } from "./join.flow.types";
 import RouteBar from "./RouteBar";
 import Hero from "./Hero";
@@ -24,22 +30,25 @@ import Done from "./Done";
 
 const SESSION_STORAGE_KEY = "krt-session";
 
-const INITIAL_ANSWERS: JoinAnswers = {
-  plan: null,
-  spotPref: null,
-  recRegion: null,
-  recSpot: "",
-  pain: null,
-  painText: "",
-  name: "",
-  contactType: "카톡",
-  contact: "",
-  word: "",
-  // 1차 카페 만남은 기본 ON — 여기까지 온 사람에게 만남을 기본값으로 제안(끌 수도 있음).
-  wantInterview: true,
-  // ⚠️ 2차(프로토타입)는 길거리 비노출 — street 제출 시 항상 false 유지(운영자가 1차 만남 후 따로 관리).
-  wantPrototype: false,
-};
+function initialAnswers(variant: "offline" | "online"): JoinAnswers {
+  return {
+    plan: null,
+    spotPref: null,
+    recRegion: null,
+    recSpot: "",
+    pain: null,
+    painText: "",
+    name: "",
+    contactType: "카톡",
+    contact: "",
+    word: "",
+    // offline: 1차 카페 만남이 기본 전제라 기본 ON(끌 수도 있음).
+    // online: 만남은 완전 선택사항이라 기본 OFF(원하면 직접 켬).
+    wantInterview: variant === "offline",
+    // ⚠️ 2차(프로토타입)는 어느 쪽도 비노출 — 운영자가 1차 만남 후 따로 관리.
+    wantPrototype: false,
+  };
+}
 
 /** localStorage 'krt-session' 재사용(없으면 randomUUID 생성·저장) — lib/analytics 와 동일 방식. */
 function getSessionId(): string | null {
@@ -82,13 +91,16 @@ function routeIndex(stage: Stage, quizStep: QuizStepIndex): number {
 export default function JoinFlow({
   initialCount,
   source,
+  variant = "offline",
 }: {
   initialCount: number;
   source: string | null;
+  variant?: "offline" | "online";
 }) {
+  const config = variant === "online" ? recommendConfig : joinConfig;
   const [stage, setStage] = useState<Stage>("hero");
   const [quizStep, setQuizStep] = useState<QuizStepIndex>(1);
-  const [answers, setAnswers] = useState<JoinAnswers>(INITIAL_ANSWERS);
+  const [answers, setAnswers] = useState<JoinAnswers>(() => initialAnswers(variant));
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const topRef = useRef<HTMLDivElement>(null);
@@ -268,7 +280,7 @@ export default function JoinFlow({
 
       <div className="join-screen" key={screenKey} ref={screenRef}>
         {stage === "hero" && (
-          <Hero count={initialCount} onStart={() => goStage("quiz")} />
+          <Hero count={initialCount} onStart={() => goStage("quiz")} config={config} />
         )}
 
         {stage === "quiz" && (
@@ -286,7 +298,9 @@ export default function JoinFlow({
           <Ticket answers={answers} onNext={() => goStage("why")} />
         )}
 
-        {stage === "why" && <Why onNext={() => goStage("join")} />}
+        {stage === "why" && (
+          <Why onNext={() => goStage("join")} config={config} variant={variant} />
+        )}
 
         {stage === "join" && (
           <JoinForm
@@ -295,11 +309,17 @@ export default function JoinFlow({
             onSubmit={handleSubmit}
             submitting={submitting}
             errorMessage={errorMessage}
+            variant={variant}
           />
         )}
 
         {stage === "done" && (
-          <Done name={answers.name} contactType={answers.contactType} />
+          <Done
+            name={answers.name}
+            contactType={answers.contactType}
+            wantInterview={answers.wantInterview}
+            config={config}
+          />
         )}
       </div>
     </div>

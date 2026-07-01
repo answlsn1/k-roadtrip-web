@@ -4,20 +4,40 @@
  * (4) why — 메리트(공정한 교환)
  *   "왜 당신이냐면" 키커 + 헤드라인 + 리드 + 메리트 4카드 +
  *   슬림 앱 링크 + CTA(→ join). reward 등 운영자 문구는 joinConfig 에서.
+ *   variant="online" (/recommend) 은 첫 카드만 "카페 만남" 대신
+ *   "약속 없이 바로 끝남"으로 바뀐다 — 나머지 3장은 동일.
  * ============================================================ */
 
-import { joinConfig } from "@/lib/join/config";
+import { joinConfig, type JoinConfig } from "@/lib/join/config";
 
-export default function Why({ onNext }: { onNext: () => void }) {
-  const { appUrl, reward, aliasCredit } = joinConfig;
+export default function Why({
+  onNext,
+  config = joinConfig,
+  variant = "offline",
+}: {
+  onNext: () => void;
+  config?: JoinConfig;
+  variant?: "offline" | "online";
+}) {
+  const { appUrl, reward, aliasCredit } = config;
+
+  const firstMerit =
+    variant === "online"
+      ? {
+          emoji: "⚡",
+          title: "약속 잡을 필요 없어요",
+          body: "지금 여기서 3분이면 끝. 이동 시간도, 약속도 필요 없어요.",
+          mint: true,
+        }
+      : {
+          emoji: "☕",
+          title: "커피는 제가 살게요",
+          body: `카페에서 30분, 편하게. ${reward} 대접할게요.`,
+          mint: true,
+        };
 
   const merits = [
-    {
-      emoji: "☕",
-      title: "커피는 제가 살게요",
-      body: `카페에서 30분, 편하게. ${reward} 대접할게요.`,
-      mint: true,
-    },
+    firstMerit,
     {
       emoji: "🗺️",
       title: "추천이 ‘당신 별명’으로 앱에",

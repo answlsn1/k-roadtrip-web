@@ -4,20 +4,26 @@
  * (6) done — 감사
  *   "고마워요, {name}!" + 연락 안내({contactType}) + 연락처 박스 +
  *   앱 링크 + "다른 친구에게도 보여주기"(Web Share API → 링크 복사 폴백).
+ *   wantInterview 가 false(온라인 제출, 만남 선택 안 함)면 "약속 잡으러
+ *   연락드릴게요" 문구 대신 "제출 감사" 톤으로 바뀐다.
  * ============================================================ */
 
 import { useState } from "react";
-import { joinConfig } from "@/lib/join/config";
+import { joinConfig, type JoinConfig } from "@/lib/join/config";
 import type { ContactType } from "@/lib/join/constants";
 
 export default function Done({
   name,
   contactType,
+  wantInterview = true,
+  config = joinConfig,
 }: {
   name: string;
   contactType: ContactType;
+  wantInterview?: boolean;
+  config?: JoinConfig;
 }) {
-  const { appName, appUrl, contactBack } = joinConfig;
+  const { appName, appUrl, contactBack } = config;
   const [copied, setCopied] = useState(false);
 
   async function handleShare() {
@@ -52,8 +58,14 @@ export default function Done({
         고마워요, {name}! 이제 0기 동행단이에요.
       </h2>
       <p className="join-lead" style={{ textAlign: "center" }}>
-        곧 {contactType}으로 약속 잡으러 연락드릴게요. 커피 한 잔 하면서 편하게
-        이야기해요 ☕
+        {wantInterview ? (
+          <>
+            곧 {contactType}으로 약속 잡으러 연락드릴게요. 커피 한 잔 하면서 편하게
+            이야기해요 ☕
+          </>
+        ) : (
+          <>알려주신 스팟, 소중하게 잘 받았어요. 실제 코스에 반영되면 앱에서 만나볼 수 있을 거예요 🚗</>
+        )}
       </p>
 
       <div className="join-contactback">{contactBack}</div>
