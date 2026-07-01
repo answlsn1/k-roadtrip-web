@@ -9,8 +9,16 @@ interface Metrics {
     knownCountry: number;
     foreignByCountry: number;
     foreignByLocale: number;
+    countryBreakdown: { country: string; count: number }[];
   };
-  dispersion: { regionCounts: Record<string, number>; metro: number; rural: number };
+  dispersion: {
+    regionCounts: Record<string, number>;
+    foreignRegionCounts: Record<string, number>;
+    metro: number;
+    rural: number;
+    foreignMetro: number;
+    foreignRural: number;
+  };
   funnel: { step: string; count: number; fromPrev: number | null }[];
   totalEvents: number;
   generatedAt: string;
@@ -21,12 +29,39 @@ type View = "locked" | "loading" | "ready" | "error" | "unconfigured";
 const TOKEN_KEY = "krt-admin-token";
 
 const FUNNEL_LABEL: Record<string, string> = {
-  region_view: "지역 발견",
-  route_view: "코스 조회",
-  plan_created: "플랜 생성",
-  naver_handoff: "원탭 길안내 (기능)",
-  affiliate_click: "예약 클릭",
+  region_view: "여행지 둘러보기",
+  route_view: "코스 자세히 보기",
+  plan_created: "일정 만들기",
+  naver_handoff: "길찾기 연결 (참고 지표)",
+  affiliate_click: "예약 링크 클릭",
 };
+
+// 주요 유입국 코드 → 국기·한글명. 못 찾으면 코드 그대로 보여준다.
+const COUNTRY_LABEL: Record<string, string> = {
+  US: "🇺🇸 미국",
+  JP: "🇯🇵 일본",
+  CN: "🇨🇳 중국",
+  TW: "🇹🇼 대만",
+  HK: "🇭🇰 홍콩",
+  SG: "🇸🇬 싱가포르",
+  GB: "🇬🇧 영국",
+  DE: "🇩🇪 독일",
+  FR: "🇫🇷 프랑스",
+  AU: "🇦🇺 호주",
+  CA: "🇨🇦 캐나다",
+  TH: "🇹🇭 태국",
+  VN: "🇻🇳 베트남",
+  PH: "🇵🇭 필리핀",
+  ID: "🇮🇩 인도네시아",
+  IN: "🇮🇳 인도",
+  MY: "🇲🇾 말레이시아",
+  NL: "🇳🇱 네덜란드",
+  KR: "🇰🇷 한국",
+};
+
+function countryLabel(code: string): string {
+  return COUNTRY_LABEL[code] ?? code;
+}
 
 function pct(n: number, d: number): string {
   return d > 0 ? `${((n / d) * 100).toFixed(0)}%` : "—";
@@ -101,7 +136,7 @@ export default function AdminMetricsPage() {
           <p className="text-xs font-bold uppercase tracking-widest text-emerald-600">
             K-RoadTrip · 비공개
           </p>
-          <h1 className="text-2xl font-extrabold text-slate-900">지역 가치 증거 대시보드</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900">외국인 여행 수요 대시보드</h1>
         </div>
         {view === "ready" && (
           <button onClick={lock} className="text-xs font-semibold text-slate-400 hover:text-slate-700">
@@ -156,8 +191,16 @@ export default function AdminMetricsPage() {
             {new Date(data.generatedAt).toLocaleString("ko-KR")}
           </p>
 
-          {/* ① 지역 커버리지 */}
-          <Section title="① 지역 커버리지 (실데이터)">
+          {data.foreign.totalSessions < 30 && (
+            <div className="rounded-2xl bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
+              ⚠️ 아직 방문자 수가 적어요 (총 {data.foreign.totalSessions}명). 방문자가 더 쌓이기
+              전까지는 아래 숫자·비율을 확정된 결론이 아니라 &quot;대략적인 흐름&quot;
+              참고용으로만 봐주세요.
+            </div>
+          )}
+
+          {/* ① 우리가 다루는 여행지 */}
+          <Section title="① 우리가 다루는 여행지">
             <div className="grid grid-cols-3 gap-3">
               <Stat label="지역" value={data.coverage.regions} />
               <Stat label="코스" value={data.coverage.routes} />
@@ -165,42 +208,72 @@ export default function AdminMetricsPage() {
             </div>
           </Section>
 
-          {/* ② 외국인 유입 */}
-          <Section title="② 외국인 유입 (세션 집계)">
+          {/* ② 외국인이 실제로 오고 있나 */}
+          <Section title="② 외국인이 실제로 오고 있나?">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Stat label="전체 세션" value={data.foreign.totalSessions} />
+              <Stat label="전체 방문자" value={data.foreign.totalSessions} />
               <Stat
-                label="외국 로케일"
+                label="외국어 사용 방문자"
                 value={data.foreign.foreignByLocale}
                 sub={pct(data.foreign.foreignByLocale, data.foreign.totalSessions)}
               />
-              <Stat label="국가 식별 세션" value={data.foreign.knownCountry} />
+              <Stat label="위치 확인된 방문자" value={data.foreign.knownCountry} />
               <Stat
-                label="비한국 국가"
+                label="해외 접속 방문자"
                 value={data.foreign.foreignByCountry}
                 sub={pct(data.foreign.foreignByCountry, data.foreign.knownCountry)}
               />
             </div>
+
+            <div className="mt-3 space-y-1 rounded-xl bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500">
+              <p>
+                <b className="text-slate-600">외국어 사용 방문자</b> — 휴대폰·브라우저 언어가
+                한국어가 아닌 방문자예요. 배포 전에도 확인할 수 있지만, 영어 폰을 쓰는 한국인도
+                섞여 정확도는 낮아요.
+              </p>
+              <p>
+                <b className="text-slate-600">해외 접속 방문자</b> — 실제 접속 위치(IP)로 확인한
+                국가가 한국이 아닌 경우예요. 더 정확하지만, 실제 배포된 사이트에서만 확인돼요.
+              </p>
+            </div>
+
+            {data.foreign.countryBreakdown.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  어느 나라에서 왔나 (위치 확인된 방문자 기준)
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {data.foreign.countryBreakdown.map((c) => (
+                    <span
+                      key={c.country}
+                      className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700"
+                    >
+                      {countryLabel(c.country)} {c.count}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </Section>
+
+          {/* ③ 외국인은 어떤 지역에 관심 있나 */}
+          <Section title="③ 외국인은 어떤 지역에 관심 있나?">
+            <div className="mb-4 grid grid-cols-2 gap-3">
+              <Stat label="지방 코스 조회 (외국인)" value={data.dispersion.foreignRural} />
+              <Stat label="수도권 코스 조회 (외국인)" value={data.dispersion.foreignMetro} />
+            </div>
+            <RegionTable
+              all={data.dispersion.regionCounts}
+              foreign={data.dispersion.foreignRegionCounts}
+            />
             <p className="mt-2 text-[11px] text-slate-400">
-              국가코드는 프로덕션(Vercel)에서만 채워집니다. 로케일 기준은 어디서나 집계됩니다.
+              &quot;외국인&quot; 열은 외국어 사용 방문자만 센 것이라, 전체 조회수보다 항상
+              작거나 같아요.
             </p>
           </Section>
 
-          {/* ③ 지방 분산 */}
-          <Section title="③ 지방 분산 (수도권 vs 지방)">
-            <div className="mb-4 grid grid-cols-2 gap-3">
-              <Stat label="지방 반응" value={data.dispersion.rural} />
-              <Stat label="수도권 반응" value={data.dispersion.metro} />
-            </div>
-            <Bars
-              rows={Object.entries(data.dispersion.regionCounts)
-                .sort((a, b) => b[1] - a[1])
-                .map(([k, v]) => ({ label: k, value: v }))}
-            />
-          </Section>
-
-          {/* ④ 수익 funnel — 발견 → 기획 → 예약 */}
-          <Section title="④ 핵심 전환: 발견 → 기획 → 예약 (외화 경로)">
+          {/* ④ 관심이 실제 예약으로 이어지나 */}
+          <Section title="④ 관심이 실제 예약으로 이어지나?">
             {(() => {
               const c = (s: string) => data.funnel.find((f) => f.step === s)?.count ?? 0;
               const discovery = c("region_view") + c("route_view");
@@ -208,22 +281,23 @@ export default function AdminMetricsPage() {
               const booking = c("affiliate_click");
               return (
                 <div className="mb-4 grid grid-cols-3 gap-3">
-                  <Stat label="발견 (조회)" value={discovery} />
-                  <Stat label="기획 (플랜)" value={planning} sub={pct(planning, discovery)} />
-                  <Stat label="예약 (제휴 클릭)" value={booking} sub={pct(booking, planning)} />
+                  <Stat label="둘러보기" value={discovery} />
+                  <Stat label="일정 만들기" value={planning} sub={pct(planning, discovery)} />
+                  <Stat label="예약 링크 클릭" value={booking} sub={pct(booking, planning)} />
                 </div>
               );
             })()}
             <p className="mb-3 text-[11px] text-slate-400">
-              핵심 가치는 <b>발견 → 기획 → 예약</b> 전환입니다. 원탭 길안내(핸드오프)는
-              보조 기능 지표로 아래에 표시합니다.
+              가장 중요하게 보는 흐름은 <b>둘러보기 → 일정 만들기 → 예약</b>이에요. 길찾기
+              연결은 예약과 직접 관련은 없지만, 실제로 여행에 썼는지 보여주는 참고 지표로
+              아래에 함께 표시해요.
             </p>
             <div className="space-y-2">
               {data.funnel.map((f) => {
                 const top = data.funnel[0].count || 1;
                 return (
                   <div key={f.step} className="flex items-center gap-3">
-                    <span className="w-28 shrink-0 text-xs font-semibold text-slate-600">
+                    <span className="w-32 shrink-0 text-xs font-semibold text-slate-600">
                       {FUNNEL_LABEL[f.step] ?? f.step}
                     </span>
                     <div className="h-6 flex-1 overflow-hidden rounded-md bg-slate-100">
@@ -241,7 +315,11 @@ export default function AdminMetricsPage() {
                 );
               })}
             </div>
-            <p className="mt-2 text-[11px] text-slate-400">우측 %는 직전 단계 대비 전환율입니다.</p>
+            <p className="mt-2 text-[11px] text-slate-400">
+              오른쪽 %는 바로 위 단계 대비 비율이에요. 참고: 방문자가 항상 이 순서대로만
+              움직이는 건 아니에요 — 코스만 보고 바로 길찾기를 누르는 경우도 있어서, 100%를
+              넘을 수도 있어요.
+            </p>
           </Section>
         </div>
       )}
@@ -274,20 +352,44 @@ function Stat({ label, value, sub }: { label: string; value: number; sub?: strin
   );
 }
 
-function Bars({ rows }: { rows: { label: string; value: number }[] }) {
-  if (rows.length === 0) {
+/** 지역별 "전체 조회 vs 외국인 조회"를 나란히 보여주는 표 — 외국인 조회 많은 순 정렬. */
+function RegionTable({
+  all,
+  foreign,
+}: {
+  all: Record<string, number>;
+  foreign: Record<string, number>;
+}) {
+  const regions = Object.keys(all);
+  if (regions.length === 0) {
     return <p className="text-xs text-slate-400">아직 데이터가 없습니다 (런칭 후 누적).</p>;
   }
-  const max = Math.max(...rows.map((r) => r.value), 1);
+  const rows = regions
+    .map((region) => ({ region, all: all[region] ?? 0, foreign: foreign[region] ?? 0 }))
+    .sort((a, b) => b.foreign - a.foreign || b.all - a.all);
+  const maxAll = Math.max(...rows.map((r) => r.all), 1);
+
   return (
     <div className="space-y-1.5">
+      <div className="flex items-center gap-3 px-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        <span className="w-24 shrink-0">지역</span>
+        <span className="flex-1">전체 조회</span>
+        <span className="w-16 shrink-0 text-right">외국인</span>
+      </div>
       {rows.map((r) => (
-        <div key={r.label} className="flex items-center gap-3">
-          <span className="w-24 shrink-0 truncate text-xs font-semibold text-slate-600">{r.label}</span>
+        <div key={r.region} className="flex items-center gap-3">
+          <span className="w-24 shrink-0 truncate text-xs font-semibold text-slate-600">
+            {r.region}
+          </span>
           <div className="h-5 flex-1 overflow-hidden rounded bg-slate-100">
-            <div className="h-full rounded bg-sky-500" style={{ width: `${(r.value / max) * 100}%` }} />
+            <div
+              className="h-full rounded bg-sky-500"
+              style={{ width: `${(r.all / maxAll) * 100}%` }}
+            />
           </div>
-          <span className="w-10 shrink-0 text-right text-[11px] text-slate-400">{r.value}</span>
+          <span className="w-16 shrink-0 text-right text-xs font-bold text-emerald-600">
+            {r.foreign > 0 ? r.foreign : "—"}
+          </span>
         </div>
       ))}
     </div>

@@ -76,32 +76,57 @@ export async function GET(request: Request) {
   let knownCountry = 0,
     foreignByCountry = 0,
     foreignByLocale = 0;
+  const countryCounts: Record<string, number> = {};
   for (const s of bySession.values()) {
     if (s.country) {
       knownCountry++;
       if (s.country !== "KR") foreignByCountry++;
+      countryCounts[s.country] = (countryCounts[s.country] ?? 0) + 1;
     }
     if (s.locale && !s.locale.toLowerCase().startsWith("ko")) foreignByLocale++;
   }
+  const countryBreakdown = Object.entries(countryCounts)
+    .map(([country, count]) => ({ country, count }))
+    .sort((a, b) => b.count - a.count);
   const foreign = {
     totalSessions: bySession.size,
     knownCountry,
     foreignByCountry,
     foreignByLocale,
+    countryBreakdown,
   };
 
-  // ── 증거 ③ 지방 분산 ──
+  // ── 증거 ③ 지역 관심 (전체 vs 외국어 설정 방문자만) ──
+  // "region"이 붙는 조회 이벤트를 지역별로 집계 — 언어가 한국어가 아닌 방문자만
+  // 따로 세어야 "외국인이 실제로 어디에 관심 있는지"를 볼 수 있다(그냥 전체
+  // 합산은 국내 방문자 조회에 묻혀 버려서 수요 파악에 못 쓴다).
   const regionCounts: Record<string, number> = {};
+  const foreignRegionCounts: Record<string, number> = {};
   let metro = 0,
-    rural = 0;
+    rural = 0,
+    foreignMetro = 0,
+    foreignRural = 0;
   for (const e of events) {
     if ((e.event_type === "region_view" || e.event_type === "route_view") && e.region) {
+      const isForeignLocale = !!e.locale && !e.locale.toLowerCase().startsWith("ko");
       regionCounts[e.region] = (regionCounts[e.region] ?? 0) + 1;
       if (METRO.has(e.region)) metro++;
       else rural++;
+      if (isForeignLocale) {
+        foreignRegionCounts[e.region] = (foreignRegionCounts[e.region] ?? 0) + 1;
+        if (METRO.has(e.region)) foreignMetro++;
+        else foreignRural++;
+      }
     }
   }
-  const dispersion = { regionCounts, metro, rural };
+  const dispersion = {
+    regionCounts,
+    foreignRegionCounts,
+    metro,
+    rural,
+    foreignMetro,
+    foreignRural,
+  };
 
   // ── 증거 ④ 수익 funnel ──
   const counts: Record<string, number> = Object.fromEntries(FUNNEL.map((t) => [t, 0]));
