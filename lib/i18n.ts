@@ -251,6 +251,94 @@ export const dict = {
   "notFound.title": { en: "Course not found", ko: "코스를 찾을 수 없습니다" },
   "notFound.body":  { en: "This route doesn't exist (yet) — it may be a mistyped link, or the course is still on its way.", ko: "이 코스는 (아직) 없습니다 — 링크 오타이거나, 코스가 곧 추가될 예정일 수 있습니다." },
   "notFound.back":  { en: "Back to all courses", ko: "전체 코스로 돌아가기" },
+
+  // ── Mode toggle (Car / Bike) ─────────────────────────────────
+  "mode.car":  { en: "🚗 Car", ko: "🚗 자동차" },
+  "mode.bike": { en: "🚴 Bike", ko: "🚴 자전거" },
+
+  // ── Bike — nav ───────────────────────────────────────────────
+  "bike.nav.passport": { en: "🎖 Passport",    ko: "🎖 인증수첩" },
+  "bike.nav.routes":   { en: "Routes",         ko: "노선" },
+  "bike.nav.why":      { en: "Why Bike-RoadTrip", ko: "Bike-RoadTrip 소개" },
+
+  // ── Bike — hero ──────────────────────────────────────────────
+  "bike.hero.badge": {
+    en: "🚴 Korea's national cycling network · 12 official routes",
+    ko: "🚴 대한민국 국토종주 자전거길 · 공식 노선 12개",
+  },
+  "bike.hero.titlePre":    { en: "Cycle ",         ko: "" },
+  "bike.hero.titleAccent": { en: "the real Korea", ko: "진짜 한국을" },
+  "bike.hero.titlePost":   { en: ".",              ko: " 페달로 만나다." },
+  "bike.hero.sub": {
+    en: "1,700+ km of government-built river, coastal & mountain bike paths — with the real certification-stamp system explained for visitors.",
+    ko: "정부가 조성한 강변·해안·고갯길 자전거길 1,700km 이상 — 외국인도 이해하기 쉽게 인증수첩 시스템까지 설명합니다.",
+  },
+  "bike.hero.note": {
+    en: "No login · Free to use · Based on Korea's official bike path network",
+    ko: "로그인 없음 · 무료 이용 · 대한민국 공식 자전거길 네트워크 기반",
+  },
+  "bike.hero.cta": { en: "See all 12 routes ↓", ko: "12개 노선 모두 보기 ↓" },
+
+  // ── Bike — routes section ────────────────────────────────────
+  "bike.routes.label":   { en: "Official National Bike Paths", ko: "공식 국토종주 자전거길" },
+  "bike.routes.heading": { en: "Pick a river, a coast, or a challenge.", ko: "강, 해안, 혹은 도전 — 골라보세요." },
+  "bike.routes.sub": {
+    en: "Every route below is part of Korea's real, government-built cycling network — not a curated suggestion, an actual path that exists on the ground.",
+    ko: "아래 노선은 전부 대한민국 정부가 실제로 조성한 자전거길입니다 — 추천 경로가 아니라 실제로 존재하는 길입니다.",
+  },
+  "bike.cat.fourRivers": { en: "🏞 The Four Rivers", ko: "🏞 4대강 노선" },
+  "bike.cat.coastal":    { en: "🌊 Coastal Routes",  ko: "🌊 해안 노선" },
+  "bike.cat.mountain":   { en: "⛰ The Mountain Pass", ko: "⛰ 고갯길 도전" },
+  "bike.cat.island":     { en: "🏝 Jeju Island Loop", ko: "🏝 제주 환상 코스" },
+  "bike.cat.more":       { en: "🌿 More Routes",      ko: "🌿 그 외 노선" },
+
+  // ── Bike — route card / detail ───────────────────────────────
+  "bike.card.viewRoute":     { en: "View route details →", ko: "노선 자세히 보기 →" },
+  "bike.card.km":            { en: "{km} km",              ko: "{km}km" },
+  "bike.difficulty.easy":        { en: "Easy",        ko: "쉬움" },
+  "bike.difficulty.moderate":    { en: "Moderate",    ko: "보통" },
+  "bike.difficulty.challenging": { en: "Challenging", ko: "도전적" },
+  "bike.route.highlights":   { en: "Highlights",              ko: "하이라이트" },
+  "bike.route.certCenters":  { en: "Key certification centers", ko: "대표 인증센터" },
+  "bike.route.fourRiversBadge": { en: "Four Rivers route", ko: "4대강 노선" },
+  "bike.route.back":         { en: "All bike routes", ko: "전체 자전거길" },
+
+  // ── Bike — passport tracker (delight feature) ────────────────
+  "bike.passport.title": { en: "My Bike Passport", ko: "내 인증수첩" },
+  "bike.passport.sub": {
+    en: "Real riders carry a paper passport and stamp it at red certification booths along the way. Track your own progress here — tap a route once you've ridden it.",
+    ko: "실제 라이더들은 종이 인증수첩을 들고 다니며 빨간 인증센터에서 도장을 찍습니다. 여기서도 똑같이 — 완주한 노선을 눌러 나만의 진행 상황을 기록해 보세요.",
+  },
+  "bike.passport.progress":   { en: "{n}/12 routes ridden", ko: "{n}/12 노선 완주" },
+  "bike.passport.totalKm":    { en: "{km} km logged",       ko: "{km}km 기록" },
+  "bike.passport.markDone":   { en: "Mark as ridden",       ko: "완주 체크" },
+  "bike.passport.doneBadge":  { en: "✓ Ridden",              ko: "✓ 완주함" },
+  "bike.passport.fourRivers": { en: "🏅 Four Rivers Medal",  ko: "🏅 4대강 메달" },
+  "bike.passport.grandSlam":  { en: "🏆 Grand Slam Medal",   ko: "🏆 그랜드슬램 메달" },
+  "bike.passport.locked":     { en: "locked",                ko: "잠김" },
+  "bike.passport.unlocked":   { en: "unlocked!",             ko: "달성!" },
+  "bike.passport.reset":      { en: "Reset progress",        ko: "기록 초기화" },
+
+  // ── Bike — before you ride ────────────────────────────────────
+  "bike.tips.label":   { en: "Before You Ride", ko: "출발 전 체크리스트" },
+  "bike.tips.heading": {
+    en: "What foreign cyclists wish they'd known",
+    ko: "외국인 라이더들이 미리 알았으면 했던 것들",
+  },
+
+  // ── Bike — why section ────────────────────────────────────────
+  "bike.why.label":   { en: "Why ride with this guide", ko: "이 가이드로 라이딩해야 하는 이유" },
+  "bike.why.heading": {
+    en: "Built for cyclists, not just road-trippers",
+    ko: "자동차 여행자가 아닌, 자전거 라이더를 위해",
+  },
+
+  // ── Bike — not found ──────────────────────────────────────────
+  "bike.notFound.title": { en: "Route not found", ko: "노선을 찾을 수 없습니다" },
+  "bike.notFound.body": {
+    en: "This bike route doesn't exist — check the 12 official national routes instead.",
+    ko: "이 자전거 노선은 존재하지 않습니다 — 공식 국토종주 노선 12개를 확인해 보세요.",
+  },
 } as const;
 
 export type DictKey = keyof typeof dict;

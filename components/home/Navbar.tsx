@@ -5,14 +5,17 @@ import Link from "next/link";
 import LangToggle from "@/components/home/LangToggle";
 import MyTripButton from "@/components/home/MyTripButton";
 import MyTripPanel from "@/components/home/MyTripPanel";
+import ModeToggle from "@/components/bike/ModeToggle";
 import { useLangStore } from "@/store/useLangStore";
 import { t } from "@/lib/i18n";
 
-export default function Navbar() {
+export default function Navbar({ mode = "car" }: { mode?: "car" | "bike" }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
   const lang = useLangStore((s) => s.lang);
+  const home = mode === "bike" ? "/bike" : "/";
+  const isBike = mode === "bike";
 
   return (
     <>
@@ -21,7 +24,7 @@ export default function Navbar() {
         <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
           {/* Logo */}
           <Link
-            href="/"
+            href={home}
             onClick={close}
             className="flex shrink-0 items-center gap-2 whitespace-nowrap text-lg font-extrabold tracking-tight text-ink"
           >
@@ -33,27 +36,52 @@ export default function Navbar() {
 
           {/* Desktop menu */}
           <div className="hidden items-center gap-6 text-sm font-semibold text-slate-600 md:flex">
-            <a href="#courses" className="transition-colors hover:text-ink">{t("nav.routes", lang)}</a>
-            <a href="#map"     className="transition-colors hover:text-ink">{t("nav.map",    lang)}</a>
-            <a href="#why"     className="transition-colors hover:text-ink">{t("nav.why",    lang)}</a>
-            <Link
-              href="/builder"
-              className="rounded-full bg-ink px-3.5 py-1.5 text-white transition-colors hover:bg-slate-700"
-            >
-              {t("nav.build", lang)}
-            </Link>
-            <MyTripButton />
+            {isBike ? (
+              <>
+                <a href="#routes" className="transition-colors hover:text-ink">{t("bike.nav.routes", lang)}</a>
+                <a href="#why"    className="transition-colors hover:text-ink">{t("bike.nav.why", lang)}</a>
+                <Link
+                  href="/bike#passport"
+                  className="rounded-full bg-ink px-3.5 py-1.5 text-white transition-colors hover:bg-slate-700"
+                >
+                  {t("bike.nav.passport", lang)}
+                </Link>
+              </>
+            ) : (
+              <>
+                <a href="#courses" className="transition-colors hover:text-ink">{t("nav.routes", lang)}</a>
+                <a href="#map"     className="transition-colors hover:text-ink">{t("nav.map",    lang)}</a>
+                <a href="#why"     className="transition-colors hover:text-ink">{t("nav.why",    lang)}</a>
+                <Link
+                  href="/builder"
+                  className="rounded-full bg-ink px-3.5 py-1.5 text-white transition-colors hover:bg-slate-700"
+                >
+                  {t("nav.build", lang)}
+                </Link>
+                <MyTripButton />
+              </>
+            )}
+            <ModeToggle mode={mode} />
             <LangToggle />
           </div>
 
           {/* Mobile: CTA + hamburger */}
           <div className="flex items-center gap-2 md:hidden">
-            <Link
-              href="/builder"
-              className="rounded-full bg-ink px-3 py-1.5 text-sm font-extrabold text-white active:scale-95"
-            >
-              {t("nav.build", lang)}
-            </Link>
+            {isBike ? (
+              <Link
+                href="/bike#passport"
+                className="rounded-full bg-ink px-3 py-1.5 text-sm font-extrabold text-white active:scale-95"
+              >
+                {t("bike.nav.passport", lang)}
+              </Link>
+            ) : (
+              <Link
+                href="/builder"
+                className="rounded-full bg-ink px-3 py-1.5 text-sm font-extrabold text-white active:scale-95"
+              >
+                {t("nav.build", lang)}
+              </Link>
+            )}
             <button
               onClick={() => setOpen((v) => !v)}
               aria-label={open ? "Close menu" : "Open menu"}
@@ -82,19 +110,33 @@ export default function Navbar() {
             onClick={(e) => e.stopPropagation()}
           >
             <nav className="flex flex-col px-4 py-3">
-              <a href="#courses" onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
-                {t("nav.routes", lang)}
-              </a>
-              <a href="#map"     onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
-                {t("nav.map", lang)}
-              </a>
-              <a href="#why"     onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
-                {t("nav.why", lang)}
-              </a>
+              {isBike ? (
+                <>
+                  <a href="#routes" onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
+                    {t("bike.nav.routes", lang)}
+                  </a>
+                  <a href="#why" onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
+                    {t("bike.nav.why", lang)}
+                  </a>
+                </>
+              ) : (
+                <>
+                  <a href="#courses" onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
+                    {t("nav.routes", lang)}
+                  </a>
+                  <a href="#map"     onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
+                    {t("nav.map", lang)}
+                  </a>
+                  <a href="#why"     onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
+                    {t("nav.why", lang)}
+                  </a>
+                </>
+              )}
               <div className="my-2 border-t border-slate-100" />
               <div className="flex items-center justify-between px-4 py-3">
-                {/* Opens the shared drawer + closes the hamburger. */}
-                <MyTripButton onOpen={close} />
+                {/* Opens the shared drawer + closes the hamburger (car mode only). */}
+                {!isBike && <MyTripButton onOpen={close} />}
+                <ModeToggle mode={mode} />
                 <LangToggle />
               </div>
             </nav>
@@ -102,9 +144,9 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* My Trip drawer — single instance, outside the hamburger so closing the
-          menu can't unmount it. Opened via useMyTripStore from either trigger. */}
-      <MyTripPanel />
+      {/* My Trip drawer — car mode only, single instance outside the hamburger so
+          closing the menu can't unmount it. Opened via useMyTripStore from either trigger. */}
+      {!isBike && <MyTripPanel />}
     </>
   );
 }
