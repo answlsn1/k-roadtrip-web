@@ -7,7 +7,7 @@ import type { RouteDraft, SavedTrip } from "@/lib/types";
 interface SavedTripsState {
   trips: SavedTrip[];
   /** Snapshot the current builder draft into My Trip (upsert by draft id). */
-  saveTrip: (draft: RouteDraft) => void;
+  saveTrip: (draft: RouteDraft, fallbackTitle: string) => void;
   removeTrip: (id: string) => void;
   clearAll: () => void;
 }
@@ -17,10 +17,10 @@ export const useSavedTripsStore = create<SavedTripsState>()(
     (set, get) => ({
       trips: [],
 
-      saveTrip: (draft) => {
+      saveTrip: (draft, fallbackTitle) => {
         const snapshot: SavedTrip = {
           id: draft.id,
-          title: draft.title?.trim() || "My Custom Route",
+          title: draft.title?.trim() || fallbackTitle,
           stops: draft.stops,
           savedAt: Date.now(),
         };

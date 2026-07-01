@@ -16,21 +16,21 @@ export const dict = {
   },
   "hero.titlePre":    { en: "Discover ",          ko: "" },
   "hero.titleAccent": { en: "Korea beyond Seoul", ko: "서울 너머의 한국" },
-  "hero.titlePost":   { en: ".",                  ko: "을 발견하다." },
+  "hero.titlePost":   { en: ".",                  ko: "을 만나다." },
   "hero.sub": {
     en: "Local-verified routes, one tap to Naver Map.",
-    ko: "현지 검증 코스, 원탭으로 네이버 지도까지.",
+    ko: "현지 검증 코스, 원탭이면 네이버 지도 길안내까지.",
   },
   "hero.note": {
     en: "No login · Free to use · Locally curated",
-    ko: "로그인 없음 · 무료 사용 · 현지 큐레이션",
+    ko: "로그인 없음 · 무료 이용 · 현지 큐레이션",
   },
 
   // ── Courses section ─────────────────────────────────────────
-  "home.label":   { en: "Curated Routes",  ko: "현지가 검증한 코스" },
+  "home.label":   { en: "Curated Routes",  ko: "현지인이 검증한 코스" },
   "home.heading": {
     en: "Pick a route. We did the homework.",
-    ko: "루트만 고르세요. 검증은 저희가 마쳤습니다.",
+    ko: "코스만 고르세요. 검증은 저희가 마쳤습니다.",
   },
   "home.sub": {
     en: "Hand-built itineraries with only local-verified stops — swipe to explore.",
@@ -43,14 +43,14 @@ export const dict = {
   "home.noMatches":     { en: "No matches found", ko: "검색 결과가 없습니다" },
   "home.noMatchesHint": {
     en: "Try a region (Andong, Gyeongju, Jeju…) or a theme (heritage, coastal…)",
-    ko: "지역(안동, 경주, 제주…)이나 테마(헤리티지, 해안…)로 검색해 보세요",
+    ko: "지역(안동, 경주, 제주…)이나 테마(문화유산, 해안…)로 검색해 보세요",
   },
 
   // ── Feed category titles ────────────────────────────────────
   "feed.trending":  { en: "🔥 Trending in Korea", ko: "🔥 한국에서 뜨는 코스" },
   "feed.beyond":    { en: "🌿 Beyond Seoul",      ko: "🌿 서울 너머" },
   "feed.heritage":  { en: "🏛 History & Culture", ko: "🏛 역사 & 문화" },
-  "feed.ocean":     { en: "🌊 Ocean Views",       ko: "🌊 바다 전망 드라이브" },
+  "feed.ocean":     { en: "🌊 Ocean Views",       ko: "🌊 해안 드라이브" },
   "feed.sponsored": { en: "⭐ Sponsored Picks",   ko: "⭐ 스폰서 추천" },
   "feed.partner":   { en: "Partner",              ko: "파트너" },
 
@@ -81,7 +81,7 @@ export const dict = {
   },
   "footer.attribution": {
     en: "Map data © OpenStreetMap contributors · Navigation by Naver Map",
-    ko: "지도 데이터 © OpenStreetMap 기여자 · 내비게이션 by 네이버 지도",
+    ko: "지도 데이터 © OpenStreetMap 기여자 · 내비게이션 제공 · 네이버 지도",
   },
 
   // ── Affiliate / sponsor disclosure ──────────────────────────
@@ -103,7 +103,7 @@ export const dict = {
   "common.loadingMap": { en: "Loading map…",    ko: "지도 불러오는 중…" },
 
   // ── Live Map section ────────────────────────────────────────
-  "map.label":   { en: "Live Map",                   ko: "실시간 지도" },
+  "map.label":   { en: "Live Map",                   ko: "전체 지도" },
   "map.heading": { en: "Every stop, local-verified", ko: "모든 장소, 현지 검증 완료" },
   "map.all":     { en: "All",                        ko: "전체" },
   "map.hint": {
@@ -151,11 +151,11 @@ export const dict = {
 
   // ── Auth modal ──────────────────────────────────────────────
   "auth.title":   { en: "Save this route for your trip!", ko: "이 코스를 여행에 저장하세요!" },
-  "auth.sub":     { en: "Sign in to keep your favorite drives.", ko: "로그인하고 마음에 드는 드라이브를 보관하세요." },
+  "auth.sub":     { en: "Sign in to keep your favorite drives.", ko: "로그인하고 마음에 드는 드라이브를 저장해 보세요." },
   "auth.inAppTitle": { en: "Google sign-in doesn't work in in-app browsers", ko: "인앱 브라우저에서는 구글 로그인이 작동하지 않습니다" },
   "auth.inAppBody": {
     en: "Tap the ⋯ menu and choose \"Open in browser\", or copy this page link into Safari/Chrome — your save will pick up right where you left off.",
-    ko: "⋯ 메뉴를 눌러 '브라우저로 열기'를 선택하거나, 이 페이지 링크를 사파리·크롬에 붙여넣으세요. 저장은 떠난 자리에서 이어집니다.",
+    ko: "⋯ 메뉴를 눌러 '브라우저로 열기'를 선택하거나, 이 페이지 링크를 사파리·크롬에 붙여넣으세요. 하려던 저장은 그대로 이어집니다.",
   },
   "auth.continueGoogle": { en: "Continue with Google", ko: "구글로 계속하기" },
   "auth.opening":   { en: "Opening Google…", ko: "구글 여는 중…" },
@@ -165,9 +165,9 @@ export const dict = {
 
   // ── My Trip panel ───────────────────────────────────────────
   "trip.empty":     { en: "Nothing saved yet", ko: "아직 저장한 게 없습니다" },
-  "trip.emptyHint": { en: "Build a route and save it, or tap ★ on any map marker.", ko: "루트를 만들어 저장하거나, 지도 마커의 ★를 눌러 장소를 저장하세요." },
-  "trip.buildCta":  { en: "+ Build a route", ko: "+ 루트 만들기" },
-  "trip.routesHeading": { en: "My saved routes", ko: "저장한 내 루트" },
+  "trip.emptyHint": { en: "Build a route and save it, or tap ★ on any map marker.", ko: "일정을 만들어 저장하거나, 지도 마커의 ★를 눌러 장소를 저장하세요." },
+  "trip.buildCta":  { en: "+ Build a route", ko: "+ 내 일정 만들기" },
+  "trip.routesHeading": { en: "My saved routes", ko: "저장한 내 일정" },
   "trip.placesHeading": { en: "Saved places", ko: "저장한 장소" },
   "trip.openInNaver":   { en: "Open in Naver Map", ko: "네이버 지도로 열기" },
   "trip.tip": {
@@ -190,11 +190,11 @@ export const dict = {
   "ledger.approxBadge": { en: "est.", ko: "추정" },
   "ledger.approxHint": {
     en: "Estimates are rough nationwide averages — edit anytime.",
-    ko: "예상치는 전국 평균 추정값입니다 — 언제든 수정하세요.",
+    ko: "예상 금액은 전국 평균을 기준으로 한 추정치입니다 — 언제든 수정하세요.",
   },
   "ledger.overwriteHint": {
     en: "Saving here replaces this category's logged total.",
-    ko: "여기에 저장하면 이 항목의 기록 합계를 대체합니다.",
+    ko: "여기에 저장하면 이 항목의 기존 기록이 새 값으로 바뀝니다.",
   },
   "ledger.withinBudget": { en: "Within budget · {pct}", ko: "예산 내 · {pct}" },
   "ledger.overBy":       { en: "Over by {amt} · {pct}",  ko: "{amt} 초과 · {pct}" },
@@ -216,6 +216,7 @@ export const dict = {
 
   // ── Builder ─────────────────────────────────────────────────
   "builder.savedHint":       { en: "Build your own road trip · saved on this device", ko: "나만의 로드트립 만들기 · 이 기기에 저장됨" },
+  "builder.untitled":        { en: "Untitled Route", ko: "제목 없는 코스" },
   "builder.namePlaceholder": { en: "Name your route", ko: "코스 이름을 입력하세요" },
   "builder.clearConfirm":    { en: "Clear all?", ko: "모두 지울까요?" },
   "builder.openRoute":       { en: "Open route in Naver Map", ko: "네이버 지도로 코스 열기" },
@@ -245,7 +246,7 @@ export const dict = {
 
   // ── Error / not-found ───────────────────────────────────────
   "error.title":    { en: "Something went wrong", ko: "문제가 발생했습니다" },
-  "error.body":     { en: "We hit a bump on the road. Please try again in a moment.", ko: "잠시 문제가 생겼습니다. 잠시 후 다시 시도해 주세요." },
+  "error.body":     { en: "We hit a bump on the road. Please try again in a moment.", ko: "가는 길에 작은 문제가 생겼어요. 잠시 후 다시 시도해 주세요." },
   "error.retry":    { en: "Try again", ko: "다시 시도" },
   "notFound.title": { en: "Course not found", ko: "코스를 찾을 수 없습니다" },
   "notFound.body":  { en: "This route doesn't exist (yet) — it may be a mistyped link, or the course is still on its way.", ko: "이 코스는 (아직) 없습니다 — 링크 오타이거나, 코스가 곧 추가될 예정일 수 있습니다." },

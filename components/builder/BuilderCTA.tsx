@@ -19,7 +19,7 @@ export default function BuilderCTA() {
 
   const handleSaveTrip = () => {
     // Read the live draft at click time (not a possibly-stale render closure).
-    saveTrip(useBuilderStore.getState().draft);
+    saveTrip(useBuilderStore.getState().draft, t("builder.untitled", lang));
     setSavedTrip(true);
     setTimeout(() => setSavedTrip(false), 2000);
   };

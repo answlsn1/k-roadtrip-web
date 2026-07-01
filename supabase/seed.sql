@@ -19,7 +19,7 @@ values
    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80'),
 
   ('gyeongju-heritage-loop', 'Gyeongju', '경주',
-   'Golden City Heritage Loop', '골든 시티 헤리티지 루프',
+   'Golden City Heritage Loop', '황금빛 고분과 황리단길 한 바퀴',
    'Royal tombs, hanok streets and a 1939 bakery — a UNESCO open-air museum you can drive in one day.',
    '왕릉과 한옥 거리, 1939년 베이커리 — 하루에 도는 유네스코 야외 박물관.',
    3.5, 15, array['history','unesco','hanok'],

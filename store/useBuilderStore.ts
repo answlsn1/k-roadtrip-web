@@ -17,7 +17,7 @@ function newId(): string {
 function emptyDraft(): RouteDraft {
   return {
     id: newId(),
-    title: "My Custom Route",
+    title: "",
     stops: [],
     updatedAt: Date.now(),
   };
