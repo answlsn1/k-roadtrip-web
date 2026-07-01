@@ -41,8 +41,8 @@ export const joinConfig: JoinConfig = {
     '알려준 그 스팟이 ‘당신 별명’을 단 추천 코스로 실제 앱에 올라갈 수 있어요. ‘이거 내가 추천했어’ 하고 자랑할 수 있게.',
   contactBack:
     '남겨주신 연락처로 며칠 안에 가볍게 연락드릴게요. 부담 없이 편한 시간에 만나요.',
-  founderName: '안지수',
-  founderTagline: '여행을 좋아해서 직접 만들기 시작한 1인 개발자예요.',
+  founderName: 'K-RoadTrip',
+  founderTagline: '여행을 좋아하는 1인 개발자가 만들고 있어요.',
   founderInitial: 'K',
   govLine: '지방 여행 활성화 — 지자체와도 함께 이야기하고 있어요.',
 };
