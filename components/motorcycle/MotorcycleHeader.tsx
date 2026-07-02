@@ -8,6 +8,7 @@ import { logOut } from "@/lib/motorcycle/auth";
 
 const NAV_LINKS = [
   { href: "/motorcycle", label: "피드" },
+  { href: "/motorcycle/record", label: "주행 기록" },
   { href: "/motorcycle/chat", label: "채팅" },
   { href: "/motorcycle/my", label: "내 루트" },
 ];
@@ -16,7 +17,7 @@ export default function MotorcycleHeader() {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
   const router = useRouter();
-  const { profile, isLoggedIn } = useMotorcycleSession();
+  const { session, profile, isLoggedIn } = useMotorcycleSession();
 
   const handleLogout = async () => {
     close();
@@ -49,11 +50,14 @@ export default function MotorcycleHeader() {
           </div>
 
           <div className="hidden items-center gap-3 md:flex">
-            {isLoggedIn ? (
+            {isLoggedIn && session ? (
               <>
-                <span className="text-sm font-bold text-slate-300">
+                <Link
+                  href={`/motorcycle/riders/${session.user.id}`}
+                  className="text-sm font-bold text-slate-300 transition-colors hover:text-amber-400"
+                >
                   {profile?.nickname ?? "라이더"}
-                </span>
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="rounded-full border border-white/15 px-3.5 py-1.5 text-sm font-semibold text-slate-300 transition-colors hover:border-amber-500/50 hover:text-amber-400"
@@ -118,11 +122,15 @@ export default function MotorcycleHeader() {
                 </Link>
               ))}
               <div className="my-2 border-t border-white/10" />
-              {isLoggedIn ? (
+              {isLoggedIn && session ? (
                 <div className="flex items-center justify-between px-4 py-3">
-                  <span className="text-sm font-bold text-slate-300">
+                  <Link
+                    href={`/motorcycle/riders/${session.user.id}`}
+                    onClick={close}
+                    className="text-sm font-bold text-slate-300 transition-colors hover:text-amber-400"
+                  >
                     {profile?.nickname ?? "라이더"}
-                  </span>
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="rounded-full border border-white/15 px-3.5 py-1.5 text-sm font-semibold text-slate-300"

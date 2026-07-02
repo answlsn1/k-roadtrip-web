@@ -5,13 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMotorcycleSession } from "@/lib/motorcycle/useSession";
 import { listMyRoutes, deleteRoute } from "@/lib/motorcycle/routes";
+import { getRiderStats } from "@/lib/motorcycle/profile";
+import { RIDER_BADGES, MONTHLY_CHALLENGE_KM, monthlyKm } from "@/lib/motorcycle/badges";
 import type { MotorcycleRouteWithAuthor } from "@/lib/motorcycle/types";
 import RouteCard from "@/components/motorcycle/RouteCard";
 
 export default function MyMotorcycleRoutesPage() {
   const router = useRouter();
-  const { isLoggedIn, loading } = useMotorcycleSession();
+  const { session, isLoggedIn, loading } = useMotorcycleSession();
   const [routes, setRoutes] = useState<MotorcycleRouteWithAuthor[] | null>(null);
+  const [stats, setStats] = useState<{ routeCount: number; totalKm: number } | null>(null);
 
   useEffect(() => {
     if (!loading && !isLoggedIn) {
@@ -23,6 +26,11 @@ export default function MyMotorcycleRoutesPage() {
     if (!isLoggedIn) return;
     listMyRoutes().then(setRoutes);
   }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (!session) return;
+    getRiderStats(session.user.id).then(setStats);
+  }, [session]);
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("이 루트를 삭제할까요? 되돌릴 수 없어요.")) return;
@@ -38,6 +46,11 @@ export default function MyMotorcycleRoutesPage() {
     return <div className="mx-auto max-w-md px-5 py-20 text-center text-sm text-slate-500">확인 중…</div>;
   }
 
+  const earnedBadges = stats ? RIDER_BADGES.filter((b) => b.earned(stats)) : [];
+  const monthKm = routes ? monthlyKm(routes) : 0;
+  const challengeDone = monthKm >= MONTHLY_CHALLENGE_KM;
+  const challengePct = Math.min(100, (monthKm / MONTHLY_CHALLENGE_KM) * 100);
+
   return (
     <div className="mx-auto max-w-6xl px-5 pb-24">
       <div className="flex items-center justify-between py-10 sm:py-14">
@@ -45,15 +58,79 @@ export default function MyMotorcycleRoutesPage() {
           <p className="mb-2 text-xs font-bold uppercase tracking-widest text-amber-500">내 루트</p>
           <h1 className="text-2xl font-extrabold text-white sm:text-3xl">내가 등록한 루트</h1>
         </div>
-        {routes && routes.length > 0 && (
+        <div className="flex shrink-0 items-center gap-2">
           <Link
-            href="/motorcycle/routes/new"
-            className="shrink-0 rounded-full bg-amber-500 px-4 py-2 text-xs font-extrabold text-ink transition-transform active:scale-[0.98] sm:text-sm"
+            href="/motorcycle/me/edit"
+            className="rounded-full border border-white/15 px-4 py-2 text-xs font-bold text-slate-300 transition-colors hover:border-amber-500/50 hover:text-amber-400 sm:text-sm"
           >
-            루트 등록
+            프로필 수정
           </Link>
-        )}
+          {routes && routes.length > 0 && (
+            <Link
+              href="/motorcycle/routes/new"
+              className="rounded-full bg-amber-500 px-4 py-2 text-xs font-extrabold text-ink transition-transform active:scale-[0.98] sm:text-sm"
+            >
+              루트 등록
+            </Link>
+          )}
+        </div>
       </div>
+
+      {stats && routes !== null && (
+        <div className="mb-8 grid gap-4 lg:grid-cols-2">
+          <div className="rounded-2xl border border-white/15 bg-white/5 p-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-amber-500">내 라이딩</p>
+            <p className="mt-2 text-xl font-extrabold text-white">
+              루트 {stats.routeCount}개{" "}
+              <span aria-hidden="true" className="text-slate-500">·</span> 총 {stats.totalKm}km
+            </p>
+            {session && earnedBadges.length > 0 && (
+              <Link
+                href={`/motorcycle/riders/${session.user.id}`}
+                className="mt-3 flex flex-wrap items-center gap-2"
+              >
+                {earnedBadges.map((b) => (
+                  <span
+                    key={b.id}
+                    className="rounded-full border border-amber-500/50 bg-amber-500/10 px-2.5 py-1 text-xs font-bold text-amber-400"
+                  >
+                    {b.emoji} {b.name}
+                  </span>
+                ))}
+                <span className="text-xs font-semibold text-slate-400">전체 배지 보기 →</span>
+              </Link>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-white/15 bg-white/5 p-5">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-bold uppercase tracking-widest text-amber-500">
+                이달의 챌린지
+              </p>
+              {challengeDone && (
+                <span className="text-xs font-extrabold text-amber-400">
+                  🎉 이달의 챌린지 달성!
+                </span>
+              )}
+            </div>
+            <p className="mt-2 text-xl font-extrabold text-white">
+              이번 달 {monthKm}km / {MONTHLY_CHALLENGE_KM}km
+            </p>
+            <div
+              role="progressbar"
+              aria-valuenow={Math.round(challengePct)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/10"
+            >
+              <div
+                className="h-full rounded-full bg-amber-500 transition-all"
+                style={{ width: `${challengePct}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {routes === null ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

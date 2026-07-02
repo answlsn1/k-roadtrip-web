@@ -1,19 +1,62 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { listPublicRoutes } from "@/lib/motorcycle/routes";
-import type { MotorcycleRouteWithAuthor } from "@/lib/motorcycle/types";
+import { getSocialForRoutes } from "@/lib/motorcycle/social";
+import type { MotorcycleRouteWithAuthor, RouteSocial } from "@/lib/motorcycle/types";
 import { useMotorcycleSession } from "@/lib/motorcycle/useSession";
 import RouteCard from "@/components/motorcycle/RouteCard";
 
+type SortKey = "latest" | "popular" | "distance";
+
+const SORT_TABS: { key: SortKey; label: string }[] = [
+  { key: "latest", label: "최신순" },
+  { key: "popular", label: "인기순" },
+  { key: "distance", label: "장거리순" },
+];
+
 export default function MotorcycleHomePage() {
   const [routes, setRoutes] = useState<MotorcycleRouteWithAuthor[] | null>(null);
+  const [social, setSocial] = useState<Record<string, RouteSocial> | null>(null);
+  const [sort, setSort] = useState<SortKey>("latest");
+  const [region, setRegion] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
   const { isLoggedIn, loading } = useMotorcycleSession();
 
   useEffect(() => {
-    listPublicRoutes().then(setRoutes);
+    listPublicRoutes().then((fetched) => {
+      setRoutes(fetched);
+      getSocialForRoutes(fetched.map((r) => r.id)).then(setSocial);
+    });
   }, []);
+
+  const regions = useMemo(() => {
+    if (!routes) return [];
+    return Array.from(new Set(routes.map((r) => r.region).filter((r): r is string => !!r)));
+  }, [routes]);
+
+  const visibleRoutes = useMemo(() => {
+    if (!routes) return null;
+    const q = query.trim().toLowerCase();
+    const filtered = routes.filter((r) => {
+      if (region && r.region !== region) return false;
+      if (!q) return true;
+      return (
+        r.title.toLowerCase().includes(q) ||
+        (r.description ?? "").toLowerCase().includes(q)
+      );
+    });
+    if (sort === "popular") {
+      return [...filtered].sort(
+        (a, b) => (social?.[b.id]?.likeCount ?? 0) - (social?.[a.id]?.likeCount ?? 0)
+      );
+    }
+    if (sort === "distance") {
+      return [...filtered].sort((a, b) => (b.distance_km ?? 0) - (a.distance_km ?? 0));
+    }
+    return filtered; // 최신순 — 서버가 이미 created_at desc 로 반환.
+  }, [routes, social, sort, region, query]);
 
   return (
     <div className="mx-auto max-w-6xl px-5 pb-24">
@@ -49,16 +92,88 @@ export default function MotorcycleHomePage() {
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-extrabold text-white sm:text-xl">공개 루트 피드</h2>
           {isLoggedIn && (
-            <Link
-              href="/motorcycle/routes/new"
-              className="rounded-full bg-amber-500 px-4 py-2 text-xs font-extrabold text-ink transition-transform active:scale-[0.98] sm:text-sm"
-            >
-              루트 등록
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/motorcycle/record"
+                className="rounded-full border border-white/15 px-4 py-2 text-xs font-bold text-slate-200 transition-colors hover:border-amber-500/50 hover:text-amber-400 sm:text-sm"
+              >
+                🔴 주행 기록
+              </Link>
+              <Link
+                href="/motorcycle/routes/new"
+                className="rounded-full bg-amber-500 px-4 py-2 text-xs font-extrabold text-ink transition-transform active:scale-[0.98] sm:text-sm"
+              >
+                루트 등록
+              </Link>
+            </div>
           )}
         </div>
 
-        {routes === null ? (
+        {routes !== null && routes.length > 0 && (
+          <div className="mb-6 space-y-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex w-fit gap-1 rounded-full border border-white/10 bg-white/5 p-1">
+                {SORT_TABS.map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setSort(tab.key)}
+                    aria-pressed={sort === tab.key}
+                    className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ${
+                      sort === tab.key
+                        ? "bg-amber-500 text-ink"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="루트 제목·설명 검색"
+                aria-label="루트 검색"
+                className="w-full rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none sm:w-64"
+              />
+            </div>
+
+            {regions.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRegion(null)}
+                  aria-pressed={region === null}
+                  className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
+                    region === null
+                      ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
+                      : "border-white/15 text-slate-400 hover:text-white"
+                  }`}
+                >
+                  전체
+                </button>
+                {regions.map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRegion(region === r ? null : r)}
+                    aria-pressed={region === r}
+                    className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
+                      region === r
+                        ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
+                        : "border-white/15 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {routes === null || visibleRoutes === null ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
               <div
@@ -79,10 +194,15 @@ export default function MotorcycleHomePage() {
               {isLoggedIn ? "첫 루트 등록하기" : "로그인하고 시작하기"}
             </Link>
           </div>
+        ) : visibleRoutes.length === 0 ? (
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center">
+            <p className="text-base font-bold text-white">조건에 맞는 루트가 없어요</p>
+            <p className="mt-2 text-sm text-slate-400">검색어나 지역 필터를 바꿔보세요.</p>
+          </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {routes.map((route) => (
-              <RouteCard key={route.id} route={route} />
+            {visibleRoutes.map((route) => (
+              <RouteCard key={route.id} route={route} social={social?.[route.id]} />
             ))}
           </div>
         )}

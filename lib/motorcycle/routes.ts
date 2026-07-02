@@ -34,6 +34,18 @@ function totalDistanceKm(stops: { latitude: number; longitude: number }[]): numb
   return Math.round(sum * 10) / 10;
 }
 
+/** [[lat,lng],...] 트랙 폴리라인의 총 길이(km) — 기록 주행은 경유지 직선보다 이게 정확. */
+function trackDistanceKm(points: [number, number][]): number {
+  let sum = 0;
+  for (let i = 1; i < points.length; i++) {
+    sum += haversineKm(
+      { latitude: points[i - 1][0], longitude: points[i - 1][1] },
+      { latitude: points[i][0], longitude: points[i][1] }
+    );
+  }
+  return Math.round(sum * 10) / 10;
+}
+
 export async function createRoute(
   input: NewMotorcycleRoute
 ): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
@@ -49,6 +61,9 @@ export async function createRoute(
   if (!title) return { ok: false, error: "title_required" };
   if (input.stops.length < 2) return { ok: false, error: "need_two_stops" };
 
+  const track =
+    input.trackPoints && input.trackPoints.length >= 2 ? input.trackPoints : null;
+
   const { data: route, error: routeError } = await supabase
     .from("motorcycle_routes")
     .insert({
@@ -56,8 +71,10 @@ export async function createRoute(
       title,
       description: input.description?.trim().slice(0, DESC_MAX) || null,
       region: input.region?.trim().slice(0, 80) || null,
-      distance_km: totalDistanceKm(input.stops),
+      distance_km: track ? trackDistanceKm(track) : totalDistanceKm(input.stops),
       is_public: input.isPublic,
+      track_points: track,
+      duration_min: input.durationMin ?? null,
     })
     .select("id")
     .single();
