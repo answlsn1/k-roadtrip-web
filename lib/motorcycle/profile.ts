@@ -77,15 +77,23 @@ export async function listRoutesByUser(
 ): Promise<MotorcycleRouteWithAuthor[]> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("motorcycle_routes")
-    .select("*, motorcycle_profiles(nickname)")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(100);
+  // routes↔profiles 는 FK 가 없어 PostgREST 임베드 불가 — 프로필을 따로 조회.
+  const [{ data, error }, profile] = await Promise.all([
+    supabase
+      .from("motorcycle_routes")
+      // 목록 페이로드 절약 — track_points 제외(routes.ts LIST_COLUMNS 와 동일 원칙).
+      .select(
+        "id, user_id, title, description, region, distance_km, is_public, duration_min, route_type, winding_score, moto_safe, created_at"
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(100),
+    getProfileById(userId),
+  ]);
   if (error || !data) return [];
   return (data as any[]).map((r) => ({
     ...r,
-    author_nickname: r.motorcycle_profiles?.nickname ?? "라이더",
+    track_points: null,
+    author_nickname: profile?.nickname ?? "라이더",
   }));
 }

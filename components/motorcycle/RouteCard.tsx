@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { MotorcycleRouteWithAuthor, RouteSocial } from "@/lib/motorcycle/types";
 import { relativeTimeKo } from "@/lib/motorcycle/relativeTime";
+import { routeTypeMeta } from "@/lib/motorcycle/routeTypes";
 import LikeButton from "@/components/motorcycle/LikeButton";
 
 interface RouteCardProps {
@@ -22,6 +23,8 @@ function formatDurationKo(min: number): string {
 }
 
 export default function RouteCard({ route, social, showVisibility, onDelete }: RouteCardProps) {
+  const typeMeta = routeTypeMeta(route.route_type);
+
   return (
     <div className="group relative flex flex-col rounded-2xl border border-white/10 bg-white/5 p-5 transition-colors hover:border-amber-500/40 hover:bg-white/[0.07] sm:rounded-3xl sm:p-6">
       {/* 카드 전체를 덮는 오버레이 링크 — 작성자/좋아요는 z-10으로 위에 얹는다. */}
@@ -32,8 +35,20 @@ export default function RouteCard({ route, social, showVisibility, onDelete }: R
       />
 
       <div className="mb-3 flex items-center justify-between gap-2">
-        <span className="truncate text-xs font-bold uppercase tracking-widest text-amber-500">
-          {route.region || "지역 미정"}
+        <span className="flex min-w-0 items-center gap-1.5">
+          <span className="truncate text-xs font-bold uppercase tracking-widest text-amber-500">
+            {route.region || "지역 미정"}
+          </span>
+          {typeMeta && (
+            <span className="shrink-0 rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-bold text-slate-300">
+              {typeMeta.emoji} {typeMeta.label}
+            </span>
+          )}
+          {route.moto_safe === true && (
+            <span className="shrink-0 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400">
+              🛵 안전경로
+            </span>
+          )}
         </span>
         {showVisibility && (
           <span
@@ -49,6 +64,12 @@ export default function RouteCard({ route, social, showVisibility, onDelete }: R
       </div>
 
       <h3 className="mb-2 text-lg font-extrabold leading-snug text-white">{route.title}</h3>
+
+      {route.winding_score != null && (
+        <span className="mb-2 w-fit rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-bold text-amber-400">
+          🌀 와인딩 {Number(route.winding_score)}
+        </span>
+      )}
 
       {route.description && (
         <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-slate-400">

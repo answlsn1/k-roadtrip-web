@@ -6,14 +6,16 @@ import { listPublicRoutes } from "@/lib/motorcycle/routes";
 import { getSocialForRoutes } from "@/lib/motorcycle/social";
 import type { MotorcycleRouteWithAuthor, RouteSocial } from "@/lib/motorcycle/types";
 import { useMotorcycleSession } from "@/lib/motorcycle/useSession";
+import { ROUTE_TYPES } from "@/lib/motorcycle/routeTypes";
 import RouteCard from "@/components/motorcycle/RouteCard";
 
-type SortKey = "latest" | "popular" | "distance";
+type SortKey = "latest" | "popular" | "distance" | "winding";
 
 const SORT_TABS: { key: SortKey; label: string }[] = [
   { key: "latest", label: "최신순" },
   { key: "popular", label: "인기순" },
   { key: "distance", label: "장거리순" },
+  { key: "winding", label: "와인딩순" },
 ];
 
 export default function MotorcycleHomePage() {
@@ -21,6 +23,7 @@ export default function MotorcycleHomePage() {
   const [social, setSocial] = useState<Record<string, RouteSocial> | null>(null);
   const [sort, setSort] = useState<SortKey>("latest");
   const [region, setRegion] = useState<string | null>(null);
+  const [routeType, setRouteType] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const { isLoggedIn, loading } = useMotorcycleSession();
 
@@ -41,6 +44,7 @@ export default function MotorcycleHomePage() {
     const q = query.trim().toLowerCase();
     const filtered = routes.filter((r) => {
       if (region && r.region !== region) return false;
+      if (routeType && r.route_type !== routeType) return false;
       if (!q) return true;
       return (
         r.title.toLowerCase().includes(q) ||
@@ -55,8 +59,14 @@ export default function MotorcycleHomePage() {
     if (sort === "distance") {
       return [...filtered].sort((a, b) => (b.distance_km ?? 0) - (a.distance_km ?? 0));
     }
+    if (sort === "winding") {
+      // winding_score 는 Postgres numeric — 문자열일 수 있어 Number() 로 강제.
+      return [...filtered].sort(
+        (a, b) => Number(b.winding_score ?? 0) - Number(a.winding_score ?? 0)
+      );
+    }
     return filtered; // 최신순 — 서버가 이미 created_at desc 로 반환.
-  }, [routes, social, sort, region, query]);
+  }, [routes, social, sort, region, routeType, query]);
 
   return (
     <div className="mx-auto max-w-6xl px-5 pb-24">
@@ -139,8 +149,40 @@ export default function MotorcycleHomePage() {
               />
             </div>
 
+            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="루트 유형 필터">
+              <span className="w-7 shrink-0 text-[11px] font-bold text-slate-500">유형</span>
+              <button
+                type="button"
+                onClick={() => setRouteType(null)}
+                aria-pressed={routeType === null}
+                className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
+                  routeType === null
+                    ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
+                    : "border-white/15 text-slate-400 hover:text-white"
+                }`}
+              >
+                전체
+              </button>
+              {ROUTE_TYPES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setRouteType(routeType === t.value ? null : t.value)}
+                  aria-pressed={routeType === t.value}
+                  className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
+                    routeType === t.value
+                      ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
+                      : "border-white/15 text-slate-400 hover:text-white"
+                  }`}
+                >
+                  {t.emoji} {t.label}
+                </button>
+              ))}
+            </div>
+
             {regions.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2" role="group" aria-label="지역 필터">
+                <span className="w-7 shrink-0 text-[11px] font-bold text-slate-500">지역</span>
                 <button
                   type="button"
                   onClick={() => setRegion(null)}
@@ -197,7 +239,7 @@ export default function MotorcycleHomePage() {
         ) : visibleRoutes.length === 0 ? (
           <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center">
             <p className="text-base font-bold text-white">조건에 맞는 루트가 없어요</p>
-            <p className="mt-2 text-sm text-slate-400">검색어나 지역 필터를 바꿔보세요.</p>
+            <p className="mt-2 text-sm text-slate-400">검색어나 필터 조건을 바꿔보세요.</p>
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

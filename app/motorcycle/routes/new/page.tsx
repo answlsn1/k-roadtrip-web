@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMotorcycleSession } from "@/lib/motorcycle/useSession";
 import { createRoute } from "@/lib/motorcycle/routes";
+import { ROUTE_TYPES } from "@/lib/motorcycle/routeTypes";
 import type { DraftStop } from "@/components/motorcycle/NewRouteMap";
 
 const NewRouteMap = dynamic(() => import("@/components/motorcycle/NewRouteMap"), {
@@ -29,6 +30,8 @@ export default function NewMotorcycleRoutePage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [region, setRegion] = useState("");
+  const [routeType, setRouteType] = useState<string | null>(null);
+  const [motoSafe, setMotoSafe] = useState(false);
   const [isPublic, setIsPublic] = useState(true);
   const [stops, setStops] = useState<DraftStop[]>([]);
   const [pendingStop, setPendingStop] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -80,6 +83,8 @@ export default function NewMotorcycleRoutePage() {
       description: description.trim() || null,
       region: region.trim() || null,
       isPublic,
+      routeType,
+      motoSafe: motoSafe ? true : null, // OFF = 미확인(null) — false 로 저장하지 않는다.
       stops: stops.map((s) => ({ name: s.name, latitude: s.latitude, longitude: s.longitude })),
     });
 
@@ -156,6 +161,52 @@ export default function NewMotorcycleRoutePage() {
               className="w-full resize-none rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
             />
           </div>
+
+          <div>
+            <p className="mb-1.5 text-sm font-semibold text-slate-300">루트 유형 (선택)</p>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="루트 유형">
+              {ROUTE_TYPES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setRouteType(routeType === t.value ? null : t.value)}
+                  aria-pressed={routeType === t.value}
+                  className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
+                    routeType === t.value
+                      ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
+                      : "border-white/15 text-slate-400 hover:text-white"
+                  }`}
+                >
+                  {t.emoji} {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setMotoSafe((v) => !v)}
+            aria-pressed={motoSafe}
+            className="flex w-full items-center justify-between rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-left"
+          >
+            <span>
+              <span className="block text-sm font-bold text-white">🛵 이륜차 안전 경로</span>
+              <span className="block text-xs text-slate-400">
+                자동차전용도로·고속도로를 지나지 않는 루트예요
+              </span>
+            </span>
+            <span
+              className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
+                motoSafe ? "bg-amber-500" : "bg-white/15"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 h-6 w-6 rounded-full bg-white transition-transform ${
+                  motoSafe ? "translate-x-[22px]" : "translate-x-0.5"
+                }`}
+              />
+            </span>
+          </button>
 
           <button
             type="button"

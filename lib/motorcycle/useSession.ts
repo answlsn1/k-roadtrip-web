@@ -36,7 +36,25 @@ export function useMotorcycleSession() {
       setProfile(null);
       return;
     }
-    getMyProfile().then(setProfile);
+    let cancelled = false;
+    getMyProfile().then((p) => {
+      if (cancelled) return;
+      if (p) {
+        setProfile(p);
+        return;
+      }
+      // 가입 직후에는 세션 이벤트가 프로필 insert(ensureProfile)보다 먼저
+      // 도착할 수 있다 — 잠시 뒤 한 번만 재시도해 첫 렌더 닉네임 폴백을 줄인다.
+      window.setTimeout(() => {
+        if (cancelled) return;
+        getMyProfile().then((p2) => {
+          if (!cancelled) setProfile(p2);
+        });
+      }, 1500);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [session]);
 
   return { session, profile, loading, isLoggedIn: !!session };

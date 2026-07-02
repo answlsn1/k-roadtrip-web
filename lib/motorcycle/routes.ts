@@ -6,12 +6,36 @@
  * ============================================================ */
 
 import { getSupabaseBrowserClient } from "@/lib/data/supabaseClient";
+import { computeWindingScore } from "./windingScore";
 import type {
   MotorcycleRoute,
   MotorcycleRouteWithAuthor,
   MotorcycleRouteWithStops,
   NewMotorcycleRoute,
 } from "./types";
+
+// 목록 쿼리 전용 컬럼 — track_points(수십 KB jsonb)를 빼서 피드 페이로드를 줄인다.
+const LIST_COLUMNS =
+  "id, user_id, title, description, region, distance_km, is_public, duration_min, route_type, winding_score, moto_safe, created_at";
+
+// ⚠️ routes.user_id 와 profiles.id 는 서로 FK 가 없어(둘 다 auth.users 참조)
+// PostgREST 임베드가 불가 — 닉네임은 별도 쿼리로 가져와 클라이언트에서 합친다.
+async function fetchNicknames(
+  supabase: NonNullable<ReturnType<typeof getSupabaseBrowserClient>>,
+  userIds: string[]
+): Promise<Record<string, string>> {
+  const unique = Array.from(new Set(userIds));
+  if (unique.length === 0) return {};
+  const { data } = await supabase
+    .from("motorcycle_profiles")
+    .select("id, nickname")
+    .in("id", unique);
+  const map: Record<string, string> = {};
+  for (const p of (data ?? []) as { id: string; nickname: string }[]) {
+    map[p.id] = p.nickname;
+  }
+  return map;
+}
 
 const TITLE_MAX = 80;
 const DESC_MAX = 500;
@@ -75,6 +99,9 @@ export async function createRoute(
       is_public: input.isPublic,
       track_points: track,
       duration_min: input.durationMin ?? null,
+      route_type: input.routeType ?? null,
+      winding_score: track ? computeWindingScore(track) : null,
+      moto_safe: input.motoSafe ?? null,
     })
     .select("id")
     .single();
@@ -103,14 +130,17 @@ export async function listPublicRoutes(): Promise<MotorcycleRouteWithAuthor[]> {
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("motorcycle_routes")
-    .select("*, motorcycle_profiles(nickname)")
+    .select(LIST_COLUMNS)
     .eq("is_public", true)
     .order("created_at", { ascending: false })
     .limit(100);
   if (error || !data) return [];
-  return (data as any[]).map((r) => ({
+  const rows = data as any[];
+  const nicknames = await fetchNicknames(supabase, rows.map((r) => r.user_id));
+  return rows.map((r) => ({
     ...r,
-    author_nickname: r.motorcycle_profiles?.nickname ?? "라이더",
+    track_points: null,
+    author_nickname: nicknames[r.user_id] ?? "라이더",
   }));
 }
 
@@ -123,13 +153,16 @@ export async function listMyRoutes(): Promise<MotorcycleRouteWithAuthor[]> {
   if (!user) return [];
   const { data, error } = await supabase
     .from("motorcycle_routes")
-    .select("*, motorcycle_profiles(nickname)")
+    .select(LIST_COLUMNS)
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
   if (error || !data) return [];
-  return (data as any[]).map((r) => ({
+  const rows = data as any[];
+  const nicknames = await fetchNicknames(supabase, [user.id]);
+  return rows.map((r) => ({
     ...r,
-    author_nickname: r.motorcycle_profiles?.nickname ?? "라이더",
+    track_points: null,
+    author_nickname: nicknames[user.id] ?? "라이더",
   }));
 }
 
@@ -138,21 +171,24 @@ export async function getRouteWithStops(id: string): Promise<MotorcycleRouteWith
   if (!supabase) return null;
   const { data: route, error } = await supabase
     .from("motorcycle_routes")
-    .select("*, motorcycle_profiles(nickname)")
+    .select("*")
     .eq("id", id)
     .maybeSingle();
   if (error || !route) return null;
 
-  const { data: stops } = await supabase
-    .from("motorcycle_route_stops")
-    .select("*")
-    .eq("route_id", id)
-    .order("sequence", { ascending: true });
-
   const r = route as any;
+  const [{ data: stops }, nicknames] = await Promise.all([
+    supabase
+      .from("motorcycle_route_stops")
+      .select("*")
+      .eq("route_id", id)
+      .order("sequence", { ascending: true }),
+    fetchNicknames(supabase, [r.user_id]),
+  ]);
+
   return {
     ...r,
-    author_nickname: r.motorcycle_profiles?.nickname ?? "라이더",
+    author_nickname: nicknames[r.user_id] ?? "라이더",
     stops: stops ?? [],
   };
 }
