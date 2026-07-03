@@ -128,7 +128,7 @@ export default function NewMotorcycleRoutePage() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="예: 강원도 미시령 야간 라이딩"
               maxLength={80}
-              className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+              className="kr-input px-4 py-3 text-sm"
             />
           </div>
 
@@ -143,7 +143,7 @@ export default function NewMotorcycleRoutePage() {
               onChange={(e) => setRegion(e.target.value)}
               placeholder="예: 강원도"
               maxLength={80}
-              className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+              className="kr-input px-4 py-3 text-sm"
             />
           </div>
 
@@ -158,7 +158,7 @@ export default function NewMotorcycleRoutePage() {
               placeholder="어떤 길이었는지, 도로 상태나 추천 포인트를 남겨주세요"
               maxLength={500}
               rows={4}
-              className="w-full resize-none rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+              className="kr-input resize-none px-4 py-3 text-sm"
             />
           </div>
 
@@ -174,7 +174,7 @@ export default function NewMotorcycleRoutePage() {
                   className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
                     routeType === t.value
                       ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
-                      : "border-white/15 text-slate-400 hover:text-white"
+                      : "border-[var(--kr-line)] bg-[var(--kr-surface-1)] text-slate-400 hover:text-white"
                   }`}
                 >
                   {t.emoji} {t.label}
@@ -187,7 +187,7 @@ export default function NewMotorcycleRoutePage() {
             type="button"
             onClick={() => setMotoSafe((v) => !v)}
             aria-pressed={motoSafe}
-            className="flex w-full items-center justify-between rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-left"
+            className="flex w-full items-center justify-between rounded-2xl border border-[var(--kr-line-strong)] bg-white/5 px-4 py-3.5 text-left"
           >
             <span>
               <span className="block text-sm font-bold text-white">🛵 이륜차 안전 경로</span>
@@ -212,7 +212,7 @@ export default function NewMotorcycleRoutePage() {
             type="button"
             onClick={() => setIsPublic((v) => !v)}
             aria-pressed={isPublic}
-            className="flex w-full items-center justify-between rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-left"
+            className="flex w-full items-center justify-between rounded-2xl border border-[var(--kr-line-strong)] bg-white/5 px-4 py-3.5 text-left"
           >
             <span>
               <span className="block text-sm font-bold text-white">다른 라이더에게 공개</span>
@@ -233,7 +233,7 @@ export default function NewMotorcycleRoutePage() {
             </span>
           </button>
 
-          <div className="rounded-2xl border border-white/15 bg-white/5 p-4">
+          <div className="kr-card p-4">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-bold text-white">경유지 ({stops.length}개)</h2>
               {stops.length < 2 && (
@@ -252,7 +252,7 @@ export default function NewMotorcycleRoutePage() {
                 {stops.map((s, i) => (
                   <li
                     key={s.tempId}
-                    className="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-3 py-2.5"
+                    className="flex items-center justify-between gap-3 rounded-xl bg-[var(--kr-bg)] px-3 py-2.5"
                   >
                     <span className="flex min-w-0 items-center gap-2.5">
                       <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-amber-500 text-xs font-extrabold text-ink">
@@ -282,14 +282,14 @@ export default function NewMotorcycleRoutePage() {
           <button
             type="submit"
             disabled={!canSubmit || submitting}
-            className="w-full rounded-2xl bg-amber-500 py-3.5 text-sm font-extrabold text-ink transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
+            className="kr-btn-primary w-full py-3.5 text-sm"
           >
             {submitting ? "등록하는 중…" : canSubmit ? "루트 등록하기" : "장소를 2개 이상 추가하세요"}
           </button>
         </div>
 
         <div className="order-1 lg:order-2">
-          <div className="relative h-[320px] overflow-hidden rounded-2xl border border-white/15 sm:h-[420px] lg:sticky lg:top-20 lg:h-[560px]">
+          <div className="krider-map-dark relative h-[320px] overflow-hidden rounded-2xl border border-[var(--kr-line-strong)] sm:h-[420px] lg:sticky lg:top-20 lg:h-[560px]">
             <NewRouteMap stops={stops} onMapClick={handleMapClick} />
           </div>
 
@@ -312,12 +312,12 @@ export default function NewMotorcycleRoutePage() {
                   }}
                   placeholder="예: 미시령 휴게소"
                   maxLength={80}
-                  className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+                  className="kr-input min-w-0 flex-1 px-3 py-2 text-sm"
                 />
                 <button
                   type="button"
                   onClick={confirmPendingStop}
-                  className="shrink-0 rounded-xl bg-amber-500 px-4 py-2 text-sm font-extrabold text-ink"
+                  className="kr-btn-primary shrink-0 px-4 py-2 text-sm"
                 >
                   추가
                 </button>

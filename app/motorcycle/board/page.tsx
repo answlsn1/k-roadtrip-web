@@ -30,10 +30,7 @@ export default function MotorcycleBoardPage() {
     <div className="mx-auto max-w-3xl px-5 pb-24">
       <div className="flex items-end justify-between gap-4 py-10 sm:py-14">
         <RiderChatTabs active="board" />
-        <Link
-          href={writeHref}
-          className="shrink-0 rounded-full bg-amber-500 px-4 py-2 text-xs font-extrabold text-ink transition-transform active:scale-[0.98] sm:text-sm"
-        >
+        <Link href={writeHref} className="kr-btn-primary shrink-0 px-4 py-2 text-xs sm:text-sm">
           글쓰기
         </Link>
       </div>
@@ -46,7 +43,7 @@ export default function MotorcycleBoardPage() {
           className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
             category === null
               ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
-              : "border-white/15 text-slate-400 hover:text-white"
+              : "border-[var(--kr-line)] bg-[var(--kr-surface-1)] text-slate-400 hover:text-white"
           }`}
         >
           전체
@@ -60,7 +57,7 @@ export default function MotorcycleBoardPage() {
             className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
               category === c.value
                 ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
-                : "border-white/15 text-slate-400 hover:text-white"
+                : "border-[var(--kr-line)] bg-[var(--kr-surface-1)] text-slate-400 hover:text-white"
             }`}
           >
             {c.label}
@@ -69,39 +66,41 @@ export default function MotorcycleBoardPage() {
       </div>
 
       {posts === null ? (
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-          <div className="divide-y divide-white/10">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="animate-pulse px-4 py-4 sm:px-5">
-                <div className="h-4 w-2/3 rounded bg-white/10" />
-                <div className="mt-2.5 h-3 w-1/3 rounded bg-white/10" />
-              </div>
-            ))}
-          </div>
+        <div className="space-y-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="kr-skeleton h-[68px]" />
+          ))}
         </div>
       ) : posts.length === 0 ? (
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center">
-          <p className="text-base font-bold text-white">아직 글이 없어요. 첫 글을 남겨보세요.</p>
-          <Link
-            href={writeHref}
-            className="mt-5 inline-block rounded-full bg-amber-500 px-6 py-2.5 text-sm font-extrabold text-ink transition-transform active:scale-[0.98]"
+        <div className="kr-card px-6 py-14 text-center">
+          <div
+            aria-hidden="true"
+            className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[var(--kr-surface-2)] text-2xl"
           >
+            📝
+          </div>
+          <p className="mt-5 text-base font-bold text-white">
+            아직 글이 없어요. 첫 글을 남겨보세요.
+          </p>
+          <Link href={writeHref} className="kr-btn-primary mt-6 px-6 py-2.5 text-sm">
             글쓰기
           </Link>
         </div>
       ) : (
-        <ul className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+        <ul className="kr-card divide-y divide-[var(--kr-line)] overflow-hidden">
           {posts.map((post) => (
             <li key={post.id}>
               <Link
                 href={`/motorcycle/board/${post.id}`}
-                className="block px-4 py-3.5 transition-colors hover:bg-white/5 sm:px-5"
+                className="group block px-4 py-3.5 transition-colors hover:bg-white/[0.04] sm:px-5"
               >
                 <p className="flex min-w-0 items-center gap-2">
                   <span className="shrink-0 rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[11px] font-bold text-slate-300">
                     {boardCategoryLabel(post.category)}
                   </span>
-                  <span className="truncate text-sm font-bold text-white">{post.title}</span>
+                  <span className="truncate text-sm font-bold text-white transition-colors group-hover:text-amber-300">
+                    {post.title}
+                  </span>
                   {post.commentCount > 0 && (
                     <span className="shrink-0 text-sm font-bold text-amber-400">
                       ({post.commentCount})

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import MotorcycleHeader from "@/components/motorcycle/MotorcycleHeader";
+import "./motorcycle.css";
 
 export const metadata: Metadata = {
   title: "K-Riders — 라이더를 위한 라이딩 커뮤니티",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function MotorcycleLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-ink text-white">
+    <div className="krider-scope min-h-screen text-white">
       <MotorcycleHeader />
       <main className="pt-16">{children}</main>
     </div>

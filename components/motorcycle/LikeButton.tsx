@@ -50,7 +50,7 @@ export default function LikeButton({
 
   const heart = (
     <svg
-      className={compact ? "h-4 w-4" : "h-5 w-5"}
+      className={compact ? "kr-heart h-4 w-4" : "kr-heart h-5 w-5"}
       viewBox="0 0 24 24"
       fill={liked ? "currentColor" : "none"}
       stroke="currentColor"
@@ -76,11 +76,9 @@ export default function LikeButton({
           ? `flex items-center gap-1.5 text-xs font-semibold transition-colors ${
               liked ? "text-amber-400" : "text-slate-400 hover:text-amber-400"
             }`
-          : `flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition-colors ${
-              liked
-                ? "border-amber-500/50 bg-amber-500/10 text-amber-400"
-                : "border-white/15 text-slate-300 hover:border-amber-500/50 hover:text-amber-400"
-            }`
+          : liked
+            ? "flex items-center gap-2 rounded-full border border-amber-500/50 bg-amber-500/10 px-4 py-2 text-sm font-bold text-amber-400 transition-colors"
+            : "kr-btn-secondary px-4 py-2 text-sm"
       }
     >
       {heart}

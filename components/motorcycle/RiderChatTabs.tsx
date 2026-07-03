@@ -12,7 +12,7 @@ export default function RiderChatTabs({ active }: { active: "board" | "lounge" }
       <p className="text-xs font-bold uppercase tracking-widest text-amber-500">라이더챗</p>
       <nav
         aria-label="라이더챗 메뉴"
-        className="mt-3 flex w-fit gap-1 rounded-full border border-white/10 bg-white/5 p-1"
+        className="mt-3 flex w-fit gap-1 rounded-full border border-[var(--kr-line)] bg-[var(--kr-surface-1)] p-1"
       >
         {TABS.map((tab) => (
           <Link

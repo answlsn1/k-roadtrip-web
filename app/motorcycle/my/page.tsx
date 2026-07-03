@@ -61,14 +61,14 @@ export default function MyMotorcycleRoutesPage() {
         <div className="flex shrink-0 items-center gap-2">
           <Link
             href="/motorcycle/me/edit"
-            className="rounded-full border border-white/15 px-4 py-2 text-xs font-bold text-slate-300 transition-colors hover:border-amber-500/50 hover:text-amber-400 sm:text-sm"
+            className="kr-btn-secondary px-4 py-2 text-xs sm:text-sm"
           >
             프로필 수정
           </Link>
           {routes && routes.length > 0 && (
             <Link
               href="/motorcycle/routes/new"
-              className="rounded-full bg-amber-500 px-4 py-2 text-xs font-extrabold text-ink transition-transform active:scale-[0.98] sm:text-sm"
+              className="kr-btn-primary px-4 py-2 text-xs sm:text-sm"
             >
               루트 등록
             </Link>
@@ -78,7 +78,7 @@ export default function MyMotorcycleRoutesPage() {
 
       {stats && routes !== null && (
         <div className="mb-8 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-white/15 bg-white/5 p-5">
+          <div className="kr-card p-5">
             <p className="text-xs font-bold uppercase tracking-widest text-amber-500">내 라이딩</p>
             <p className="mt-2 text-xl font-extrabold text-white">
               루트 {stats.routeCount}개{" "}
@@ -102,7 +102,7 @@ export default function MyMotorcycleRoutesPage() {
             )}
           </div>
 
-          <div className="rounded-2xl border border-white/15 bg-white/5 p-5">
+          <div className="kr-card p-5">
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-bold uppercase tracking-widest text-amber-500">
                 이달의 챌린지
@@ -121,7 +121,7 @@ export default function MyMotorcycleRoutesPage() {
               aria-valuenow={Math.round(challengePct)}
               aria-valuemin={0}
               aria-valuemax={100}
-              className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/10"
+              className="mt-3 h-2.5 overflow-hidden rounded-full bg-[var(--kr-surface-2)]"
             >
               <div
                 className="h-full rounded-full bg-amber-500 transition-all"
@@ -135,17 +135,20 @@ export default function MyMotorcycleRoutesPage() {
       {routes === null ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-40 animate-pulse rounded-2xl border border-white/10 bg-white/5 sm:rounded-3xl" />
+            <div key={i} className="kr-skeleton h-44" />
           ))}
         </div>
       ) : routes.length === 0 ? (
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center">
-          <p className="text-base font-bold text-white">아직 등록한 루트가 없어요</p>
-          <p className="mt-2 text-sm text-slate-400">첫 라이딩 루트를 기록해보세요.</p>
-          <Link
-            href="/motorcycle/routes/new"
-            className="mt-5 inline-block rounded-full bg-amber-500 px-6 py-2.5 text-sm font-extrabold text-ink transition-transform active:scale-[0.98]"
+        <div className="kr-card px-6 py-14 text-center">
+          <div
+            aria-hidden="true"
+            className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[var(--kr-surface-2)] text-2xl"
           >
+            🏁
+          </div>
+          <p className="mt-5 text-base font-bold text-white">아직 등록한 루트가 없어요</p>
+          <p className="mt-2 text-sm text-slate-400">첫 라이딩 루트를 기록해보세요.</p>
+          <Link href="/motorcycle/routes/new" className="kr-btn-primary mt-6 px-6 py-2.5 text-sm">
             첫 루트 등록하기
           </Link>
         </div>

@@ -62,10 +62,7 @@ export default function MotorcycleSignupPage() {
           {email} 주소로 확인 메일을 보냈어요. 메일함에서 링크를 눌러 인증을 마치면
           바로 로그인할 수 있어요.
         </p>
-        <Link
-          href="/motorcycle/login"
-          className="mt-8 rounded-full bg-amber-500 px-6 py-2.5 text-sm font-extrabold text-ink"
-        >
+        <Link href="/motorcycle/login" className="kr-btn-primary mt-8 px-6 py-2.5 text-sm">
           로그인 화면으로
         </Link>
       </div>
@@ -92,7 +89,7 @@ export default function MotorcycleSignupPage() {
             onChange={(e) => setNickname(e.target.value)}
             placeholder="라이딩할 때 불릴 이름"
             maxLength={40}
-            className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+            className="kr-input px-4 py-3 text-sm"
           />
         </div>
 
@@ -108,7 +105,7 @@ export default function MotorcycleSignupPage() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             autoComplete="email"
-            className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+            className="kr-input px-4 py-3 text-sm"
           />
         </div>
 
@@ -125,7 +122,7 @@ export default function MotorcycleSignupPage() {
             placeholder="6자 이상"
             minLength={6}
             autoComplete="new-password"
-            className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+            className="kr-input px-4 py-3 text-sm"
           />
         </div>
 
@@ -141,7 +138,7 @@ export default function MotorcycleSignupPage() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="비밀번호를 다시 입력해주세요"
             autoComplete="new-password"
-            className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+            className="kr-input px-4 py-3 text-sm"
           />
           {confirmPassword.length > 0 && password !== confirmPassword && (
             <p className="mt-1.5 text-xs font-semibold text-red-400">비밀번호가 일치하지 않아요.</p>
@@ -157,7 +154,7 @@ export default function MotorcycleSignupPage() {
         <button
           type="submit"
           disabled={!canSubmit || submitting}
-          className="w-full rounded-2xl bg-amber-500 py-3.5 text-sm font-extrabold text-ink transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
+          className="kr-btn-primary w-full py-3.5 text-sm"
         >
           {submitting ? "가입하는 중…" : "회원가입"}
         </button>

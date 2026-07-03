@@ -26,12 +26,12 @@ export default function RouteCard({ route, social, showVisibility, onDelete }: R
   const typeMeta = routeTypeMeta(route.route_type);
 
   return (
-    <div className="group relative flex flex-col rounded-2xl border border-white/10 bg-white/5 p-5 transition-colors hover:border-amber-500/40 hover:bg-white/[0.07] sm:rounded-3xl sm:p-6">
+    <div className="kr-card kr-card-hover group relative flex flex-col p-5 sm:p-6">
       {/* 카드 전체를 덮는 오버레이 링크 — 작성자/좋아요는 z-10으로 위에 얹는다. */}
       <Link
         href={`/motorcycle/routes/${route.id}`}
         aria-label={route.title}
-        className="absolute inset-0 z-0 rounded-2xl sm:rounded-3xl"
+        className="absolute inset-0 z-0 rounded-[1.25rem]"
       />
 
       <div className="mb-3 flex items-center justify-between gap-2">
@@ -87,13 +87,15 @@ export default function RouteCard({ route, social, showVisibility, onDelete }: R
         <span className="flex shrink-0 items-center gap-2">
           {route.distance_km != null && (
             <>
-              <span>{route.distance_km}km</span>
+              <span className="font-bold text-slate-300">{route.distance_km}km</span>
               <span aria-hidden="true">·</span>
             </>
           )}
           {route.duration_min != null && (
             <>
-              <span>{formatDurationKo(route.duration_min)}</span>
+              <span className="font-bold text-slate-300">
+                {formatDurationKo(route.duration_min)}
+              </span>
               <span aria-hidden="true">·</span>
             </>
           )}
@@ -102,7 +104,7 @@ export default function RouteCard({ route, social, showVisibility, onDelete }: R
       </div>
 
       {social && (
-        <div className="relative z-10 mt-3 flex items-center gap-4 border-t border-white/10 pt-3">
+        <div className="relative z-10 mt-3 flex items-center gap-4 border-t border-[var(--kr-line)] pt-3">
           <LikeButton
             routeId={route.id}
             initialCount={social.likeCount}
@@ -110,7 +112,20 @@ export default function RouteCard({ route, social, showVisibility, onDelete }: R
             compact
           />
           <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-            <span aria-hidden="true">💬</span>
+            <svg
+              className="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8 12h8M8 8h8m-9 8l-3 3V6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H9z"
+              />
+            </svg>
             {social.commentCount}
           </span>
         </div>

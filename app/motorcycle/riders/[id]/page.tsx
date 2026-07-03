@@ -92,10 +92,7 @@ export default function RiderProfilePage() {
       <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-5 text-center">
         <h1 className="text-xl font-extrabold text-white">라이더를 찾을 수 없어요</h1>
         <p className="mt-3 text-sm text-slate-400">탈퇴했거나 존재하지 않는 라이더예요.</p>
-        <Link
-          href="/motorcycle"
-          className="mt-8 rounded-full bg-amber-500 px-6 py-2.5 text-sm font-extrabold text-ink"
-        >
+        <Link href="/motorcycle" className="kr-btn-primary mt-8 px-6 py-2.5 text-sm">
           피드로 돌아가기
         </Link>
       </div>
@@ -115,10 +112,7 @@ export default function RiderProfilePage() {
           <div className="flex flex-col items-center gap-3 sm:flex-row">
             <h1 className="text-2xl font-extrabold text-white sm:text-3xl">{profile.nickname}</h1>
             {isMe ? (
-              <Link
-                href="/motorcycle/me/edit"
-                className="rounded-full border border-white/15 px-4 py-1.5 text-xs font-bold text-slate-300 transition-colors hover:border-amber-500/50 hover:text-amber-400"
-              >
+              <Link href="/motorcycle/me/edit" className="kr-btn-secondary px-4 py-1.5 text-xs">
                 프로필 수정
               </Link>
             ) : (
@@ -128,11 +122,9 @@ export default function RiderProfilePage() {
                   type="button"
                   onClick={handleFollowToggle}
                   disabled={followBusy}
-                  className={`rounded-full px-4 py-1.5 text-xs font-extrabold transition-colors disabled:opacity-60 ${
-                    following
-                      ? "border border-white/15 text-slate-300 hover:border-red-500/40 hover:text-red-400"
-                      : "bg-amber-500 text-ink hover:bg-amber-400"
-                  }`}
+                  className={`disabled:opacity-60 ${
+                    following ? "kr-btn-secondary" : "kr-btn-primary"
+                  } px-4 py-1.5 text-xs`}
                 >
                   {following ? "팔로잉" : "팔로우"}
                 </button>
@@ -162,7 +154,7 @@ export default function RiderProfilePage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/15 bg-white/5 px-5 py-4">
+      <div className="kr-card px-5 py-4">
         <p className="text-sm font-extrabold text-white">
           루트 {stats.routeCount}개 <span aria-hidden="true" className="text-slate-500">·</span> 총{" "}
           {stats.totalKm}km
@@ -177,10 +169,8 @@ export default function RiderProfilePage() {
             return (
               <div
                 key={badge.id}
-                className={`rounded-2xl border p-4 text-center ${
-                  earned
-                    ? "border-amber-500/50 bg-amber-500/10"
-                    : "border-white/10 bg-white/5 opacity-50 grayscale"
+                className={`kr-card p-4 text-center ${
+                  earned ? "!border-amber-500/50 !bg-amber-500/10" : "opacity-50 grayscale"
                 }`}
               >
                 <div className="text-3xl" aria-hidden="true">
@@ -199,8 +189,14 @@ export default function RiderProfilePage() {
           {isMe ? "내 루트" : `${profile.nickname}님의 루트`}
         </h2>
         {routes.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center">
-            <p className="text-base font-bold text-white">아직 공개된 루트가 없어요</p>
+          <div className="kr-card px-6 py-14 text-center">
+            <div
+              aria-hidden="true"
+              className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[var(--kr-surface-2)] text-2xl"
+            >
+              🛣️
+            </div>
+            <p className="mt-5 text-base font-bold text-white">아직 공개된 루트가 없어요</p>
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

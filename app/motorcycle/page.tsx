@@ -70,28 +70,22 @@ export default function MotorcycleHomePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 pb-24">
-      <section className="py-14 text-center sm:py-20">
-        <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-amber-500">
+      <section className="py-10 sm:py-14">
+        <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-500">
           K-Riders
         </p>
-        <h1 className="mx-auto max-w-2xl text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl">
+        <h1 className="max-w-2xl text-3xl font-extrabold leading-[1.15] tracking-tight text-white sm:text-5xl">
           오늘 달린 길, 라이더들과 나눠보세요
         </h1>
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-400 sm:text-base">
+        <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-400 sm:text-base">
           내가 달린 라이딩 루트를 기록하고, 다른 라이더들이 남긴 길을 발견하세요.
         </p>
         {!loading && !isLoggedIn && (
-          <div className="mt-8 flex justify-center gap-3">
-            <Link
-              href="/motorcycle/signup"
-              className="rounded-full bg-amber-500 px-6 py-3 text-sm font-extrabold text-ink transition-transform active:scale-[0.98]"
-            >
+          <div className="mt-8 flex gap-3">
+            <Link href="/motorcycle/signup" className="kr-btn-primary px-6 py-3 text-sm">
               지금 시작하기
             </Link>
-            <Link
-              href="/motorcycle/login"
-              className="rounded-full border border-white/15 px-6 py-3 text-sm font-bold text-slate-200 transition-colors hover:border-amber-500/50"
-            >
+            <Link href="/motorcycle/login" className="kr-btn-secondary px-6 py-3 text-sm">
               로그인
             </Link>
           </div>
@@ -105,13 +99,13 @@ export default function MotorcycleHomePage() {
             <div className="flex items-center gap-2">
               <Link
                 href="/motorcycle/record"
-                className="rounded-full border border-white/15 px-4 py-2 text-xs font-bold text-slate-200 transition-colors hover:border-amber-500/50 hover:text-amber-400 sm:text-sm"
+                className="kr-btn-secondary px-4 py-2 text-xs sm:text-sm"
               >
                 🔴 주행 기록
               </Link>
               <Link
                 href="/motorcycle/routes/new"
-                className="rounded-full bg-amber-500 px-4 py-2 text-xs font-extrabold text-ink transition-transform active:scale-[0.98] sm:text-sm"
+                className="kr-btn-primary px-4 py-2 text-xs sm:text-sm"
               >
                 루트 등록
               </Link>
@@ -122,7 +116,7 @@ export default function MotorcycleHomePage() {
         {routes !== null && routes.length > 0 && (
           <div className="mb-6 space-y-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex w-fit gap-1 rounded-full border border-white/10 bg-white/5 p-1">
+              <div className="flex w-fit gap-1 rounded-full border border-[var(--kr-line)] bg-[var(--kr-surface-1)] p-1">
                 {SORT_TABS.map((tab) => (
                   <button
                     key={tab.key}
@@ -145,7 +139,7 @@ export default function MotorcycleHomePage() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="루트 제목·설명 검색"
                 aria-label="루트 검색"
-                className="w-full rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none sm:w-64"
+                className="w-full rounded-full border border-[var(--kr-line-strong)] bg-[var(--kr-surface-1)] px-4 py-2 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none sm:w-64"
               />
             </div>
 
@@ -158,7 +152,7 @@ export default function MotorcycleHomePage() {
                 className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
                   routeType === null
                     ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
-                    : "border-white/15 text-slate-400 hover:text-white"
+                    : "border-[var(--kr-line)] bg-[var(--kr-surface-1)] text-slate-400 hover:text-white"
                 }`}
               >
                 전체
@@ -172,7 +166,7 @@ export default function MotorcycleHomePage() {
                   className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
                     routeType === t.value
                       ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
-                      : "border-white/15 text-slate-400 hover:text-white"
+                      : "border-[var(--kr-line)] bg-[var(--kr-surface-1)] text-slate-400 hover:text-white"
                   }`}
                 >
                   {t.emoji} {t.label}
@@ -190,7 +184,7 @@ export default function MotorcycleHomePage() {
                   className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
                     region === null
                       ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
-                      : "border-white/15 text-slate-400 hover:text-white"
+                      : "border-[var(--kr-line)] bg-[var(--kr-surface-1)] text-slate-400 hover:text-white"
                   }`}
                 >
                   전체
@@ -204,7 +198,7 @@ export default function MotorcycleHomePage() {
                     className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
                       region === r
                         ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
-                        : "border-white/15 text-slate-400 hover:text-white"
+                        : "border-[var(--kr-line)] bg-[var(--kr-surface-1)] text-slate-400 hover:text-white"
                     }`}
                   >
                     {r}
@@ -218,31 +212,40 @@ export default function MotorcycleHomePage() {
         {routes === null || visibleRoutes === null ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-40 animate-pulse rounded-2xl border border-white/10 bg-white/5 sm:rounded-3xl"
-              />
+              <div key={i} className="kr-skeleton h-44" />
             ))}
           </div>
         ) : routes.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center">
-            <p className="text-base font-bold text-white">
+          <div className="kr-card px-6 py-14 text-center">
+            <div
+              aria-hidden="true"
+              className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[var(--kr-surface-2)] text-2xl"
+            >
+              🏁
+            </div>
+            <p className="mt-5 text-base font-bold text-white">
               아직 등록된 루트가 없어요, 첫 루트를 남겨보세요
             </p>
             <Link
               href={isLoggedIn ? "/motorcycle/routes/new" : "/motorcycle/login"}
-              className="mt-5 inline-block rounded-full bg-amber-500 px-6 py-2.5 text-sm font-extrabold text-ink transition-transform active:scale-[0.98]"
+              className="kr-btn-primary mt-6 px-6 py-2.5 text-sm"
             >
               {isLoggedIn ? "첫 루트 등록하기" : "로그인하고 시작하기"}
             </Link>
           </div>
         ) : visibleRoutes.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center">
-            <p className="text-base font-bold text-white">조건에 맞는 루트가 없어요</p>
+          <div className="kr-card px-6 py-14 text-center">
+            <div
+              aria-hidden="true"
+              className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[var(--kr-surface-2)] text-2xl"
+            >
+              🛣️
+            </div>
+            <p className="mt-5 text-base font-bold text-white">조건에 맞는 루트가 없어요</p>
             <p className="mt-2 text-sm text-slate-400">검색어나 필터 조건을 바꿔보세요.</p>
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="kr-fade-up grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {visibleRoutes.map((route) => (
               <RouteCard key={route.id} route={route} social={social?.[route.id]} />
             ))}

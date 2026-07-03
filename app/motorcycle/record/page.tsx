@@ -231,12 +231,12 @@ export default function MotorcycleRecordPage() {
           <button
             type="button"
             onClick={startRecording}
-            className="w-full rounded-2xl bg-amber-500 py-5 text-lg font-extrabold text-ink transition-transform active:scale-[0.99]"
+            className="kr-btn-primary w-full py-5 text-lg"
           >
             주행 기록 시작
           </button>
 
-          <div className="rounded-2xl border border-white/15 bg-white/5 p-5 text-sm leading-relaxed text-slate-400">
+          <div className="kr-card p-5 text-sm leading-relaxed text-slate-400">
             <p className="mb-1.5 font-bold text-slate-300">시작 전에 알아두세요</p>
             <p>
               웹 브라우저 특성상 화면이 꺼지면 기록이 끊길 수 있어요. 주행 중에는 거치대에
@@ -265,23 +265,23 @@ export default function MotorcycleRecordPage() {
             )}
           </div>
 
-          <div className="relative h-[320px] overflow-hidden rounded-2xl border border-white/15 sm:h-[400px]">
+          <div className="krider-map-dark relative h-[320px] overflow-hidden rounded-2xl border border-[var(--kr-line-strong)] sm:h-[400px]">
             <RecordMap points={points} />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-2xl border border-white/15 bg-white/5 p-4 text-center">
+            <div className="kr-card p-4 text-center">
               <p className="text-xs font-bold text-slate-500">시간</p>
               <p className="mt-1 text-xl font-extrabold text-white">{formatElapsed(elapsedSec)}</p>
             </div>
-            <div className="rounded-2xl border border-white/15 bg-white/5 p-4 text-center">
+            <div className="kr-card p-4 text-center">
               <p className="text-xs font-bold text-slate-500">거리</p>
               <p className="mt-1 text-xl font-extrabold text-white">
                 {distanceKm.toFixed(1)}
                 <span className="ml-0.5 text-sm font-bold text-slate-400">km</span>
               </p>
             </div>
-            <div className="rounded-2xl border border-white/15 bg-white/5 p-4 text-center">
+            <div className="kr-card p-4 text-center">
               <p className="text-xs font-bold text-slate-500">포인트</p>
               <p className="mt-1 text-xl font-extrabold text-white">{points.length}</p>
             </div>
@@ -299,23 +299,23 @@ export default function MotorcycleRecordPage() {
 
       {phase === "finished" && (
         <div className="space-y-6">
-          <div className="relative h-[240px] overflow-hidden rounded-2xl border border-white/15 sm:h-[320px]">
+          <div className="krider-map-dark relative h-[240px] overflow-hidden rounded-2xl border border-[var(--kr-line-strong)] sm:h-[320px]">
             <RecordMap points={points} />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-center">
+            <div className="kr-card !border-amber-500/40 !bg-amber-500/10 p-4 text-center">
               <p className="text-xs font-bold text-amber-400">총 거리</p>
               <p className="mt-1 text-xl font-extrabold text-white">
                 {distanceKm.toFixed(1)}
                 <span className="ml-0.5 text-sm font-bold text-slate-400">km</span>
               </p>
             </div>
-            <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-center">
+            <div className="kr-card !border-amber-500/40 !bg-amber-500/10 p-4 text-center">
               <p className="text-xs font-bold text-amber-400">총 시간</p>
               <p className="mt-1 text-xl font-extrabold text-white">{formatElapsed(elapsedSec)}</p>
             </div>
-            <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-center">
+            <div className="kr-card !border-amber-500/40 !bg-amber-500/10 p-4 text-center">
               <p className="text-xs font-bold text-amber-400">포인트</p>
               <p className="mt-1 text-xl font-extrabold text-white">{points.length}</p>
             </div>
@@ -334,7 +334,7 @@ export default function MotorcycleRecordPage() {
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="예: 북악스카이웨이 아침 주행"
                 maxLength={80}
-                className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+                className="kr-input px-4 py-3 text-sm"
               />
             </div>
 
@@ -349,7 +349,7 @@ export default function MotorcycleRecordPage() {
                 onChange={(e) => setRegion(e.target.value)}
                 placeholder="예: 서울"
                 maxLength={80}
-                className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+                className="kr-input px-4 py-3 text-sm"
               />
             </div>
 
@@ -365,7 +365,7 @@ export default function MotorcycleRecordPage() {
                     className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
                       routeType === t.value
                         ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
-                        : "border-white/15 text-slate-400 hover:text-white"
+                        : "border-[var(--kr-line)] bg-[var(--kr-surface-1)] text-slate-400 hover:text-white"
                     }`}
                   >
                     {t.emoji} {t.label}
@@ -378,7 +378,7 @@ export default function MotorcycleRecordPage() {
               type="button"
               onClick={() => setMotoSafe((v) => !v)}
               aria-pressed={motoSafe}
-              className="flex w-full items-center justify-between rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-left"
+              className="flex w-full items-center justify-between rounded-2xl border border-[var(--kr-line-strong)] bg-white/5 px-4 py-3.5 text-left"
             >
               <span>
                 <span className="block text-sm font-bold text-white">🛵 이륜차 안전 경로</span>
@@ -403,7 +403,7 @@ export default function MotorcycleRecordPage() {
               type="button"
               onClick={() => setIsPublic((v) => !v)}
               aria-pressed={isPublic}
-              className="flex w-full items-center justify-between rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-left"
+              className="flex w-full items-center justify-between rounded-2xl border border-[var(--kr-line-strong)] bg-white/5 px-4 py-3.5 text-left"
             >
               <span>
                 <span className="block text-sm font-bold text-white">다른 라이더에게 공개</span>
@@ -433,7 +433,7 @@ export default function MotorcycleRecordPage() {
             <button
               type="submit"
               disabled={!title.trim() || submitting}
-              className="w-full rounded-2xl bg-amber-500 py-3.5 text-sm font-extrabold text-ink transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
+              className="kr-btn-primary w-full py-3.5 text-sm"
             >
               {submitting ? "저장하는 중…" : "루트로 저장"}
             </button>
@@ -441,7 +441,7 @@ export default function MotorcycleRecordPage() {
             <button
               type="button"
               onClick={discardRecording}
-              className="w-full rounded-2xl border border-white/15 py-3 text-sm font-bold text-slate-400 transition-colors hover:border-red-500/40 hover:text-red-400"
+              className="kr-btn-secondary w-full py-3 text-sm"
             >
               버리기
             </button>

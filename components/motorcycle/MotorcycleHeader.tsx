@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useMotorcycleSession } from "@/lib/motorcycle/useSession";
 import { logOut } from "@/lib/motorcycle/auth";
 
@@ -13,10 +13,18 @@ const NAV_LINKS = [
   { href: "/motorcycle/my", label: "내 루트" },
 ];
 
+/** 현재 경로 기준 활성 나브 판정 — 피드는 정확 일치, 게시판은 하위 경로 포함. */
+function isNavActive(pathname: string, href: string): boolean {
+  if (href === "/motorcycle") return pathname === "/motorcycle";
+  if (href === "/motorcycle/board") return pathname.startsWith("/motorcycle/board");
+  return pathname === href;
+}
+
 export default function MotorcycleHeader() {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
   const router = useRouter();
+  const pathname = usePathname();
   const { session, profile, isLoggedIn } = useMotorcycleSession();
 
   const handleLogout = async () => {
@@ -28,7 +36,7 @@ export default function MotorcycleHeader() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-ink/90 backdrop-blur-md">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--kr-line)] bg-[#0c0e12]/85 backdrop-blur-md">
         <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
           <Link
             href="/motorcycle"
@@ -42,11 +50,27 @@ export default function MotorcycleHeader() {
           </Link>
 
           <div className="hidden items-center gap-6 text-sm font-semibold text-slate-300 md:flex">
-            {NAV_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className="transition-colors hover:text-amber-400">
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const active = isNavActive(pathname, link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`relative flex h-16 items-center transition-colors ${
+                    active ? "text-amber-400" : "hover:text-amber-400"
+                  }`}
+                >
+                  {link.label}
+                  {active && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute bottom-0 h-0.5 w-full rounded-full bg-amber-500"
+                    />
+                  )}
+                </Link>
+              );
+            })}
           </div>
 
           <div className="hidden items-center gap-3 md:flex">
@@ -58,25 +82,16 @@ export default function MotorcycleHeader() {
                 >
                   {profile?.nickname ?? "라이더"}
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="rounded-full border border-white/15 px-3.5 py-1.5 text-sm font-semibold text-slate-300 transition-colors hover:border-amber-500/50 hover:text-amber-400"
-                >
+                <button onClick={handleLogout} className="kr-btn-secondary px-3.5 py-1.5 text-sm">
                   로그아웃
                 </button>
               </>
             ) : (
               <>
-                <Link
-                  href="/motorcycle/login"
-                  className="rounded-full px-3.5 py-1.5 text-sm font-semibold text-slate-300 transition-colors hover:text-amber-400"
-                >
+                <Link href="/motorcycle/login" className="kr-btn-secondary px-3.5 py-1.5 text-sm">
                   로그인
                 </Link>
-                <Link
-                  href="/motorcycle/signup"
-                  className="rounded-full bg-amber-500 px-3.5 py-1.5 text-sm font-bold text-ink transition-colors hover:bg-amber-400"
-                >
+                <Link href="/motorcycle/signup" className="kr-btn-primary px-3.5 py-1.5 text-sm">
                   회원가입
                 </Link>
               </>
@@ -111,16 +126,24 @@ export default function MotorcycleHeader() {
             onClick={(e) => e.stopPropagation()}
           >
             <nav className="flex flex-col px-4 py-3">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={close}
-                  className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-200 hover:bg-white/5 active:bg-white/10"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {NAV_LINKS.map((link) => {
+                const active = isNavActive(pathname, link.href);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={close}
+                    aria-current={active ? "page" : undefined}
+                    className={`rounded-xl px-4 py-3.5 text-base font-semibold active:bg-white/10 ${
+                      active
+                        ? "bg-white/5 text-amber-400"
+                        : "text-slate-200 hover:bg-white/5"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
               <div className="my-2 border-t border-white/10" />
               {isLoggedIn && session ? (
                 <div className="flex items-center justify-between px-4 py-3">
@@ -131,10 +154,7 @@ export default function MotorcycleHeader() {
                   >
                     {profile?.nickname ?? "라이더"}
                   </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="rounded-full border border-white/15 px-3.5 py-1.5 text-sm font-semibold text-slate-300"
-                  >
+                  <button onClick={handleLogout} className="kr-btn-secondary px-3.5 py-1.5 text-sm">
                     로그아웃
                   </button>
                 </div>
@@ -143,14 +163,14 @@ export default function MotorcycleHeader() {
                   <Link
                     href="/motorcycle/login"
                     onClick={close}
-                    className="flex-1 rounded-full border border-white/15 py-2 text-center text-sm font-semibold text-slate-300"
+                    className="kr-btn-secondary flex-1 py-2 text-sm"
                   >
                     로그인
                   </Link>
                   <Link
                     href="/motorcycle/signup"
                     onClick={close}
-                    className="flex-1 rounded-full bg-amber-500 py-2 text-center text-sm font-bold text-ink"
+                    className="kr-btn-primary flex-1 py-2 text-sm"
                   >
                     회원가입
                   </Link>

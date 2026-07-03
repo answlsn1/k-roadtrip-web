@@ -88,10 +88,7 @@ export default function MotorcycleChatPage() {
         <p className="mt-3 text-sm text-slate-400">
           라이더 라운지에서 다른 라이더들과 실시간으로 이야기해보세요.
         </p>
-        <Link
-          href="/motorcycle/login"
-          className="mt-8 rounded-full bg-amber-500 px-6 py-2.5 text-sm font-extrabold text-ink"
-        >
+        <Link href="/motorcycle/login" className="kr-btn-primary mt-8 px-6 py-2.5 text-sm">
           로그인하기
         </Link>
       </div>
@@ -121,8 +118,8 @@ export default function MotorcycleChatPage() {
                   <div
                     className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                       isMine
-                        ? "rounded-tr-sm bg-amber-500 text-ink"
-                        : "rounded-tl-sm bg-white/10 text-slate-100"
+                        ? "rounded-tr-md bg-amber-500 text-ink"
+                        : "rounded-tl-md bg-[var(--kr-surface-2)] text-slate-100"
                     }`}
                   >
                     {msg.body}
@@ -143,23 +140,25 @@ export default function MotorcycleChatPage() {
           {sendError}
         </div>
       )}
-      <form onSubmit={handleSend} className="flex gap-2 border-t border-white/10 pt-4">
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="메시지를 입력하세요"
-          maxLength={500}
-          className="min-w-0 flex-1 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
-        />
-        <button
-          type="submit"
-          disabled={!text.trim() || sending}
-          className="shrink-0 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-ink transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          전송
-        </button>
-      </form>
+      <div className="border-t border-[var(--kr-line)] bg-[#0c0e12]/90 pt-4 backdrop-blur">
+        <form onSubmit={handleSend} className="flex gap-2">
+          <input
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="메시지를 입력하세요"
+            maxLength={500}
+            className="kr-input min-w-0 flex-1 px-4 py-3 text-sm"
+          />
+          <button
+            type="submit"
+            disabled={!text.trim() || sending}
+            className="kr-btn-primary shrink-0 px-5 text-sm"
+          >
+            전송
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

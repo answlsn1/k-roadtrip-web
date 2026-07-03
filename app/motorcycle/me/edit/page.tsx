@@ -85,7 +85,7 @@ export default function EditMyProfilePage() {
             onChange={(e) => setNickname(e.target.value)}
             placeholder="예: 미시령바람"
             maxLength={40}
-            className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+            className="kr-input px-4 py-3 text-sm"
           />
         </div>
 
@@ -100,7 +100,7 @@ export default function EditMyProfilePage() {
             onChange={(e) => setBikeModel(e.target.value)}
             placeholder="예: 혼다 CB650R"
             maxLength={80}
-            className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+            className="kr-input px-4 py-3 text-sm"
           />
         </div>
 
@@ -120,7 +120,7 @@ export default function EditMyProfilePage() {
             placeholder="어떤 라이딩을 좋아하는지, 주로 달리는 지역을 소개해주세요"
             maxLength={BIO_MAX}
             rows={5}
-            className="w-full resize-none rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+            className="kr-input resize-none px-4 py-3 text-sm"
           />
         </div>
 
@@ -133,7 +133,7 @@ export default function EditMyProfilePage() {
         <button
           type="submit"
           disabled={!nickname.trim() || submitting}
-          className="w-full rounded-2xl bg-amber-500 py-3.5 text-sm font-extrabold text-ink transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
+          className="kr-btn-primary w-full py-3.5 text-sm"
         >
           {submitting ? "저장하는 중…" : "프로필 저장"}
         </button>

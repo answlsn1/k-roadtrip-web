@@ -164,10 +164,7 @@ export default function RouteDetailClient({ id }: { id: string }) {
       <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-5 text-center">
         <h1 className="text-xl font-extrabold text-white">루트를 찾을 수 없어요</h1>
         <p className="mt-3 text-sm text-slate-400">삭제되었거나 존재하지 않는 루트예요.</p>
-        <Link
-          href="/motorcycle"
-          className="mt-8 rounded-full bg-amber-500 px-6 py-2.5 text-sm font-extrabold text-ink"
-        >
+        <Link href="/motorcycle" className="kr-btn-primary mt-8 px-6 py-2.5 text-sm">
           피드로 돌아가기
         </Link>
       </div>
@@ -233,11 +230,9 @@ export default function RouteDetailClient({ id }: { id: string }) {
               type="button"
               onClick={handleFollowToggle}
               disabled={followBusy}
-              className={`rounded-full px-3 py-1 text-xs font-extrabold transition-colors disabled:opacity-60 ${
-                following
-                  ? "border border-white/15 text-slate-300 hover:border-red-500/40 hover:text-red-400"
-                  : "bg-amber-500 text-ink hover:bg-amber-400"
-              }`}
+              className={`disabled:opacity-60 ${
+                following ? "kr-btn-secondary" : "kr-btn-primary"
+              } px-3 py-1 text-xs`}
             >
               {following ? "팔로잉" : "팔로우"}
             </button>
@@ -288,7 +283,7 @@ export default function RouteDetailClient({ id }: { id: string }) {
           <button
             type="button"
             onClick={handleShare}
-            className="rounded-full border border-white/15 px-5 py-2 text-sm font-bold text-slate-200 transition-colors hover:border-amber-500/50 hover:text-amber-400"
+            className="kr-btn-secondary px-5 py-2 text-sm"
           >
             {shareCopied ? "링크 복사됨 ✓" : "공유"}
           </button>
@@ -296,7 +291,7 @@ export default function RouteDetailClient({ id }: { id: string }) {
             type="button"
             onClick={handleGpxDownload}
             title={isLoggedIn ? "GPX 파일로 내려받기" : "로그인이 필요해요"}
-            className="rounded-full border border-white/15 px-5 py-2 text-sm font-bold text-slate-200 transition-colors hover:border-amber-500/50 hover:text-amber-400"
+            className="kr-btn-secondary px-5 py-2 text-sm"
           >
             GPX 다운로드
             {!sessionLoading && !isLoggedIn && (
@@ -307,7 +302,7 @@ export default function RouteDetailClient({ id }: { id: string }) {
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="rounded-full border border-red-500/40 px-5 py-2 text-sm font-bold text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-40"
+              className="kr-btn-danger px-5 py-2 text-sm"
             >
               {deleting ? "삭제하는 중…" : "삭제"}
             </button>
@@ -316,11 +311,11 @@ export default function RouteDetailClient({ id }: { id: string }) {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-        <div className="relative h-[320px] overflow-hidden rounded-2xl border border-white/15 sm:h-[420px] lg:h-[520px]">
+        <div className="krider-map-dark relative h-[320px] overflow-hidden rounded-2xl border border-[var(--kr-line-strong)] sm:h-[420px] lg:h-[520px]">
           <RouteDetailMap stops={route.stops} trackPoints={route.track_points} />
         </div>
 
-        <div className="rounded-2xl border border-white/15 bg-white/5 p-5">
+        <div className="kr-card p-5">
           <h2 className="mb-4 text-sm font-bold text-white">경유지 ({route.stops.length}개)</h2>
           <ol className="space-y-3">
             {route.stops.map((stop, i) => (
@@ -344,7 +339,7 @@ export default function RouteDetailClient({ id }: { id: string }) {
         <h2 className="mb-4 text-lg font-extrabold text-white">
           댓글{comments !== null ? ` (${comments.length})` : ""}
         </h2>
-        <div className="rounded-2xl border border-white/15 bg-white/5 p-5 sm:rounded-3xl sm:p-6">
+        <div className="kr-card p-5 sm:p-6">
           {comments === null ? (
             <p className="py-4 text-center text-sm text-slate-500">댓글을 불러오는 중…</p>
           ) : comments.length === 0 ? (
@@ -386,7 +381,7 @@ export default function RouteDetailClient({ id }: { id: string }) {
             (isLoggedIn && profile ? (
               <form
                 onSubmit={handleAddComment}
-                className="mt-5 flex gap-2 border-t border-white/10 pt-5"
+                className="mt-5 flex gap-2 border-t border-[var(--kr-line)] pt-5"
               >
                 <input
                   type="text"
@@ -394,18 +389,18 @@ export default function RouteDetailClient({ id }: { id: string }) {
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="댓글을 남겨보세요"
                   maxLength={500}
-                  className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+                  className="kr-input min-w-0 flex-1 px-3 py-2.5 text-sm"
                 />
                 <button
                   type="submit"
                   disabled={!commentText.trim() || commentSubmitting}
-                  className="shrink-0 rounded-xl bg-amber-500 px-4 py-2 text-sm font-extrabold text-ink transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="kr-btn-primary shrink-0 px-4 py-2 text-sm"
                 >
                   {commentSubmitting ? "등록 중…" : "등록"}
                 </button>
               </form>
             ) : !isLoggedIn ? (
-              <p className="mt-5 border-t border-white/10 pt-5 text-sm text-slate-400">
+              <p className="mt-5 border-t border-[var(--kr-line)] pt-5 text-sm text-slate-400">
                 댓글을 남기려면{" "}
                 <Link href="/motorcycle/login" className="font-bold text-amber-400 hover:underline">
                   로그인

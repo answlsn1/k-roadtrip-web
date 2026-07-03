@@ -68,7 +68,7 @@ export default function MotorcycleLoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             autoComplete="email"
-            className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+            className="kr-input px-4 py-3 text-sm"
           />
         </div>
 
@@ -84,7 +84,7 @@ export default function MotorcycleLoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="비밀번호"
             autoComplete="current-password"
-            className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+            className="kr-input px-4 py-3 text-sm"
           />
         </div>
 
@@ -97,7 +97,7 @@ export default function MotorcycleLoginPage() {
         <button
           type="submit"
           disabled={!canSubmit || submitting}
-          className="w-full rounded-2xl bg-amber-500 py-3.5 text-sm font-extrabold text-ink transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
+          className="kr-btn-primary w-full py-3.5 text-sm"
         >
           {submitting ? "로그인 중…" : "로그인"}
         </button>

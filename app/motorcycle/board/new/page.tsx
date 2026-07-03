@@ -83,7 +83,7 @@ export default function NewBoardPostPage() {
                 className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
                   category === c.value
                     ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
-                    : "border-white/15 text-slate-400 hover:text-white"
+                    : "border-[var(--kr-line)] bg-[var(--kr-surface-1)] text-slate-400 hover:text-white"
                 }`}
               >
                 {c.label}
@@ -104,7 +104,7 @@ export default function NewBoardPostPage() {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="예: 이번 주말 미시령 같이 달리실 분?"
             maxLength={100}
-            className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+            className="kr-input px-4 py-3 text-sm"
           />
         </div>
 
@@ -120,7 +120,7 @@ export default function NewBoardPostPage() {
             placeholder="라이더들과 나누고 싶은 이야기를 적어보세요"
             rows={10}
             maxLength={5000}
-            className="w-full resize-y rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm leading-relaxed text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none"
+            className="kr-input resize-y px-4 py-3 text-sm leading-relaxed"
           />
           <p className="mt-1 text-right text-xs text-slate-500">{body.length}/5000</p>
         </div>
@@ -138,13 +138,13 @@ export default function NewBoardPostPage() {
           <button
             type="submit"
             disabled={!canSubmit || submitting || !profile}
-            className="rounded-full bg-amber-500 px-6 py-2.5 text-sm font-extrabold text-ink transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+            className="kr-btn-primary w-full py-3.5 text-sm"
           >
             {submitting ? "등록 중…" : "등록"}
           </button>
           <Link
             href="/motorcycle/board"
-            className="text-sm font-semibold text-slate-400 transition-colors hover:text-amber-400"
+            className="shrink-0 text-sm font-semibold text-slate-400 transition-colors hover:text-amber-400"
           >
             취소
           </Link>
