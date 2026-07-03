@@ -9,7 +9,7 @@ import { logOut } from "@/lib/motorcycle/auth";
 const NAV_LINKS = [
   { href: "/motorcycle", label: "피드" },
   { href: "/motorcycle/record", label: "주행 기록" },
-  { href: "/motorcycle/chat", label: "채팅" },
+  { href: "/motorcycle/board", label: "라이더챗" },
   { href: "/motorcycle/my", label: "내 루트" },
 ];
 

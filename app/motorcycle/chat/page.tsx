@@ -5,13 +5,30 @@ import Link from "next/link";
 import { useMotorcycleSession } from "@/lib/motorcycle/useSession";
 import { listRecentMessages, sendMessage, subscribeToNewMessages } from "@/lib/motorcycle/chat";
 import type { MotorcycleChatMessage } from "@/lib/motorcycle/types";
+import RiderChatTabs from "@/components/motorcycle/RiderChatTabs";
+
+const RATE_LIMIT_MESSAGE =
+  "도배 방지를 위해 잠시 후 다시 시도해주세요. 같은 내용을 반복해서 올릴 수는 없어요.";
 
 export default function MotorcycleChatPage() {
   const { session, profile, isLoggedIn, loading } = useMotorcycleSession();
   const [messages, setMessages] = useState<MotorcycleChatMessage[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const errorTimerRef = useRef<number | null>(null);
+
+  const clearSendErrorTimer = () => {
+    if (errorTimerRef.current !== null) {
+      window.clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return clearSendErrorTimer;
+  }, []);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -41,6 +58,15 @@ export default function MotorcycleChatPage() {
 
     if (result.ok) {
       setText("");
+      clearSendErrorTimer();
+      setSendError(null);
+    } else if (result.error === "rate_limited") {
+      clearSendErrorTimer();
+      setSendError(RATE_LIMIT_MESSAGE);
+      errorTimerRef.current = window.setTimeout(() => {
+        setSendError(null);
+        errorTimerRef.current = null;
+      }, 4000);
     } else {
       console.error("sendMessage error:", result.error);
     }
@@ -75,8 +101,7 @@ export default function MotorcycleChatPage() {
   return (
     <div className="mx-auto flex h-[calc(100dvh-4rem)] max-w-3xl flex-col px-5 pb-4">
       <div className="border-b border-white/10 py-5">
-        <p className="text-xs font-bold uppercase tracking-widest text-amber-500">라이더 라운지</p>
-        <h1 className="mt-1 text-xl font-extrabold text-white">실시간 채팅</h1>
+        <RiderChatTabs active="lounge" />
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto py-5">
@@ -110,6 +135,14 @@ export default function MotorcycleChatPage() {
         <div ref={bottomRef} />
       </div>
 
+      {sendError && (
+        <div
+          role="alert"
+          className="mb-2 rounded-xl bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-400"
+        >
+          {sendError}
+        </div>
+      )}
       <form onSubmit={handleSend} className="flex gap-2 border-t border-white/10 pt-4">
         <input
           type="text"

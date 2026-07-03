@@ -43,7 +43,8 @@ export async function sendMessage(
     nickname,
     body: trimmed,
   });
-  if (error) return { ok: false, error: error.message };
+  // 42501 = RLS 거부 — 0009 의 도배 방지(간격 3초·동일 내용 2분) 정책 위반 포함.
+  if (error) return { ok: false, error: error.code === "42501" ? "rate_limited" : error.message };
   return { ok: true };
 }
 

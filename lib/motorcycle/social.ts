@@ -115,7 +115,11 @@ export async function addComment(
     .insert({ route_id: routeId, user_id: user.id, nickname, body: trimmed })
     .select("*")
     .single();
-  if (error || !data) return { ok: false, error: error?.message ?? "insert_failed" };
+  if (error || !data) {
+    // 42501 = RLS 거부 — 0009 도배 방지(간격 10초·동일 내용 10분) 정책 위반 포함.
+    if (error?.code === "42501") return { ok: false, error: "rate_limited" };
+    return { ok: false, error: error?.message ?? "insert_failed" };
+  }
   return { ok: true, comment: data as MotorcycleComment };
 }
 
