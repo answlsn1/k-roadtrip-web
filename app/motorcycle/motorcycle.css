@@ -137,6 +137,62 @@
   animation: kr-shimmer 1.6s infinite;
 }
 
+/* ── 한글 줄내림 — 어절 단위 유지(대형 타이포 필수 처리) ── */
+.krider-scope h1,
+.krider-scope h2,
+.krider-scope h3 {
+  word-break: keep-all;
+}
+.kr-balance { text-wrap: balance; }
+
+/* ── 대형 숫자 — 라이트 웨이트 디스플레이(제네시스 스탯 타이포) ── */
+.kr-display-num {
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 시네마틱 히어로(제네시스식 풀블리드 미디어) ── */
+/* 스크림 하단을 페이지 배경색으로 완전히 수렴시켜 이음새 없이 녹아들게 한다 */
+.kr-hero-scrim {
+  background:
+    linear-gradient(to top,
+      #0c0e12 0%,
+      rgba(12, 14, 18, 0.55) 42%,
+      rgba(12, 14, 18, 0.2) 70%,
+      rgba(12, 14, 18, 0.5) 100%);
+}
+@keyframes kr-kenburns {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .kr-hero-slide-active img {
+    animation: kr-kenburns 8s linear forwards;
+  }
+}
+
+/* ── 스크롤 리빌(제네시스식 섹션 등장) ── */
+.kr-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 700ms ease, transform 700ms ease;
+}
+.kr-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kr-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ── 헤어라인 디바이더 + 아이브로우(섹션 도입부) ── */
+.kr-hairline { border-top: 1px solid var(--kr-line); }
+
 /* ── 모션 ── */
 @keyframes kr-shimmer {
   100% { transform: translateX(100%); }

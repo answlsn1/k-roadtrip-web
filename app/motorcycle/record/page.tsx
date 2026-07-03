@@ -272,18 +272,18 @@ export default function MotorcycleRecordPage() {
           <div className="grid grid-cols-3 gap-3">
             <div className="kr-card p-4 text-center">
               <p className="text-xs font-bold text-slate-500">시간</p>
-              <p className="mt-1 text-xl font-extrabold text-white">{formatElapsed(elapsedSec)}</p>
+              <p className="kr-display-num mt-1 text-3xl text-white">{formatElapsed(elapsedSec)}</p>
             </div>
             <div className="kr-card p-4 text-center">
               <p className="text-xs font-bold text-slate-500">거리</p>
-              <p className="mt-1 text-xl font-extrabold text-white">
+              <p className="kr-display-num mt-1 text-3xl text-white">
                 {distanceKm.toFixed(1)}
                 <span className="ml-0.5 text-sm font-bold text-slate-400">km</span>
               </p>
             </div>
             <div className="kr-card p-4 text-center">
               <p className="text-xs font-bold text-slate-500">포인트</p>
-              <p className="mt-1 text-xl font-extrabold text-white">{points.length}</p>
+              <p className="kr-display-num mt-1 text-3xl text-white">{points.length}</p>
             </div>
           </div>
 
@@ -306,18 +306,18 @@ export default function MotorcycleRecordPage() {
           <div className="grid grid-cols-3 gap-3">
             <div className="kr-card !border-amber-500/40 !bg-amber-500/10 p-4 text-center">
               <p className="text-xs font-bold text-amber-400">총 거리</p>
-              <p className="mt-1 text-xl font-extrabold text-white">
+              <p className="kr-display-num mt-1 text-3xl text-white">
                 {distanceKm.toFixed(1)}
                 <span className="ml-0.5 text-sm font-bold text-slate-400">km</span>
               </p>
             </div>
             <div className="kr-card !border-amber-500/40 !bg-amber-500/10 p-4 text-center">
               <p className="text-xs font-bold text-amber-400">총 시간</p>
-              <p className="mt-1 text-xl font-extrabold text-white">{formatElapsed(elapsedSec)}</p>
+              <p className="kr-display-num mt-1 text-3xl text-white">{formatElapsed(elapsedSec)}</p>
             </div>
             <div className="kr-card !border-amber-500/40 !bg-amber-500/10 p-4 text-center">
               <p className="text-xs font-bold text-amber-400">포인트</p>
-              <p className="mt-1 text-xl font-extrabold text-white">{points.length}</p>
+              <p className="kr-display-num mt-1 text-3xl text-white">{points.length}</p>
             </div>
           </div>
 

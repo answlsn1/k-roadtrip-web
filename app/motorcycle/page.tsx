@@ -8,6 +8,8 @@ import type { MotorcycleRouteWithAuthor, RouteSocial } from "@/lib/motorcycle/ty
 import { useMotorcycleSession } from "@/lib/motorcycle/useSession";
 import { ROUTE_TYPES } from "@/lib/motorcycle/routeTypes";
 import RouteCard from "@/components/motorcycle/RouteCard";
+import KRidersHero from "@/components/motorcycle/KRidersHero";
+import Reveal from "@/components/motorcycle/Reveal";
 
 type SortKey = "latest" | "popular" | "distance" | "winding";
 
@@ -69,48 +71,43 @@ export default function MotorcycleHomePage() {
   }, [routes, social, sort, region, routeType, query]);
 
   return (
-    <div className="mx-auto max-w-6xl px-5 pb-24">
-      <section className="py-10 sm:py-14">
-        <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-500">
-          K-Riders
-        </p>
-        <h1 className="max-w-2xl text-3xl font-extrabold leading-[1.15] tracking-tight text-white sm:text-5xl">
-          오늘 달린 길, 라이더들과 나눠보세요
-        </h1>
-        <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-400 sm:text-base">
-          내가 달린 라이딩 루트를 기록하고, 다른 라이더들이 남긴 길을 발견하세요.
-        </p>
-        {!loading && !isLoggedIn && (
-          <div className="mt-8 flex gap-3">
-            <Link href="/motorcycle/signup" className="kr-btn-primary px-6 py-3 text-sm">
-              지금 시작하기
-            </Link>
-            <Link href="/motorcycle/login" className="kr-btn-secondary px-6 py-3 text-sm">
-              로그인
-            </Link>
-          </div>
-        )}
-      </section>
+    <div className="pb-24">
+      {/* 시네마틱 히어로 — 풀블리드(제네시스 벤치마킹) */}
+      <KRidersHero
+        showAuthCta={!loading && !isLoggedIn}
+        showRiderCta={!loading && isLoggedIn}
+      />
 
-      <section className="pb-10">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-lg font-extrabold text-white sm:text-xl">공개 루트 피드</h2>
-          {isLoggedIn && (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/motorcycle/record"
-                className="kr-btn-secondary px-4 py-2 text-xs sm:text-sm"
-              >
-                🔴 주행 기록
-              </Link>
-              <Link
-                href="/motorcycle/routes/new"
-                className="kr-btn-primary px-4 py-2 text-xs sm:text-sm"
-              >
-                루트 등록
-              </Link>
+      <div className="mx-auto max-w-6xl px-5">
+      <Reveal>
+      <section className="pb-10 pt-12 sm:pt-16">
+        <div className="kr-hairline mb-8 pt-8">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-500">
+                Routes
+              </p>
+              <h2 className="text-xl font-extrabold tracking-tight text-white sm:text-2xl">
+                공개 루트 피드
+              </h2>
             </div>
-          )}
+            {isLoggedIn && (
+              <div className="flex shrink-0 items-center gap-2">
+                <Link
+                  href="/motorcycle/record"
+                  className="kr-btn-secondary px-4 py-2 text-xs sm:text-sm"
+                >
+                  🔴 주행 기록
+                </Link>
+                <Link
+                  href="/motorcycle/routes/new"
+                  className="kr-btn-primary px-4 py-2 text-xs sm:text-sm"
+                >
+                  루트 등록
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
 
         {routes !== null && routes.length > 0 && (
@@ -252,6 +249,8 @@ export default function MotorcycleHomePage() {
           </div>
         )}
       </section>
+      </Reveal>
+      </div>
     </div>
   );
 }

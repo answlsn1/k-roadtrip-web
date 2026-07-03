@@ -154,11 +154,25 @@ export default function RiderProfilePage() {
         </div>
       </div>
 
-      <div className="kr-card px-5 py-4">
-        <p className="text-sm font-extrabold text-white">
-          루트 {stats.routeCount}개 <span aria-hidden="true" className="text-slate-500">·</span> 총{" "}
-          {stats.totalKm}km
-        </p>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="kr-card px-5 py-5">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+            등록 루트
+          </p>
+          <p className="kr-display-num mt-1.5 text-4xl text-white">
+            {stats.routeCount}
+            <span className="ml-1 text-base text-slate-500">개</span>
+          </p>
+        </div>
+        <div className="kr-card px-5 py-5">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+            누적 거리
+          </p>
+          <p className="kr-display-num mt-1.5 text-4xl text-white">
+            {stats.totalKm}
+            <span className="ml-1 text-base text-slate-500">km</span>
+          </p>
+        </div>
       </div>
 
       <section className="mt-10">
