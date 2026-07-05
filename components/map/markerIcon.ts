@@ -41,3 +41,17 @@ export function previewIcon(): L.DivIcon {
     iconAnchor: [14, 14],
   });
 }
+
+/**
+ * Pin-drop candidate dot ("you picked here") for the builder map.
+ * Anchored dead-center so the dot sits exactly on the clicked point;
+ * the pulse ring lives in globals.css (off under prefers-reduced-motion).
+ */
+export function pinDropIcon(): L.DivIcon {
+  return L.divIcon({
+    html: '<span class="krt-pin-dot"><span class="krt-pin-dot-ring"></span></span>',
+    className: "",
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+  });
+}

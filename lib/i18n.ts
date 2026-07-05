@@ -229,6 +229,10 @@ export const dict = {
   "builder.noStops":         { en: "No stops yet", ko: "아직 장소가 없습니다" },
   "builder.noStopsHint":     { en: "Search above or tap a pin on the map to start building your route.", ko: "위에서 검색하거나 지도의 핀을 눌러 코스를 만들어 보세요." },
   "builder.dragReorder":     { en: "Drag to reorder", ko: "드래그하여 순서 변경" },
+  "builder.pinHint":         { en: "Click anywhere on the map to add that spot to your route", ko: "지도를 클릭하면 그 지점을 루트에 추가할 수 있어요" },
+  "builder.pinResolving":    { en: "Looking up address…", ko: "주소 확인 중…" },
+  "builder.pinAdd":          { en: "+ Add to route", ko: "+ 루트에 추가" },
+  "builder.pinBadge":        { en: "pinned", ko: "핀 지정" },
   "builder.saveTrip":        { en: "★ Save to My Trip", ko: "★ 내 여행에 저장" },
   "builder.savedTrip":       { en: "✓ Saved to My Trip", ko: "✓ 내 여행에 저장됨" },
 

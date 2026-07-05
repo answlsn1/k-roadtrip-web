@@ -88,9 +88,16 @@ function SortableStop({
             {stop.name_en}
           </span>
           <span className="block truncate text-[11px] text-slate-400">
-            {stop.name_ko}
+            {/* Pin stops: name_ko duplicates the title (same address), so show
+                the exact coordinates instead — that's the useful detail here. */}
+            {stop.source === "pin"
+              ? `${stop.latitude.toFixed(5)}, ${stop.longitude.toFixed(5)}`
+              : stop.name_ko}
             {stop.source === "curated" && (
               <span className="ml-1 text-emerald-600">· {t("builder.verified", lang)}</span>
+            )}
+            {stop.source === "pin" && (
+              <span className="ml-1">· 📍 {t("builder.pinBadge", lang)}</span>
             )}
           </span>
         </span>

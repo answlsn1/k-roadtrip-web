@@ -61,7 +61,7 @@ export interface MapWaypoint {
 
 // ── Builder ───────────────────────────────────────────────────
 
-export type StopSource = "curated" | "osm" | "sponsored";
+export type StopSource = "curated" | "osm" | "sponsored" | "pin";
 
 export interface PlaceResult {
   sourceId: string;

@@ -11,6 +11,8 @@ import BuilderCTA from "./BuilderCTA";
 import { SPONSORED_PLACES } from "@/lib/config/sponsored";
 import { trackEvent } from "@/lib/analytics/events";
 import { useSavedTripsStore } from "@/store/useSavedTripsStore";
+import { useLangStore } from "@/store/useLangStore";
+import { t } from "@/lib/i18n";
 
 const BuilderMap = dynamic(() => import("./BuilderMap"), {
   ssr: false,
@@ -30,6 +32,7 @@ export default function RouteBuilder({ curatedData }: RouteBuilderProps) {
   const [hydrated, setHydrated] = useState(false);
   const stops = useBuilderStore((s) => s.draft.stops);
   const addStop = useBuilderStore((s) => s.addStop);
+  const lang = useLangStore((s) => s.lang);
 
   // Read localStorage on the client only (store uses skipHydration).
   useEffect(() => {
@@ -112,7 +115,14 @@ export default function RouteBuilder({ curatedData }: RouteBuilderProps) {
         stops={hydrated ? stops : []}
         previews={previews}
         onAddPreview={(p) => addStop(p)}
+        onAddPin={addStop}
       />
+
+      {/* Pin-drop hint — pointer-events-none so it never blocks the map.
+          Centered over the visible map area (desktop offsets past the panel). */}
+      <p className="pointer-events-none absolute left-1/2 top-3 z-[5] max-w-[90vw] -translate-x-1/2 rounded-full bg-white/90 px-3.5 py-1.5 text-center text-[11px] font-semibold text-slate-600 shadow-md backdrop-blur md:left-[calc(50%+200px)] md:max-w-[420px]">
+        📍 {t("builder.pinHint", lang)}
+      </p>
 
       {/* Desktop: fixed left panel */}
       <aside className="absolute bottom-0 left-0 top-0 z-10 hidden w-[400px] flex-col bg-white pt-4 shadow-2xl md:flex">
