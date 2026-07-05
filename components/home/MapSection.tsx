@@ -43,9 +43,10 @@ export default function MapSection({ waypoints }: MapSectionProps) {
               the single page-level primary CTA (BuildRouteFab). */}
           <button
             onClick={() => setActiveRegion(null)}
+            aria-pressed={activeRegion === null}
             className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors ${
               activeRegion === null
-                ? "bg-emerald-600 text-white"
+                ? "bg-emerald-700 text-white"
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
@@ -59,9 +60,10 @@ export default function MapSection({ waypoints }: MapSectionProps) {
                 setActiveRegion(next);
                 if (next) trackEvent("region_view", { region: r });
               }}
+              aria-pressed={activeRegion === r}
               className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors ${
                 activeRegion === r
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-emerald-700 text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -71,7 +73,9 @@ export default function MapSection({ waypoints }: MapSectionProps) {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-slate-200 shadow-xl">
+      {/* isolate: Leaflet 내부 z-index(pane 200~700, control 1000)가 루트 스태킹
+          컨텍스트로 탈출해 고정 FAB(z-30)·Navbar(z-50)를 뚫는 것을 차단. */}
+      <div className="isolate overflow-hidden rounded-3xl border border-slate-200 shadow-xl">
         <div className="h-[420px] sm:h-[480px] w-full">
           <LeafletMap waypoints={waypoints} activeRegion={activeRegion} />
         </div>

@@ -63,16 +63,26 @@ export default function CategoryRow({
     };
   }, [updateState]);
 
+  // JS 스크롤은 CSS(motion-reduce:scroll-auto)를 무시하므로 여기서도 감속 설정을 존중.
+  const scrollBehavior = (): ScrollBehavior =>
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+      ? "auto"
+      : "smooth";
+
   const scroll = useCallback((dir: "left" | "right") => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollBy({ left: dir === "left" ? -el.clientWidth : el.clientWidth, behavior: "smooth" });
+    el.scrollBy({
+      left: dir === "left" ? -el.clientWidth : el.clientWidth,
+      behavior: scrollBehavior(),
+    });
   }, []);
 
   const scrollToPage = useCallback((index: number) => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollTo({ left: index * el.clientWidth, behavior: "smooth" });
+    el.scrollTo({ left: index * el.clientWidth, behavior: scrollBehavior() });
   }, []);
 
   return (
