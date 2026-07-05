@@ -82,9 +82,11 @@ export default function RoadTripTips() {
         <p className="mb-2 text-xs font-bold uppercase tracking-widest text-emerald-400">
           {t("tips.label", lang)}
         </p>
-        <h3 className="mb-6 text-xl font-extrabold text-white sm:text-2xl">
+        {/* h2: section-level heading — keeps the document outline consistent
+            with the other home sections (visual scale stays card-level). */}
+        <h2 className="mb-6 text-xl font-extrabold text-white sm:text-2xl">
           {t("tips.heading", lang)}
-        </h3>
+        </h2>
         <div className="grid gap-6 sm:grid-cols-3">
           {TIPS.map((tip) => (
             <div key={tip.en.title}>

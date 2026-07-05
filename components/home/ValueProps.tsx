@@ -48,7 +48,7 @@ export default function ValueProps() {
   return (
     <section id="why" className="border-y border-slate-200/70 bg-slate-50">
       <div className="mx-auto max-w-6xl px-5 py-20 sm:py-28">
-        <div className="mb-14 text-center">
+        <div className="mb-12 text-center">
           <p className="mb-3 text-xs font-bold uppercase tracking-widest text-emerald-600">
             {t("why.label", lang)}
           </p>

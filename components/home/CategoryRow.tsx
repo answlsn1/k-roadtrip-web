@@ -142,11 +142,29 @@ export default function CategoryRow({
       </div>
 
       {/* Horizontal scroll strip — touch: native snap scroll, buttons: scrollBy */}
-      <div
-        ref={scrollRef}
-        className="flex gap-4 overflow-x-auto pb-3 pl-5 pr-5 sm:pl-0 sm:pr-0 snap-x snap-mandatory scroll-smooth scroll-pl-5 sm:scroll-pl-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {children}
+      <div className="relative">
+        <div
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto pb-3 pl-5 pr-5 sm:pl-0 sm:pr-0 snap-x snap-mandatory scroll-smooth motion-reduce:scroll-auto scroll-pl-5 sm:scroll-pl-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {children}
+        </div>
+
+        {/* Edge fades — hint that the strip continues; driven by the existing
+            canPrev/canNext state so they vanish at either end. pointer-events-none
+            keeps the cards fully clickable underneath. */}
+        <div
+          aria-hidden
+          className={`pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-white to-transparent transition-opacity duration-300 ${
+            canPrev ? "opacity-100" : "opacity-0"
+          }`}
+        />
+        <div
+          aria-hidden
+          className={`pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent transition-opacity duration-300 ${
+            canNext ? "opacity-100" : "opacity-0"
+          }`}
+        />
       </div>
 
       {/* Dot pagination — hidden when only one page */}

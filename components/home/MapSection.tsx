@@ -29,21 +29,23 @@ export default function MapSection({ waypoints }: MapSectionProps) {
     <section id="map" className="mx-auto max-w-6xl scroll-mt-20 px-5 pb-20 sm:pb-28">
       <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-emerald-600">
+          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-emerald-600">
             {t("map.label", lang)}
           </p>
-          <h2 className="text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
+          <h2 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
             {t("map.heading", lang)}
           </h2>
         </div>
 
         {/* Region filter pills */}
         <div className="flex flex-wrap gap-2">
+          {/* Selection chips use the emerald accent — solid ink is reserved for
+              the single page-level primary CTA (BuildRouteFab). */}
           <button
             onClick={() => setActiveRegion(null)}
             className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors ${
               activeRegion === null
-                ? "bg-ink text-white"
+                ? "bg-emerald-600 text-white"
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
@@ -59,7 +61,7 @@ export default function MapSection({ waypoints }: MapSectionProps) {
               }}
               className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors ${
                 activeRegion === r
-                  ? "bg-ink text-white"
+                  ? "bg-emerald-600 text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >

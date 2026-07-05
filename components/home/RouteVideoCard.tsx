@@ -38,7 +38,7 @@ export default function RouteVideoCard({
   return (
     <Link
       href={`/routes/${slug}`}
-      className={`group relative block overflow-hidden rounded-3xl bg-slate-900 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${sizeClass}`}
+      className={`group relative block overflow-hidden rounded-3xl bg-slate-900 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${sizeClass}`}
     >
       {/* Blur skeleton */}
       <div
@@ -105,7 +105,7 @@ export default function RouteVideoCard({
             ))}
           </div>
         )}
-        <p className="mt-4 text-sm font-bold text-amber-300 transition-transform group-hover:translate-x-1">
+        <p className="mt-4 text-sm font-bold text-amber-300 transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">
           {t("card.viewmap", lang)}
         </p>
       </div>

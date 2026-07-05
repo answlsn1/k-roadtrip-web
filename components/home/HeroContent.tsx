@@ -17,14 +17,20 @@ export default function HeroContent({ courses }: HeroContentProps) {
       <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white/80 backdrop-blur">
         {t("hero.badge", lang)}
       </p>
-      <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-        {t("hero.titlePre", lang)}
-        <span className="text-amber-300">{t("hero.titleAccent", lang)}</span>
-        {t("hero.titlePost", lang)}
-      </h1>
-      <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
-        {t("hero.sub", lang)}
-      </p>
+      {/* Headline block — extra side padding below md keeps the centered text
+          clear of the fixed FAB zone (right-4 + 48px circle ≈ 64px). The badge,
+          search and note sit outside the FAB's vertical band, so they keep the
+          full width. */}
+      <div className="px-11 md:px-0">
+        <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+          {t("hero.titlePre", lang)}
+          <span className="text-amber-300">{t("hero.titleAccent", lang)}</span>
+          {t("hero.titlePost", lang)}
+        </h1>
+        <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
+          {t("hero.sub", lang)}
+        </p>
+      </div>
 
       <CourseSearch courses={courses} />
 
