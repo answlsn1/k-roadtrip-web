@@ -18,10 +18,10 @@ export default function HeroContent({ courses }: HeroContentProps) {
         {t("hero.badge", lang)}
       </p>
       {/* Headline block — extra side padding below md keeps the centered text
-          clear of the fixed FAB zone (right-4 + 48px circle ≈ 64px). The badge,
-          search and note sit outside the FAB's vertical band, so they keep the
-          full width. */}
-      <div className="px-11 md:px-0">
+          clear of the fixed FAB zone (right-3 + ~54px vertical pill ≈ 68px).
+          The badge, search and note sit outside the FAB's vertical band, so
+          they keep the full width. */}
+      <div className="px-12 md:px-0">
         <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
           {t("hero.titlePre", lang)}
           <span className="text-amber-300">{t("hero.titleAccent", lang)}</span>
