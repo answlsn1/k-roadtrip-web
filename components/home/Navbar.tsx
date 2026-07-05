@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import BuildRouteFab from "@/components/home/BuildRouteFab";
 import LangToggle from "@/components/home/LangToggle";
 import MyTripButton from "@/components/home/MyTripButton";
 import MyTripPanel from "@/components/home/MyTripPanel";
@@ -46,40 +47,33 @@ export default function Navbar({ mode = "car" }: { mode?: "car" | "bike" }) {
                 >
                   {t("bike.nav.passport", lang)}
                 </Link>
+                <ModeToggle mode={mode} />
+                <LangToggle />
               </>
             ) : (
               <>
+                {/* Tertiary: quiet text anchors — the primary CTA lives in BuildRouteFab. */}
                 <a href="#courses" className="transition-colors hover:text-ink">{t("nav.routes", lang)}</a>
                 <a href="#map"     className="transition-colors hover:text-ink">{t("nav.map",    lang)}</a>
                 <a href="#why"     className="transition-colors hover:text-ink">{t("nav.why",    lang)}</a>
-                <Link
-                  href="/builder"
-                  className="rounded-full bg-ink px-3.5 py-1.5 text-white transition-colors hover:bg-slate-700"
-                >
-                  {t("nav.build", lang)}
-                </Link>
-                <MyTripButton />
+                {/* Utility cluster: one quiet visual unit, divided from the anchors. */}
+                <div className="flex items-center gap-3 border-l border-slate-200 pl-6">
+                  <MyTripButton />
+                  <ModeToggle mode={mode} />
+                  <LangToggle />
+                </div>
               </>
             )}
-            <ModeToggle mode={mode} />
-            <LangToggle />
           </div>
 
-          {/* Mobile: CTA + hamburger */}
+          {/* Mobile: CTA (bike only — car's primary CTA is BuildRouteFab) + hamburger */}
           <div className="flex items-center gap-2 md:hidden">
-            {isBike ? (
+            {isBike && (
               <Link
                 href="/bike#passport"
                 className="rounded-full bg-ink px-3 py-1.5 text-sm font-extrabold text-white active:scale-95"
               >
                 {t("bike.nav.passport", lang)}
-              </Link>
-            ) : (
-              <Link
-                href="/builder"
-                className="rounded-full bg-ink px-3 py-1.5 text-sm font-extrabold text-white active:scale-95"
-              >
-                {t("nav.build", lang)}
               </Link>
             )}
             <button
@@ -130,6 +124,9 @@ export default function Navbar({ mode = "car" }: { mode?: "car" | "bike" }) {
                   <a href="#why"     onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
                     {t("nav.why", lang)}
                   </a>
+                  <Link href="/builder" onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
+                    {t("nav.build", lang)}
+                  </Link>
                 </>
               )}
               <div className="my-2 border-t border-slate-100" />
@@ -147,6 +144,9 @@ export default function Navbar({ mode = "car" }: { mode?: "car" | "bike" }) {
       {/* My Trip drawer — car mode only, single instance outside the hamburger so
           closing the menu can't unmount it. Opened via useMyTripStore from either trigger. */}
       {!isBike && <MyTripPanel />}
+
+      {/* Primary CTA — fixed right-middle pill, car mode only (hides itself on /builder). */}
+      {!isBike && <BuildRouteFab />}
     </>
   );
 }
