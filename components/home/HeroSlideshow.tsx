@@ -90,8 +90,10 @@ export default function HeroSlideshow() {
         );
       })}
 
-      {/* Single readability overlay above the whole stack — z-[5] */}
-      <div className="absolute inset-0 z-[5] bg-gradient-to-b from-slate-950/55 via-slate-950/30 to-slate-950/80" />
+      {/* Single readability overlay above the whole stack — z-[5].
+          Cinematic curve: clearer middle so the photo breathes, deeper bottom
+          anchoring the hero into the page (design v2). */}
+      <div className="absolute inset-0 z-[5] bg-gradient-to-b from-slate-950/60 via-slate-950/25 to-slate-950/90" />
 
       {/* Dots — z-[15] */}
       <div className="absolute bottom-4 left-1/2 z-[15] flex -translate-x-1/2 gap-2.5 sm:bottom-6">

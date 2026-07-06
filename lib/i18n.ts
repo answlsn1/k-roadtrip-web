@@ -55,7 +55,8 @@ export const dict = {
   "feed.partner":   { en: "Partner",              ko: "파트너" },
 
   // ── Cards ───────────────────────────────────────────────────
-  "card.viewmap": { en: "View course on map →", ko: "지도에서 코스 보기 →" },
+  // Arrow lives in the card's circular affordance now (RouteVideoCard) — keep the label clean.
+  "card.viewmap": { en: "View course on map", ko: "지도에서 코스 보기" },
   "card.add":     { en: "+ Add to Trip",         ko: "+ 내 여행에 추가" },
   "card.added":   { en: "✓ Added to Trip",       ko: "✓ 추가됨" },
   "card.book":    { en: "Book Now",              ko: "예약하기" },

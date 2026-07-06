@@ -77,17 +77,19 @@ export default function RoadTripTips() {
   const lang = useLangStore((s) => s.lang);
 
   return (
-    <section className="mx-auto max-w-6xl px-5 pb-20 sm:pb-28">
-      <div className="rounded-3xl bg-ink px-7 py-8 sm:px-10 sm:py-10">
-        <p className="mb-2 text-xs font-bold uppercase tracking-widest text-emerald-400">
+    // Design v2: promoted from an ink card to a full-bleed dark section —
+    // gives the light-based home one deep "ink" beat before the footer echoes it.
+    <section className="bg-ink">
+      <div className="mx-auto max-w-6xl px-5 py-20 sm:py-28">
+        <p className="mb-3 text-xs font-bold uppercase tracking-widest text-amber-300">
           {t("tips.label", lang)}
         </p>
-        {/* h2: section-level heading — keeps the document outline consistent
-            with the other home sections (visual scale stays card-level). */}
-        <h2 className="mb-6 text-xl font-extrabold text-white sm:text-2xl">
+        {/* h2: section-level heading — editorial scale to match the other
+            home sections now that this is a full section, not a card. */}
+        <h2 className="mb-10 max-w-2xl text-2xl font-extrabold leading-tight tracking-tight text-white sm:text-3xl">
           {t("tips.heading", lang)}
         </h2>
-        <div className="grid gap-6 sm:grid-cols-3">
+        <div className="grid gap-x-8 gap-y-8 sm:grid-cols-3">
           {TIPS.map((tip) => (
             <div key={tip.en.title}>
               <p className="mb-1.5 text-sm font-bold text-white">

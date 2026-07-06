@@ -14,7 +14,8 @@ export default function HeroContent({ courses }: HeroContentProps) {
 
   return (
     <div className="relative z-10 mx-auto w-full max-w-3xl px-5 pb-12 pt-28 text-center sm:pb-16 sm:pt-24">
-      <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white/80 backdrop-blur">
+      {/* Floating dark translucent chip — same grammar as the course cards. */}
+      <p className="mb-6 inline-flex items-center gap-2 rounded-full bg-slate-950/40 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white/90 ring-1 ring-white/20 backdrop-blur-md">
         {t("hero.badge", lang)}
       </p>
       {/* Headline block — extra side padding below md keeps the centered text
@@ -27,7 +28,7 @@ export default function HeroContent({ courses }: HeroContentProps) {
           <span className="text-amber-300">{t("hero.titleAccent", lang)}</span>
           {t("hero.titlePost", lang)}
         </h1>
-        <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
+        <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg">
           {t("hero.sub", lang)}
         </p>
       </div>

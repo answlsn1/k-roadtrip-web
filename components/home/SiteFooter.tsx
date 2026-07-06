@@ -3,18 +3,34 @@
 import { useLangStore } from "@/store/useLangStore";
 import { t } from "@/lib/i18n";
 
-export default function SiteFooter() {
+interface SiteFooterProps {
+  /**
+   * "light" (default) — original quiet footer, used on /bike pages.
+   * "ink" — dark full-bleed close-out for the home page (design v2);
+   * opt-in so shared consumers keep their current look.
+   */
+  tone?: "light" | "ink";
+}
+
+export default function SiteFooter({ tone = "light" }: SiteFooterProps) {
   const lang = useLangStore((s) => s.lang);
+  const ink = tone === "ink";
 
   return (
-    <footer className="mx-auto max-w-6xl px-5 py-10 text-xs text-slate-400">
-      <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-        <p>{t("footer.tagline", lang)}</p>
-        <p>{t("footer.attribution", lang)}</p>
+    <footer className={ink ? "bg-ink" : undefined}>
+      <div className={`mx-auto max-w-6xl px-5 text-xs text-slate-400 ${ink ? "py-12" : "py-10"}`}>
+        <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
+          <p>{t("footer.tagline", lang)}</p>
+          <p>{t("footer.attribution", lang)}</p>
+        </div>
+        <p
+          className={`mt-4 text-center text-[11px] leading-relaxed sm:text-left ${
+            ink ? "text-slate-500" : "text-slate-400/80"
+          }`}
+        >
+          {t("disclosure.affiliate", lang)}
+        </p>
       </div>
-      <p className="mt-4 text-center text-[11px] leading-relaxed text-slate-400/80 sm:text-left">
-        {t("disclosure.affiliate", lang)}
-      </p>
     </footer>
   );
 }

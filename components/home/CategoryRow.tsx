@@ -90,7 +90,7 @@ export default function CategoryRow({
       {/* Heading row — nav buttons pinned to the right */}
       <div className="mb-4 flex items-center justify-between px-5 sm:px-0">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-extrabold tracking-tight text-slate-900 sm:text-xl">
+          <h2 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
             {t(titleKey, lang)}
           </h2>
           {badgeKey && (

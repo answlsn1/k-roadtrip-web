@@ -74,12 +74,13 @@ export default function RouteVideoCard({
         />
       )}
 
-      {/* Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/95 via-slate-900/20 to-transparent" />
+      {/* Gradient — image-forward: photo stays clear up top, bottom third
+          goes deep so the white editorial title sits on solid dark. */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/35 via-35% to-transparent to-70%" />
 
-      {/* Badge */}
+      {/* Badge — floating dark translucent chip over the photo */}
       <div className="absolute left-5 top-5">
-        <span className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-900 backdrop-blur-sm">
+        <span className="rounded-full bg-slate-950/55 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white ring-1 ring-white/20 backdrop-blur-md">
           {badgeLabel(meta.badge, lang)}
         </span>
       </div>
@@ -92,22 +93,38 @@ export default function RouteVideoCard({
         </div>
       )}
 
-      {/* Content */}
+      {/* Content — editorial contrast: big heavy title, small quiet meta */}
       <div className="absolute inset-x-0 bottom-0 p-5">
-        <h3 className="text-xl font-extrabold leading-tight text-white drop-shadow-md">{title}</h3>
-        {sub && <p className="mt-1 text-sm text-white/70">{sub}</p>}
+        <h3 className="text-2xl font-extrabold leading-tight tracking-tight text-white drop-shadow-md">{title}</h3>
+        {sub && <p className="mt-1.5 text-[13px] text-white/65">{sub}</p>}
         {chips.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {chips.map((chip) => (
-              <span key={chip} className="rounded-full bg-white/15 px-2.5 py-1 text-xs font-semibold text-white/90 backdrop-blur-sm">
+              <span key={chip} className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold text-white/90 ring-1 ring-white/15 backdrop-blur-md">
                 {chip}
               </span>
             ))}
           </div>
         )}
-        <p className="mt-4 text-sm font-bold text-amber-300 transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">
-          {t("card.viewmap", lang)}
-        </p>
+        {/* CTA row — amber label + circular arrow affordance (decorative; the
+            whole card is the link, so the icon is aria-hidden). */}
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <p className="text-sm font-bold text-amber-300">{t("card.viewmap", lang)}</p>
+          <span
+            aria-hidden
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/25 backdrop-blur-md transition-colors duration-300 group-hover:bg-amber-300 group-hover:text-slate-900 motion-reduce:transition-none"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M3 8h10M9 4l4 4-4 4"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        </div>
       </div>
     </Link>
   );

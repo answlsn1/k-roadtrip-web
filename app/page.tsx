@@ -154,7 +154,8 @@ export default async function HomePage() {
       <RecommendBanner />
 
       {/* ============ FOOTER ============ */}
-      <SiteFooter />
+      {/* Ink tone (design v2): echoes the dark tips section and closes the page. */}
+      <SiteFooter tone="ink" />
     </main>
   );
 }
