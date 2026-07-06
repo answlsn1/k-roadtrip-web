@@ -120,6 +120,12 @@ export const dict = {
   "route.startNav":     { en: "Start Navigation with Naver Map", ko: "네이버 지도로 길안내 시작" },
   "route.nextStop":     { en: "Next stop",             ko: "다음 장소" },
   "route.tripComplete": { en: "Trip complete 🎉",      ko: "여행 완료 🎉" },
+  "route.customOrder":  { en: "Custom order",          ko: "나만의 순서" },
+  "route.restoreOrder": { en: "Restore original order", ko: "원래 순서로" },
+  "route.moveUp":       { en: "Move {name} up",        ko: "{name} 위로 이동" },
+  "route.moveDown":     { en: "Move {name} down",      ko: "{name} 아래로 이동" },
+  "route.orderAnnounce": { en: "{name} is now stop {n}", ko: "{name} 순서가 {n}번으로 변경됨" },
+  "route.orderRestored": { en: "Original order restored", ko: "원래 순서로 복원됨" },
 
   // ── Naver handoff bridge modal ──────────────────────────────
   "bridge.title": { en: "Opening Naver Map", ko: "네이버 지도 여는 중" },

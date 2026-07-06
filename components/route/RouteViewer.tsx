@@ -39,10 +39,51 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
     else router.push("/");
   };
 
-  const ordered = useMemo(
+  /* ---------- waypoint order (session-local reorder) ----------
+   * The curated order from the server stays the source of truth.
+   * `customOrder` holds waypoint ids in the user's order (null = default),
+   * lives only in React state, and never touches the DB. `ordered` clones
+   * the waypoints with sequence re-assigned 1..n so every consumer
+   * (list, map markers, Naver handoff, copy list) follows automatically. */
+  const defaultOrder = useMemo(
     () => [...waypoints].sort((a, b) => a.sequence - b.sequence),
     [waypoints]
   );
+  const [customOrder, setCustomOrder] = useState<number[] | null>(null);
+  const [orderNotice, setOrderNotice] = useState("");
+
+  const ordered = useMemo(() => {
+    if (!customOrder) return defaultOrder;
+    const byId = new Map(defaultOrder.map((w) => [w.id, w]));
+    return customOrder.flatMap((id, i) => {
+      const w = byId.get(id);
+      return w ? [{ ...w, sequence: i + 1 }] : [];
+    });
+  }, [defaultOrder, customOrder]);
+
+  const isReordered = customOrder !== null;
+
+  const moveWaypoint = (index: number, dir: -1 | 1) => {
+    const target = index + dir;
+    if (target < 0 || target >= ordered.length) return;
+    const ids = (customOrder ?? defaultOrder.map((w) => w.id)).slice();
+    [ids[index], ids[target]] = [ids[target], ids[index]];
+    // Back to the curated order? Drop the override entirely.
+    const isDefault = ids.every((id, i) => id === defaultOrder[i]?.id);
+    setCustomOrder(isDefault ? null : ids);
+    const moved = ordered[index];
+    setOrderNotice(
+      tf("route.orderAnnounce", lang, {
+        name: lang === "ko" ? moved.place_name_ko : moved.place_name_en,
+        n: target + 1,
+      })
+    );
+  };
+
+  const restoreOrder = () => {
+    setCustomOrder(null);
+    setOrderNotice(t("route.orderRestored", lang));
+  };
 
   /* ---------- analytics: one view event per route mount ---------- */
   useEffect(() => {
@@ -151,6 +192,19 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
           <span>⏱ {fmtDur(route.total_duration)} {t("route.driveSuffix", lang)}</span>
         )}
       </div>
+      {isReordered && (
+        <div className="mt-2.5 flex items-center gap-1.5">
+          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 ring-1 ring-amber-200">
+            {t("route.customOrder", lang)}
+          </span>
+          <button
+            onClick={restoreOrder}
+            className="rounded-full px-2.5 py-1.5 text-[11px] font-bold text-slate-500 underline underline-offset-2 transition-colors hover:text-slate-800"
+          >
+            {t("route.restoreOrder", lang)}
+          </button>
+        </div>
+      )}
       {route.theme_tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {route.theme_tags.map((tag) => (
@@ -185,41 +239,72 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
                 </span>
               </div>
             )}
-            <button
-              onClick={() => selectWaypoint(w)}
-              className={`group flex w-full items-center gap-3 rounded-xl px-1.5 py-2 text-left transition-colors ${
+            <div
+              className={`group flex w-full items-center gap-1 rounded-xl py-1 pl-1.5 pr-0.5 transition-colors ${
                 selected ? "bg-slate-50" : "hover:bg-slate-50/60"
               }`}
             >
-              <span
-                className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-extrabold text-white"
-                style={{ background: meta.color }}
+              <button
+                onClick={() => selectWaypoint(w)}
+                aria-expanded={selected}
+                className="flex min-w-0 flex-1 items-center gap-3 py-1.5 text-left"
               >
-                {visited ? "✓" : w.sequence}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-bold text-slate-900">
-                  {w.place_name_en}
+                <span
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-extrabold text-white"
+                  style={{ background: meta.color }}
+                >
+                  {visited ? "✓" : w.sequence}
                 </span>
-                <span className="block truncate text-[11px] text-slate-400">
-                  {w.place_name_ko} · {lang === "ko" ? meta.label_ko : meta.label_en}
-                  {w.rating != null && ` · ★ ${Number(w.rating).toFixed(1)}`}
-                  {w.review_count != null &&
-                    ` (${tf("route.reviews", lang, { n: w.review_count.toLocaleString() })})`}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-bold text-slate-900">
+                    {w.place_name_en}
+                  </span>
+                  <span className="block truncate text-[11px] text-slate-400">
+                    {w.place_name_ko} · {lang === "ko" ? meta.label_ko : meta.label_en}
+                    {w.rating != null && ` · ★ ${Number(w.rating).toFixed(1)}`}
+                    {w.review_count != null &&
+                      ` (${tf("route.reviews", lang, { n: w.review_count.toLocaleString() })})`}
+                  </span>
                 </span>
-              </span>
-              <svg
-                className={`h-4 w-4 shrink-0 text-slate-300 transition-transform ${
-                  selected ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+                <svg
+                  className={`h-4 w-4 shrink-0 text-slate-300 transition-transform ${
+                    selected ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div className="flex shrink-0 items-center">
+                <button
+                  onClick={() => moveWaypoint(i, -1)}
+                  disabled={i === 0}
+                  aria-label={tf("route.moveUp", lang, {
+                    name: lang === "ko" ? w.place_name_ko : w.place_name_en,
+                  })}
+                  className="grid h-11 w-11 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 active:scale-95 disabled:opacity-25 disabled:hover:bg-transparent"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => moveWaypoint(i, 1)}
+                  disabled={i === ordered.length - 1}
+                  aria-label={tf("route.moveDown", lang, {
+                    name: lang === "ko" ? w.place_name_ko : w.place_name_en,
+                  })}
+                  className="grid h-11 w-11 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 active:scale-95 disabled:opacity-25 disabled:hover:bg-transparent"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
 
             {selected && (
               <div className="mb-2 ml-10 rounded-xl border border-slate-200/70 bg-slate-50 p-3 text-sm text-slate-600">
@@ -271,6 +356,11 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-slate-100">
+      {/* screen-reader announcement for reorder actions */}
+      <p role="status" aria-live="polite" className="sr-only">
+        {orderNotice}
+      </p>
+
       {/* ---------- full-screen Leaflet map ---------- */}
       <RouteLeafletMap
         waypoints={ordered}
