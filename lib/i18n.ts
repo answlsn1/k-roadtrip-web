@@ -66,12 +66,8 @@ export const dict = {
   "feed.cat9":  { en: "Hot Springs & Slow Towns",  ko: "온천 슬로우타운" },
   "feed.cat10": { en: "Screen & Culture Spots",    ko: "K-컬처 로케이션" },
 
-  // ── Full library intro ──────────────────────────────────────
-  "library.kicker":  { en: "The Full Library", ko: "전체 루트 라이브러리" },
-  "library.heading": {
-    en: "{count} local-verified routes across 10 themes",
-    ko: "{count}개의 로컬 검증 루트, 10가지 테마로",
-  },
+  // ── Category tile grid ───────────────────────────────────────
+  "library.routeCount": { en: "{n} routes", ko: "{n}개 코스" },
 
   // ── Cards ───────────────────────────────────────────────────
   // Arrow lives in the card's circular affordance now (RouteVideoCard) — keep the label clean.

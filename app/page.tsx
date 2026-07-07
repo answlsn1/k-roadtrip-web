@@ -4,16 +4,14 @@ import HeroSlideshow from "@/components/home/HeroSlideshow";
 import MapSection from "@/components/home/MapSection";
 import Navbar from "@/components/home/Navbar";
 import RoadTripTips from "@/components/home/RoadTripTips";
-import RouteVideoCard from "@/components/home/RouteVideoCard";
 import CategoryRow from "@/components/home/CategoryRow";
-import LibrarySectionHeader from "@/components/home/LibrarySectionHeader";
+import CategoryTileGrid from "@/components/home/CategoryTileGrid";
 import SiteFooter from "@/components/home/SiteFooter";
 import SponsoredCard from "@/components/home/SponsoredCard";
 import AffiliateDisclosure from "@/components/home/AffiliateDisclosure";
 import ValueProps from "@/components/home/ValueProps";
 import RecommendBanner from "@/components/home/RecommendBanner";
 import { getPublishedRoutes, getAllWaypointsForMap } from "@/lib/data/queries";
-import { getCardMeta, getCardMetaForRoute, getRouteVideoUrl } from "@/lib/config/cardMeta";
 import { SPONSORED_PLACES } from "@/lib/config/sponsored";
 import type { DictKey } from "@/lib/i18n";
 import type { Route } from "@/lib/types";
@@ -63,6 +61,37 @@ export default async function HomePage() {
     getAllWaypointsForMap(),
   ]);
 
+  // ── Category tile groups — 4 curated + 10 DB categories, one unified section ──
+  const curatedGroups = FEED_CATEGORIES.map((cat) => ({
+    id: cat.id,
+    titleKey: cat.titleKey as DictKey,
+    routes: cat.slugs
+      .map((slug) => routes.find((r) => r.slug === slug))
+      .filter((r): r is Route => Boolean(r)),
+  }));
+
+  const dbCategoryGroups = Array.from({ length: 10 }, (_, i) => i + 1).map((catNum) => ({
+    id: `cat-${catNum}`,
+    titleKey: `feed.cat${catNum}` as DictKey,
+    routes: routes.filter((r) => r.category === catNum),
+  }));
+
+  const groups = [...curatedGroups, ...dbCategoryGroups]
+    .filter((g) => g.routes.length > 0)
+    .map((g) => ({
+      id: g.id,
+      titleKey: g.titleKey,
+      image: g.routes.find((r) => r.thumbnail_url)?.thumbnail_url ?? null,
+      routes: g.routes.map((r) => ({
+        slug: r.slug,
+        title_en: r.title_en,
+        title_ko: r.title_ko,
+        thumbnail_url: r.thumbnail_url,
+        description_en: r.description_en,
+        description_ko: r.description_ko,
+      })),
+    }));
+
   return (
     <main>
       {/* ============ NAVBAR ============ */}
@@ -100,29 +129,7 @@ export default async function HomePage() {
           </div>
         ) : (
           <div className="sm:mx-auto sm:max-w-6xl">
-            {FEED_CATEGORIES.map((cat) => {
-              const cards = cat.slugs
-                .map((slug) => routes.find((r) => r.slug === slug))
-                .filter((r): r is Route => Boolean(r));
-              if (cards.length === 0) return null;
-              return (
-                <CategoryRow key={cat.id} titleKey={cat.titleKey}>
-                  {cards.map((r) => (
-                    <div key={r.id} className="snap-start shrink-0 w-[300px] sm:w-[340px]">
-                      <RouteVideoCard
-                        slug={r.slug}
-                        title_en={r.title_en}
-                        title_ko={r.title_ko ?? undefined}
-                        thumbnail_url={r.thumbnail_url}
-                        video_url={getRouteVideoUrl(r.slug)}
-                        meta={getCardMeta(r.slug)}
-                        sizeClass="h-[400px] w-full"
-                      />
-                    </div>
-                  ))}
-                </CategoryRow>
-              );
-            })}
+            <CategoryTileGrid groups={groups} />
 
             {/* ⭐ Sponsored Picks row — hidden until real partners are added */}
             {SPONSORED_PLACES.length > 0 && (
@@ -139,34 +146,6 @@ export default async function HomePage() {
                 <AffiliateDisclosure className="-mt-6 mb-10 px-5 text-xs text-slate-400 sm:px-0" />
               </>
             )}
-
-            {/* ============ FULL LIBRARY — Phase 1 batch content, by category ============ */}
-            {/* categorizedCount is derived from the live fetch, never hardcoded, so it
-                stays correct as future content phases add more routes. */}
-            <LibrarySectionHeader
-              count={routes.filter((r) => r.category != null).length}
-            />
-            {Array.from({ length: 10 }, (_, i) => i + 1).map((catNum) => {
-              const catRoutes = routes.filter((r) => r.category === catNum);
-              if (catRoutes.length === 0) return null;
-              return (
-                <CategoryRow key={`cat-${catNum}`} titleKey={`feed.cat${catNum}` as DictKey}>
-                  {catRoutes.map((r) => (
-                    <div key={r.id} className="snap-start shrink-0 w-[300px] sm:w-[340px]">
-                      <RouteVideoCard
-                        slug={r.slug}
-                        title_en={r.title_en}
-                        title_ko={r.title_ko ?? undefined}
-                        thumbnail_url={r.thumbnail_url}
-                        video_url={getRouteVideoUrl(r.slug)}
-                        meta={getCardMetaForRoute(r)}
-                        sizeClass="h-[400px] w-full"
-                      />
-                    </div>
-                  ))}
-                </CategoryRow>
-              );
-            })}
           </div>
         )}
       </section>
