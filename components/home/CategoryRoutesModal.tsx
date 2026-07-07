@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useLangStore } from "@/store/useLangStore";
-import { t, type DictKey } from "@/lib/i18n";
+import { t, tf, type DictKey } from "@/lib/i18n";
 import { useModalA11y } from "@/hooks/useModalA11y";
 
 export interface ModalRoute {
@@ -55,7 +55,12 @@ export default function CategoryRoutesModal({ titleKey, routes, onClose }: Categ
         className="relative z-10 max-h-[80vh] w-full overflow-y-auto rounded-t-3xl bg-white p-6 shadow-2xl sm:max-w-lg sm:rounded-3xl"
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-extrabold text-ink">{t(titleKey, lang)}</h2>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <h2 className="truncate text-xl font-extrabold text-ink">{t(titleKey, lang)}</h2>
+            <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-bold text-slate-500">
+              {tf("library.routeCount", lang, { n: routes.length })}
+            </span>
+          </div>
           <button
             onClick={onClose}
             aria-label={t("common.close", lang)}
@@ -75,15 +80,15 @@ export default function CategoryRoutesModal({ titleKey, routes, onClose }: Categ
                 key={r.slug}
                 href={`/routes/${r.slug}`}
                 onClick={onClose}
-                className="flex items-center gap-3 rounded-2xl border border-slate-200 p-3 transition-colors hover:border-slate-300 hover:bg-slate-50"
+                className="group flex items-center gap-3 rounded-2xl border border-slate-200 p-3 transition-colors hover:border-slate-300 hover:bg-slate-50"
               >
-                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-900">
+                <div className="h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-slate-900">
                   {r.thumbnail_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={r.thumbnail_url} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-800 to-slate-950">
-                      <svg className="h-5 w-5 text-white/15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <svg className="h-6 w-6 text-white/15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <circle cx="5.5" cy="5" r="2" fill="currentColor" />
                         <path d="M5.5 7.4v4.6a4 4 0 0 0 4 4h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeDasharray="0.1 3.2" />
                         <circle cx="18.5" cy="18" r="2" fill="currentColor" />
@@ -95,7 +100,7 @@ export default function CategoryRoutesModal({ titleKey, routes, onClose }: Categ
                   <p className="truncate text-sm font-bold text-ink">{title}</p>
                   {desc && <p className="line-clamp-2 text-xs leading-relaxed text-slate-500">{desc}</p>}
                 </div>
-                <span aria-hidden className="shrink-0 text-slate-300">
+                <span aria-hidden className="shrink-0 text-slate-300 transition-colors group-hover:text-amber-500">
                   →
                 </span>
               </Link>
