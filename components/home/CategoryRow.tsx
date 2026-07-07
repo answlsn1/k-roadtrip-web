@@ -96,7 +96,7 @@ export default function CategoryRow({
             const rest = title.slice(1);
             return (
               <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-                <span className="bg-gradient-to-br from-amber-500 to-orange-600 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-br from-amber-600 to-orange-700 bg-clip-text text-transparent">
                   {first}
                 </span>
                 {rest}
