@@ -111,6 +111,8 @@ export const dict = {
   "map.label":   { en: "Live Map",                   ko: "전체 지도" },
   "map.heading": { en: "Every stop, local-verified", ko: "모든 장소, 현지 검증 완료" },
   "map.all":     { en: "All",                        ko: "전체" },
+  "map.more":    { en: "+{n} more",                  ko: "+{n}개 더" },
+  "map.less":    { en: "Show less",                  ko: "간략히 보기" },
   "map.hint": {
     en: "Tap a marker for details & Naver Map navigation",
     ko: "마커를 눌러 상세 정보와 네이버 지도 길안내를 확인하세요",

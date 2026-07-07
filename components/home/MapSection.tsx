@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import type { MapWaypoint } from "@/lib/types";
 import { useLangStore } from "@/store/useLangStore";
-import { t } from "@/lib/i18n";
+import { t, tf } from "@/lib/i18n";
 import { trackEvent } from "@/lib/analytics/events";
 
 const LeafletMap = dynamic(() => import("./LeafletMap"), {
@@ -23,7 +23,12 @@ interface MapSectionProps {
 export default function MapSection({ waypoints }: MapSectionProps) {
   const regions = Array.from(new Set(waypoints.map((w) => w.region_name_en))).sort();
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
+  const [showAllRegions, setShowAllRegions] = useState(false);
   const lang = useLangStore((s) => s.lang);
+
+  const VISIBLE_COUNT = 8;
+  const visibleRegions = showAllRegions ? regions : regions.slice(0, VISIBLE_COUNT);
+  const hiddenCount = regions.length - VISIBLE_COUNT;
 
   return (
     <section id="map" className="mx-auto max-w-6xl scroll-mt-20 px-5 pb-20 sm:pb-28">
@@ -52,7 +57,7 @@ export default function MapSection({ waypoints }: MapSectionProps) {
           >
             {t("map.all", lang)}
           </button>
-          {regions.map((r) => (
+          {visibleRegions.map((r) => (
             <button
               key={r}
               onClick={() => {
@@ -70,6 +75,29 @@ export default function MapSection({ waypoints }: MapSectionProps) {
               {r}
             </button>
           ))}
+          {regions.length > VISIBLE_COUNT && (
+            <button
+              onClick={() => setShowAllRegions((v) => !v)}
+              aria-expanded={showAllRegions}
+              className="flex items-center gap-1 rounded-full border border-dashed border-slate-300 px-4 py-1.5 text-xs font-bold text-slate-500 transition-colors hover:border-slate-400 hover:bg-slate-50"
+            >
+              {showAllRegions ? t("map.less", lang) : tf("map.more", lang, { n: hiddenCount })}
+              <svg
+                className={`h-3 w-3 transition-transform ${showAllRegions ? "rotate-180" : ""}`}
+                viewBox="0 0 12 12"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M3 4.5L6 7.5L9 4.5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 
