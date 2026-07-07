@@ -168,55 +168,71 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
     min == null ? null : min >= 60 ? `${Math.floor(min / 60)}h ${min % 60}m` : `${min}m`;
 
   /* ---------- panel pieces (rendered exactly once) ---------- */
+  // Design v2 / Phase B: image-forward header — real thumbnail when the route
+  // has one, dark ink fallback otherwise (new curated batches may ship with
+  // thumbnail_url = null, so this must never look broken either way). The
+  // background is absolutely positioned inside a `relative` box whose height
+  // comes entirely from the in-flow text below, so it never changes the
+  // block's height — the mobile bottom-sheet peek height is unaffected.
   const summary = (
-    <div className="px-5 pb-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-600">
+    <div className="relative overflow-hidden">
+      <div className="absolute inset-0" aria-hidden>
+        {route.thumbnail_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={route.thumbnail_url} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="h-full w-full bg-ink bg-[radial-gradient(circle_at_25%_15%,rgba(255,255,255,0.08),transparent_55%)]" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/92 via-slate-950/55 to-slate-950/10" />
+      </div>
+
+      <div className="relative px-5 pb-4 pt-4">
+        <div className="flex items-center justify-between gap-3">
+          <span className="rounded-full bg-slate-950/55 px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-white ring-1 ring-white/20 backdrop-blur-md">
             {route.region_name_en}
             {route.region_name_ko ? ` · ${route.region_name_ko}` : ""}
-          </p>
-          <h1 className="mt-1 text-xl font-extrabold leading-tight text-slate-900">
-            {route.title_en}
-          </h1>
-          {route.title_ko && (
-            <p className="mt-0.5 text-sm font-medium text-slate-400">{route.title_ko}</p>
+          </span>
+          <SaveRouteButton routeId={route.id} />
+        </div>
+        <h1 className="mt-4 text-xl font-extrabold leading-tight tracking-tight text-white drop-shadow-md">
+          {route.title_en}
+        </h1>
+        {route.title_ko && (
+          <p className="mt-0.5 text-sm font-medium text-white/65">{route.title_ko}</p>
+        )}
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-white/70">
+          <span>{tf("route.stops", lang, { n: ordered.length })}</span>
+          {fmtKm(route.total_distance) && <span>🚗 {fmtKm(route.total_distance)}</span>}
+          {fmtDur(route.total_duration) && (
+            <span>⏱ {fmtDur(route.total_duration)} {t("route.driveSuffix", lang)}</span>
           )}
         </div>
-        <SaveRouteButton routeId={route.id} className="mt-1" />
-      </div>
-      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-slate-500">
-        <span>{tf("route.stops", lang, { n: ordered.length })}</span>
-        {fmtKm(route.total_distance) && <span>🚗 {fmtKm(route.total_distance)}</span>}
-        {fmtDur(route.total_duration) && (
-          <span>⏱ {fmtDur(route.total_duration)} {t("route.driveSuffix", lang)}</span>
+        {isReordered && (
+          <div className="mt-2.5 flex items-center gap-1.5">
+            <span className="rounded-full bg-amber-300 px-2.5 py-1 text-[11px] font-bold text-slate-900 ring-1 ring-amber-200/60">
+              {t("route.customOrder", lang)}
+            </span>
+            <button
+              onClick={restoreOrder}
+              className="rounded-full px-2.5 py-1.5 text-[11px] font-bold text-white/70 underline underline-offset-2 transition-colors hover:text-white"
+            >
+              {t("route.restoreOrder", lang)}
+            </button>
+          </div>
+        )}
+        {route.theme_tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {route.theme_tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/90 ring-1 ring-white/15 backdrop-blur-md"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
         )}
       </div>
-      {isReordered && (
-        <div className="mt-2.5 flex items-center gap-1.5">
-          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 ring-1 ring-amber-200">
-            {t("route.customOrder", lang)}
-          </span>
-          <button
-            onClick={restoreOrder}
-            className="rounded-full px-2.5 py-1.5 text-[11px] font-bold text-slate-500 underline underline-offset-2 transition-colors hover:text-slate-800"
-          >
-            {t("route.restoreOrder", lang)}
-          </button>
-        </div>
-      )}
-      {route.theme_tags.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {route.theme_tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600"
-            >
-              #{tag}
-            </span>
-          ))}
-        </div>
-      )}
     </div>
   );
 
@@ -285,7 +301,7 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
                   aria-label={tf("route.moveUp", lang, {
                     name: lang === "ko" ? w.place_name_ko : w.place_name_en,
                   })}
-                  className="grid h-11 w-11 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 active:scale-95 disabled:opacity-25 disabled:hover:bg-transparent"
+                  className="grid h-11 w-11 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-600 active:scale-95 disabled:opacity-25 disabled:hover:bg-transparent"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
@@ -297,7 +313,7 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
                   aria-label={tf("route.moveDown", lang, {
                     name: lang === "ko" ? w.place_name_ko : w.place_name_en,
                   })}
-                  className="grid h-11 w-11 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 active:scale-95 disabled:opacity-25 disabled:hover:bg-transparent"
+                  className="grid h-11 w-11 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-600 active:scale-95 disabled:opacity-25 disabled:hover:bg-transparent"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -307,7 +323,7 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
             </div>
 
             {selected && (
-              <div className="mb-2 ml-10 rounded-xl border border-slate-200/70 bg-slate-50 p-3 text-sm text-slate-600">
+              <div className="mb-2 ml-10 rounded-2xl border border-slate-200/70 bg-slate-50 p-3 text-sm text-slate-600">
                 {w.description_en && <p className="leading-relaxed">{w.description_en}</p>}
                 <div className="mt-2 space-y-1.5 text-[13px]">
                   {w.parking_note_en && <p>🅿️ {w.parking_note_en}</p>}
@@ -317,7 +333,7 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
                 </div>
                 <button
                   onClick={() => navigateToStop(w)}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-extrabold text-white transition-transform active:scale-[0.99]"
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-2.5 text-xs font-extrabold text-white transition-transform active:scale-[0.99]"
                   style={{ background: NAVER_GREEN }}
                 >
                   <span
@@ -382,7 +398,7 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
 
       {/* ---------- Trip Mode resume banner ---------- */}
       {!bannerDismissed && (nextStop || tripComplete) && (
-        <div className="absolute left-1/2 top-4 z-20 flex max-w-[92%] -translate-x-1/2 items-center gap-1 rounded-full bg-slate-900/90 py-1.5 pl-4 pr-1.5 text-white shadow-xl backdrop-blur">
+        <div className="absolute left-1/2 top-4 z-20 flex max-w-[92%] -translate-x-1/2 items-center gap-1 rounded-full bg-slate-950/55 py-1.5 pl-4 pr-1.5 text-white shadow-xl ring-1 ring-white/20 backdrop-blur-md">
           {nextStop ? (
             <button
               onClick={() => setBridgeTarget([nextStop])}

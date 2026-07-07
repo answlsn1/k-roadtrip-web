@@ -109,10 +109,10 @@ export default function SaveRouteButton({ routeId, className = "" }: SaveRouteBu
         disabled={busy}
         aria-pressed={saved}
         aria-label={saved ? "Remove from saved routes" : "Save this route"}
-        className={`grid h-10 w-10 shrink-0 place-items-center rounded-full border transition-all active:scale-90 ${
+        className={`grid h-10 w-10 shrink-0 place-items-center rounded-full ring-1 backdrop-blur-md transition-all active:scale-90 ${
           saved
-            ? "border-rose-200 bg-rose-50 text-rose-500"
-            : "border-slate-200 bg-white text-slate-400 hover:border-rose-200 hover:text-rose-400"
+            ? "bg-rose-500 text-white ring-rose-300/70"
+            : "bg-slate-950/55 text-white/80 ring-white/20 hover:bg-slate-950/70 hover:text-white"
         } ${className}`}
       >
         <svg
