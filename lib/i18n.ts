@@ -84,6 +84,10 @@ export const dict = {
     en: "Map data © OpenStreetMap contributors · Navigation by Naver Map",
     ko: "지도 데이터 © OpenStreetMap 기여자 · 내비게이션 제공 · 네이버 지도",
   },
+  "footer.contact": {
+    en: "Contact: {email}",
+    ko: "문의: {email}",
+  },
 
   // ── Affiliate / sponsor disclosure ──────────────────────────
   "disclosure.affiliate": {
