@@ -6,14 +6,16 @@ import Navbar from "@/components/home/Navbar";
 import RoadTripTips from "@/components/home/RoadTripTips";
 import RouteVideoCard from "@/components/home/RouteVideoCard";
 import CategoryRow from "@/components/home/CategoryRow";
+import LibrarySectionHeader from "@/components/home/LibrarySectionHeader";
 import SiteFooter from "@/components/home/SiteFooter";
 import SponsoredCard from "@/components/home/SponsoredCard";
 import AffiliateDisclosure from "@/components/home/AffiliateDisclosure";
 import ValueProps from "@/components/home/ValueProps";
 import RecommendBanner from "@/components/home/RecommendBanner";
 import { getPublishedRoutes, getAllWaypointsForMap } from "@/lib/data/queries";
-import { getCardMeta, getRouteVideoUrl } from "@/lib/config/cardMeta";
+import { getCardMeta, getCardMetaForRoute, getRouteVideoUrl } from "@/lib/config/cardMeta";
 import { SPONSORED_PLACES } from "@/lib/config/sponsored";
+import type { DictKey } from "@/lib/i18n";
 import type { Route } from "@/lib/types";
 
 // Render per-request: works with or without Supabase env at build time,
@@ -137,6 +139,34 @@ export default async function HomePage() {
                 <AffiliateDisclosure className="-mt-6 mb-10 px-5 text-xs text-slate-400 sm:px-0" />
               </>
             )}
+
+            {/* ============ FULL LIBRARY — Phase 1 batch content, by category ============ */}
+            {/* categorizedCount is derived from the live fetch, never hardcoded, so it
+                stays correct as future content phases add more routes. */}
+            <LibrarySectionHeader
+              count={routes.filter((r) => r.category != null).length}
+            />
+            {Array.from({ length: 10 }, (_, i) => i + 1).map((catNum) => {
+              const catRoutes = routes.filter((r) => r.category === catNum);
+              if (catRoutes.length === 0) return null;
+              return (
+                <CategoryRow key={`cat-${catNum}`} titleKey={`feed.cat${catNum}` as DictKey}>
+                  {catRoutes.map((r) => (
+                    <div key={r.id} className="snap-start shrink-0 w-[300px] sm:w-[340px]">
+                      <RouteVideoCard
+                        slug={r.slug}
+                        title_en={r.title_en}
+                        title_ko={r.title_ko ?? undefined}
+                        thumbnail_url={r.thumbnail_url}
+                        video_url={getRouteVideoUrl(r.slug)}
+                        meta={getCardMetaForRoute(r)}
+                        sizeClass="h-[400px] w-full"
+                      />
+                    </div>
+                  ))}
+                </CategoryRow>
+              );
+            })}
           </div>
         )}
       </section>

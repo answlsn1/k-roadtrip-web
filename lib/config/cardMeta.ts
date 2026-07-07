@@ -115,6 +115,39 @@ export function getCardMeta(slug: string): CardMeta {
   );
 }
 
+// Duration-type → badge label for routes that aren't hand-curated (Phase 1
+// batch content). Keys mirror the `routes.duration_type` DB values.
+const DURATION_BADGE_EN: Record<string, string> = {
+  daytrip: "1-Day Course",
+  "1n2d": "2-Day Course",
+  "2n3d": "3-Day Course",
+};
+
+/**
+ * Like `getCardMeta`, but falls back to a badge derived from `duration_type`
+ * and a truncated description instead of an empty shell — for routes that
+ * were never hand-curated into CARD_META (e.g. the Phase 1 batch of 30).
+ */
+export function getCardMetaForRoute(route: {
+  slug: string;
+  description_en: string | null;
+  description_ko: string | null;
+  duration_type: string | null;
+}): CardMeta {
+  const curated = CARD_META[route.slug];
+  if (curated) return curated;
+  const badge = (route.duration_type && DURATION_BADGE_EN[route.duration_type]) || "Course";
+  const truncate = (s: string | null, max: number) =>
+    s ? (s.length > max ? s.slice(0, max - 1).trimEnd() + "…" : s) : "";
+  return {
+    badge,
+    sub_en: truncate(route.description_en, 90),
+    sub_ko: truncate(route.description_ko, 90),
+    chips_en: [],
+    chips_ko: [],
+  };
+}
+
 // ── Route hero videos ────────────────────────────────────────────────────────
 // HARD RULE (CLAUDE.md §5): NO external sample/placeholder media in production.
 // All sample URLs (MDN cc0 / Big Buck Bunny / learningcontainer) were removed.

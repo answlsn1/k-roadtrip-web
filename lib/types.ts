@@ -16,6 +16,8 @@ export interface Route {
   total_duration: number | null;
   theme_tags: string[];
   thumbnail_url: string | null;
+  category: number | null; // Phase 1 content category (1–10); null on the original 12 routes
+  duration_type: string | null; // "daytrip" | "1n2d" | "2n3d"; null on the original 12 routes
 }
 
 export interface Waypoint {

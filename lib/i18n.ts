@@ -54,6 +54,25 @@ export const dict = {
   "feed.sponsored": { en: "Sponsored Picks",   ko: "스폰서 추천" },
   "feed.partner":   { en: "Partner",              ko: "파트너" },
 
+  // ── Full library category titles (Phase 1 content, category 1–10) ────
+  "feed.cat1":  { en: "Hanok & Heritage Towns",   ko: "전통 한옥 마을" },
+  "feed.cat2":  { en: "UNESCO & Ancient Capitals", ko: "유네스코 고도" },
+  "feed.cat3":  { en: "Local Food Trails",         ko: "미식 로드" },
+  "feed.cat4":  { en: "East Coast Drives",         ko: "동해안 드라이브" },
+  "feed.cat5":  { en: "Southern Islands",          ko: "남해의 섬들" },
+  "feed.cat6":  { en: "Mountain Passes",           ko: "산악 고갯길" },
+  "feed.cat7":  { en: "Nature & National Parks",   ko: "자연 국립공원" },
+  "feed.cat8":  { en: "Seasonal Only",             ko: "계절 한정" },
+  "feed.cat9":  { en: "Hot Springs & Slow Towns",  ko: "온천 슬로우타운" },
+  "feed.cat10": { en: "Screen & Culture Spots",    ko: "K-컬처 로케이션" },
+
+  // ── Full library intro ──────────────────────────────────────
+  "library.kicker":  { en: "The Full Library", ko: "전체 루트 라이브러리" },
+  "library.heading": {
+    en: "{count} local-verified routes across 10 themes",
+    ko: "{count}개의 로컬 검증 루트, 10가지 테마로",
+  },
+
   // ── Cards ───────────────────────────────────────────────────
   // Arrow lives in the card's circular affordance now (RouteVideoCard) — keep the label clean.
   "card.viewmap": { en: "View course on map", ko: "지도에서 코스 보기" },

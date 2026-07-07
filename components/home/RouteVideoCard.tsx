@@ -55,7 +55,13 @@ export default function RouteVideoCard({
             className={`h-full w-full object-cover ${video_url ? "blur-sm scale-105" : ""}`}
           />
         ) : (
-          <div className="h-full w-full animate-pulse bg-slate-800" />
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-800 to-slate-950">
+            <svg className="h-12 w-12 text-white/10" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="5.5" cy="5" r="2" fill="currentColor" />
+              <path d="M5.5 7.4v4.6a4 4 0 0 0 4 4h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeDasharray="0.1 3.2" />
+              <circle cx="18.5" cy="18" r="2" fill="currentColor" />
+            </svg>
+          </div>
         )}
         <div className="absolute inset-0 bg-slate-900/40" />
       </div>
