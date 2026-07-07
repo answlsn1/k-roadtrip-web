@@ -47,11 +47,11 @@ export const dict = {
   },
 
   // ── Feed category titles ────────────────────────────────────
-  "feed.trending":  { en: "🔥 Trending in Korea", ko: "🔥 한국에서 뜨는 코스" },
-  "feed.beyond":    { en: "🌿 Beyond Seoul",      ko: "🌿 서울 너머" },
-  "feed.heritage":  { en: "🏛 History & Culture", ko: "🏛 역사 & 문화" },
-  "feed.ocean":     { en: "🌊 Ocean Views",       ko: "🌊 해안 드라이브" },
-  "feed.sponsored": { en: "⭐ Sponsored Picks",   ko: "⭐ 스폰서 추천" },
+  "feed.trending":  { en: "Trending in Korea", ko: "한국에서 뜨는 코스" },
+  "feed.beyond":    { en: "Beyond Seoul",      ko: "서울 너머" },
+  "feed.heritage":  { en: "History & Culture", ko: "역사 & 문화" },
+  "feed.ocean":     { en: "Ocean Views",       ko: "해안 드라이브" },
+  "feed.sponsored": { en: "Sponsored Picks",   ko: "스폰서 추천" },
   "feed.partner":   { en: "Partner",              ko: "파트너" },
 
   // ── Cards ───────────────────────────────────────────────────

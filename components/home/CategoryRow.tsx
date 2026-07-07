@@ -90,9 +90,19 @@ export default function CategoryRow({
       {/* Heading row — nav buttons pinned to the right */}
       <div className="mb-4 flex items-center justify-between px-5 sm:px-0">
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
-            {t(titleKey, lang)}
-          </h2>
+          {(() => {
+            const title = t(titleKey, lang);
+            const first = title.slice(0, 1);
+            const rest = title.slice(1);
+            return (
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                <span className="bg-gradient-to-br from-amber-500 to-orange-600 bg-clip-text text-transparent">
+                  {first}
+                </span>
+                {rest}
+              </h2>
+            );
+          })()}
           {badgeKey && (
             <span
               className={`rounded-full px-3 py-0.5 text-[11px] font-bold uppercase tracking-wider ${badgeClass}`}
