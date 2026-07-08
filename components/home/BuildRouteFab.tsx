@@ -33,7 +33,7 @@ export default function BuildRouteFab() {
         "gap-0.5 rounded-full bg-ink px-2.5 py-3.5 text-white shadow-float-dark",
         // hover 리프트: 기본 -translate-y-1/2(수직 센터링)를 대체하는 유틸이라
         // calc로 센터링+2px 부양을 합성 — 값 교체 시 FAB가 점프하지 않게 주의.
-        "transition duration-300 ease-out hover:bg-slate-700 hover:translate-y-[calc(-50%-2px)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.55),0_24px_56px_-8px_rgba(0,0,0,0.65)] active:scale-95",
+        "transition duration-300 ease-out hover:bg-slate-700 hover:translate-y-[calc(-50%-2px)] hover:shadow-float-dark-lg active:scale-95",
         "motion-reduce:transition-none motion-reduce:hover:-translate-y-1/2",
         // 어두운 사진 위에서도 흰 링, 흰 배경 위에서도 ink 아웃라인이 보이게 2중 포커스 표시.
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink focus-visible:ring-2 focus-visible:ring-white",

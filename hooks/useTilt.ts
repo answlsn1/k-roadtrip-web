@@ -21,18 +21,28 @@ const MAX_RX_DEG = 4;
  *   카드에 공유해도 안전하다.
  */
 export function useTilt<T extends HTMLElement = HTMLElement>() {
-  const enabled = useRef(false);
+  const mqNoHover = useRef<MediaQueryList | null>(null);
+  const mqReduced = useRef<MediaQueryList | null>(null);
   const frame = useRef(0);
 
   useEffect(() => {
-    const noHover = window.matchMedia("(hover: none)").matches;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    enabled.current = !noHover && !reduced;
+    mqNoHover.current = window.matchMedia("(hover: none)");
+    mqReduced.current = window.matchMedia("(prefers-reduced-motion: reduce)");
     return () => cancelAnimationFrame(frame.current);
   }, []);
 
+  // 이벤트 시점마다 평가 — 세션 중 OS에서 감속 선호를 켜도 즉시 no-op 전환.
+  const isEnabled = useCallback(
+    () =>
+      mqNoHover.current !== null &&
+      mqReduced.current !== null &&
+      !mqNoHover.current.matches &&
+      !mqReduced.current.matches,
+    []
+  );
+
   const onPointerMove = useCallback((e: React.PointerEvent<T>) => {
-    if (!enabled.current) return;
+    if (!isEnabled()) return;
     // rAF 콜백 시점엔 SyntheticEvent.currentTarget이 비어 있으므로 동기 캡처.
     const el = e.currentTarget;
     const rect = el.getBoundingClientRect();
@@ -44,14 +54,16 @@ export function useTilt<T extends HTMLElement = HTMLElement>() {
       el.style.setProperty("--rx", `${(-py * 2 * MAX_RX_DEG).toFixed(2)}deg`);
       el.style.setProperty("--ry", `${(px * 2 * MAX_RY_DEG).toFixed(2)}deg`);
     });
-  }, []);
+  }, [isEnabled]);
 
   const onPointerLeave = useCallback((e: React.PointerEvent<T>) => {
+    // 터치 기기 등 비활성 환경에선 변수를 아예 기록하지 않는다(완전 no-op 계약).
+    if (!isEnabled()) return;
     const el = e.currentTarget;
     cancelAnimationFrame(frame.current);
     el.style.setProperty("--rx", "0deg");
     el.style.setProperty("--ry", "0deg");
-  }, []);
+  }, [isEnabled]);
 
   return { onPointerMove, onPointerLeave };
 }

@@ -39,7 +39,7 @@ export default function CategoryTileGrid({ groups }: { groups: CategoryGroup[] }
             onClick={() => setOpenId(g.id)}
             onPointerMove={tilt.onPointerMove}
             onPointerLeave={tilt.onPointerLeave}
-            className="group relative aspect-[3/4] rounded-3xl text-left shadow-float ring-1 ring-white/10 transition-[transform,box-shadow] [transition-duration:180ms,300ms] ease-out [transform:perspective(900px)_rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))_translateY(var(--ty,0px))_scale(var(--s,1))] hover:[--ty:-6px] active:[--s:0.98] hover:shadow-float-lg hover:ring-amber-300/40 motion-reduce:transition-none motion-reduce:[transform:none]"
+            className="group relative aspect-[3/4] rounded-3xl text-left shadow-float ring-1 ring-white/10 transition-[transform,box-shadow] [transition-duration:180ms,300ms] ease-out [transform:perspective(900px)_rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))_translateY(var(--ty,0px))_scale(var(--s,1))] hover:[--ty:-6px] active:[--s:0.98] hover:shadow-float-lg hover:ring-amber-300/40 focus-visible:[--ty:-6px] focus-visible:shadow-float-lg motion-reduce:transition-none motion-reduce:[transform:none]"
           >
             {/* 미디어 클리핑 전용 레이어 — isolate + translateZ(0)로 자체
                 스태킹/합성 레이어를 고정해 hover 줌 중에도 둥근 클립이 유지된다.
