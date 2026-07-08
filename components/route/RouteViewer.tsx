@@ -3,22 +3,173 @@
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import NavigationBridgeModal from "./NavigationBridgeModal";
 import SaveRouteButton from "./SaveRouteButton";
 import type { Route, Waypoint } from "@/lib/types";
 import { typeMeta, NAVER_GREEN } from "@/lib/config/constants";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { trackEvent } from "@/lib/analytics/events";
 import { useTripStore } from "@/store/useTripStore";
 import { kmBetween, driveMin } from "@/lib/domain/geo";
 import { useLangStore } from "@/store/useLangStore";
-import { t, tf } from "@/lib/i18n";
+import { t, tf, type Lang } from "@/lib/i18n";
 
 const RouteLeafletMap = dynamic(() => import("./RouteLeafletMap"), { ssr: false });
 
 interface RouteViewerProps {
   route: Route;
   waypoints: Waypoint[];
+}
+
+function SortableWaypointRow({
+  waypoint: w,
+  prev,
+  selected,
+  visited,
+  lang,
+  onSelect,
+  onNavigate,
+}: {
+  waypoint: Waypoint;
+  prev: Waypoint | null;
+  selected: boolean;
+  visited: boolean;
+  lang: Lang;
+  onSelect: (w: Waypoint) => void;
+  onNavigate: (w: Waypoint) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: w.id });
+  const reducedMotion = useReducedMotion();
+  const meta = typeMeta(w.type_tag);
+  const km = prev ? kmBetween(prev, w) : null;
+
+  return (
+    <div>
+      {km !== null && (
+        <div className="my-1 flex items-center gap-2 pl-[15px]">
+          <span className="h-4 w-px bg-slate-300" />
+          <span className="text-[11px] font-semibold text-slate-400">
+            🚗 ≈ {tf("route.kmDrive", lang, { km: km.toFixed(1), min: driveMin(km) })}{" "}
+            {t("route.driveSuffix", lang)}
+          </span>
+        </div>
+      )}
+      <div
+        ref={setNodeRef}
+        style={{
+          // dnd-kit's own translate lives in `transform`, so the drag scale
+          // bump is appended into the same string — a sibling Tailwind class
+          // would just get clobbered by this inline style.
+          transform: transform
+            ? `${CSS.Transform.toString(transform)}${isDragging ? " scale(1.02)" : ""}`
+            : undefined,
+          transition: reducedMotion ? undefined : transition,
+        }}
+        className={`group relative flex w-full items-center gap-1 rounded-xl py-1 pl-1.5 pr-0.5 transition-colors ${
+          isDragging
+            ? "z-10 bg-white shadow-lg shadow-slate-900/10 ring-1 ring-black/5"
+            : selected
+              ? "bg-slate-50"
+              : "hover:bg-slate-50/60"
+        }`}
+      >
+        <button
+          onClick={() => onSelect(w)}
+          aria-expanded={selected}
+          className="flex min-w-0 flex-1 items-center gap-3 py-1.5 text-left"
+        >
+          <span
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-extrabold text-white"
+            style={{ background: meta.color }}
+          >
+            {visited ? "✓" : w.sequence}
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-bold text-slate-900">
+              {w.place_name_en}
+            </span>
+            <span className="block truncate text-[11px] text-slate-400">
+              {w.place_name_ko} · {lang === "ko" ? meta.label_ko : meta.label_en}
+              {w.rating != null && ` · ★ ${Number(w.rating).toFixed(1)}`}
+              {w.review_count != null &&
+                ` (${tf("route.reviews", lang, { n: w.review_count.toLocaleString() })})`}
+            </span>
+          </span>
+          <svg
+            className={`h-4 w-4 shrink-0 text-slate-300 transition-transform ${
+              selected ? "rotate-180" : ""
+            }`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <button
+          {...attributes}
+          {...listeners}
+          aria-label={t("builder.dragReorder", lang)}
+          className="grid h-11 w-11 shrink-0 cursor-grab touch-none place-items-center rounded-lg text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-600 active:scale-95 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:ring-offset-2"
+        >
+          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+            <circle cx="7" cy="5" r="1.4" />
+            <circle cx="13" cy="5" r="1.4" />
+            <circle cx="7" cy="10" r="1.4" />
+            <circle cx="13" cy="10" r="1.4" />
+            <circle cx="7" cy="15" r="1.4" />
+            <circle cx="13" cy="15" r="1.4" />
+          </svg>
+        </button>
+      </div>
+
+      {selected && (
+        <div className="mb-2 ml-10 rounded-2xl border border-slate-200/70 bg-slate-50 p-3 text-sm text-slate-600">
+          {w.description_en && <p className="leading-relaxed">{w.description_en}</p>}
+          <div className="mt-2 space-y-1.5 text-[13px]">
+            {w.parking_note_en && <p>🅿️ {w.parking_note_en}</p>}
+            {w.booking_note_en && <p>🕐 {w.booking_note_en}</p>}
+            {w.address_en && <p>📍 {w.address_en}</p>}
+            {w.address_ko && <p className="text-slate-400">{w.address_ko}</p>}
+          </div>
+          <button
+            onClick={() => onNavigate(w)}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-2.5 text-xs font-extrabold text-white transition-transform active:scale-[0.99]"
+            style={{ background: NAVER_GREEN }}
+          >
+            <span
+              className="grid h-4 w-4 place-items-center rounded bg-white text-[10px] font-black"
+              style={{ color: NAVER_GREEN }}
+            >
+              N
+            </span>
+            {t("route.navigateStop", lang)}
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 /* ============================================================
@@ -63,19 +214,28 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
 
   const isReordered = customOrder !== null;
 
-  const moveWaypoint = (index: number, dir: -1 | 1) => {
-    const target = index + dir;
-    if (target < 0 || target >= ordered.length) return;
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
     const ids = (customOrder ?? defaultOrder.map((w) => w.id)).slice();
-    [ids[index], ids[target]] = [ids[target], ids[index]];
+    const oldIndex = ids.indexOf(Number(active.id));
+    const newIndex = ids.indexOf(Number(over.id));
+    if (oldIndex < 0 || newIndex < 0) return;
+    const nextIds = arrayMove(ids, oldIndex, newIndex);
     // Back to the curated order? Drop the override entirely.
-    const isDefault = ids.every((id, i) => id === defaultOrder[i]?.id);
-    setCustomOrder(isDefault ? null : ids);
-    const moved = ordered[index];
+    const isDefault = nextIds.every((id, i) => id === defaultOrder[i]?.id);
+    setCustomOrder(isDefault ? null : nextIds);
+    const moved = ordered[oldIndex];
     setOrderNotice(
       tf("route.orderAnnounce", lang, {
         name: lang === "ko" ? moved.place_name_ko : moved.place_name_en,
-        n: target + 1,
+        n: newIndex + 1,
       })
     );
   };
@@ -238,117 +398,25 @@ export default function RouteViewer({ route, waypoints }: RouteViewerProps) {
 
   const list = (
     <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-4">
-      {ordered.map((w, i) => {
-        const selected = selectedId === w.id;
-        const visited = progress >= w.sequence && progress > 0;
-        const meta = typeMeta(w.type_tag);
-        const prev = i > 0 ? ordered[i - 1] : null;
-        const km = prev ? kmBetween(prev, w) : null;
-        return (
-          <div key={w.id}>
-            {km !== null && (
-              <div className="my-1 flex items-center gap-2 pl-[15px]">
-                <span className="h-4 w-px bg-slate-300" />
-                <span className="text-[11px] font-semibold text-slate-400">
-                  🚗 ≈ {tf("route.kmDrive", lang, { km: km.toFixed(1), min: driveMin(km) })}{" "}
-                  {t("route.driveSuffix", lang)}
-                </span>
-              </div>
-            )}
-            <div
-              className={`group flex w-full items-center gap-1 rounded-xl py-1 pl-1.5 pr-0.5 transition-colors ${
-                selected ? "bg-slate-50" : "hover:bg-slate-50/60"
-              }`}
-            >
-              <button
-                onClick={() => selectWaypoint(w)}
-                aria-expanded={selected}
-                className="flex min-w-0 flex-1 items-center gap-3 py-1.5 text-left"
-              >
-                <span
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-extrabold text-white"
-                  style={{ background: meta.color }}
-                >
-                  {visited ? "✓" : w.sequence}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-bold text-slate-900">
-                    {w.place_name_en}
-                  </span>
-                  <span className="block truncate text-[11px] text-slate-400">
-                    {w.place_name_ko} · {lang === "ko" ? meta.label_ko : meta.label_en}
-                    {w.rating != null && ` · ★ ${Number(w.rating).toFixed(1)}`}
-                    {w.review_count != null &&
-                      ` (${tf("route.reviews", lang, { n: w.review_count.toLocaleString() })})`}
-                  </span>
-                </span>
-                <svg
-                  className={`h-4 w-4 shrink-0 text-slate-300 transition-transform ${
-                    selected ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              <div className="flex shrink-0 items-center">
-                <button
-                  onClick={() => moveWaypoint(i, -1)}
-                  disabled={i === 0}
-                  aria-label={tf("route.moveUp", lang, {
-                    name: lang === "ko" ? w.place_name_ko : w.place_name_en,
-                  })}
-                  className="grid h-11 w-11 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-600 active:scale-95 disabled:opacity-25 disabled:hover:bg-transparent"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => moveWaypoint(i, 1)}
-                  disabled={i === ordered.length - 1}
-                  aria-label={tf("route.moveDown", lang, {
-                    name: lang === "ko" ? w.place_name_ko : w.place_name_en,
-                  })}
-                  className="grid h-11 w-11 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-600 active:scale-95 disabled:opacity-25 disabled:hover:bg-transparent"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {selected && (
-              <div className="mb-2 ml-10 rounded-2xl border border-slate-200/70 bg-slate-50 p-3 text-sm text-slate-600">
-                {w.description_en && <p className="leading-relaxed">{w.description_en}</p>}
-                <div className="mt-2 space-y-1.5 text-[13px]">
-                  {w.parking_note_en && <p>🅿️ {w.parking_note_en}</p>}
-                  {w.booking_note_en && <p>🕐 {w.booking_note_en}</p>}
-                  {w.address_en && <p>📍 {w.address_en}</p>}
-                  {w.address_ko && <p className="text-slate-400">{w.address_ko}</p>}
-                </div>
-                <button
-                  onClick={() => navigateToStop(w)}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-2.5 text-xs font-extrabold text-white transition-transform active:scale-[0.99]"
-                  style={{ background: NAVER_GREEN }}
-                >
-                  <span
-                    className="grid h-4 w-4 place-items-center rounded bg-white text-[10px] font-black"
-                    style={{ color: NAVER_GREEN }}
-                  >
-                    N
-                  </span>
-                  {t("route.navigateStop", lang)}
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      })}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <SortableContext
+          items={ordered.map((w) => w.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {ordered.map((w, i) => (
+            <SortableWaypointRow
+              key={w.id}
+              waypoint={w}
+              prev={i > 0 ? ordered[i - 1] : null}
+              selected={selectedId === w.id}
+              visited={progress >= w.sequence && progress > 0}
+              lang={lang}
+              onSelect={selectWaypoint}
+              onNavigate={navigateToStop}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
     </div>
   );
 
