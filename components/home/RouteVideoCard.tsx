@@ -38,51 +38,57 @@ export default function RouteVideoCard({
   return (
     <Link
       href={`/routes/${slug}`}
-      className={`group relative block overflow-hidden rounded-3xl bg-slate-900 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${sizeClass}`}
+      className={`group relative block rounded-3xl bg-slate-900 shadow-float transition-all duration-300 hover:-translate-y-1.5 hover:shadow-float-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${sizeClass}`}
     >
-      {/* Blur skeleton */}
-      <div
-        className={`absolute inset-0 transition-opacity duration-700 ${playing ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-        aria-hidden
-      >
-        {thumbnail_url ? (
-          // Blur only while acting as a loading skeleton behind a video; with no
-          // video the thumbnail IS the final poster, so render it crisp.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={thumbnail_url}
-            alt={title}
-            className={`h-full w-full object-cover ${video_url ? "blur-sm scale-105" : ""}`}
+      {/* 미디어 클리핑 전용 레이어 — 링크(리프트·그림자 담당)에서 클리핑을
+          분리. isolate + translateZ(0)로 합성 레이어를 고정해 리프트 애니메이션
+          중 둥근 클립이 풀리며 모서리가 깜빡이는 합성 버그를 차단
+          (CategoryTileGrid와 동일 패턴). */}
+      <div className="absolute inset-0 overflow-hidden rounded-3xl isolate [transform:translateZ(0)] [-webkit-mask-image:-webkit-radial-gradient(white,black)]">
+        {/* Blur skeleton */}
+        <div
+          className={`absolute inset-0 transition-opacity duration-700 ${playing ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+          aria-hidden
+        >
+          {thumbnail_url ? (
+            // Blur only while acting as a loading skeleton behind a video; with no
+            // video the thumbnail IS the final poster, so render it crisp.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={thumbnail_url}
+              alt={title}
+              className={`h-full w-full object-cover ${video_url ? "blur-sm scale-105" : ""}`}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-800 to-slate-950">
+              <svg className="h-12 w-12 text-white/10" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="5.5" cy="5" r="2" fill="currentColor" />
+                <path d="M5.5 7.4v4.6a4 4 0 0 0 4 4h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeDasharray="0.1 3.2" />
+                <circle cx="18.5" cy="18" r="2" fill="currentColor" />
+              </svg>
+            </div>
+          )}
+          <div className="absolute inset-0 bg-slate-900/40" />
+        </div>
+
+        {/* Video — only when a real (self-hosted) clip exists; otherwise the poster shows. */}
+        {video_url && (
+          <video
+            ref={videoRef}
+            src={video_url}
+            poster={thumbnail_url ?? undefined}
+            playsInline muted loop preload="none"
+            onPlaying={() => setPlaying(true)}
+            onPause={() => setPlaying(false)}
+            onError={() => setPlaying(false)}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${playing ? "opacity-100" : "opacity-0"}`}
           />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-800 to-slate-950">
-            <svg className="h-12 w-12 text-white/10" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <circle cx="5.5" cy="5" r="2" fill="currentColor" />
-              <path d="M5.5 7.4v4.6a4 4 0 0 0 4 4h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeDasharray="0.1 3.2" />
-              <circle cx="18.5" cy="18" r="2" fill="currentColor" />
-            </svg>
-          </div>
         )}
-        <div className="absolute inset-0 bg-slate-900/40" />
+
+        {/* Gradient — image-forward: photo stays clear up top, bottom third
+            goes deep so the white editorial title sits on solid dark. */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/35 via-35% to-transparent to-70%" />
       </div>
-
-      {/* Video — only when a real (self-hosted) clip exists; otherwise the poster shows. */}
-      {video_url && (
-        <video
-          ref={videoRef}
-          src={video_url}
-          poster={thumbnail_url ?? undefined}
-          playsInline muted loop preload="none"
-          onPlaying={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
-          onError={() => setPlaying(false)}
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${playing ? "opacity-100" : "opacity-0"}`}
-        />
-      )}
-
-      {/* Gradient — image-forward: photo stays clear up top, bottom third
-          goes deep so the white editorial title sits on solid dark. */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/35 via-35% to-transparent to-70%" />
 
       {/* Badge — floating dark translucent chip over the photo */}
       <div className="absolute left-5 top-5">

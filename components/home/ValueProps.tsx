@@ -60,7 +60,7 @@ export default function ValueProps() {
           {PROPS.map((p) => (
             <div
               key={p.en.title}
-              className="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+              className="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-float transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-float-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
               <div
                 className={`mb-5 grid h-12 w-12 place-items-center rounded-2xl text-2xl ${p.iconClass}`}

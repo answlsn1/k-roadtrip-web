@@ -52,7 +52,7 @@ export default function CategoryRoutesModal({ titleKey, routes, onClose }: Categ
         role="dialog"
         aria-modal="true"
         aria-label={t(titleKey, lang)}
-        className="relative z-10 max-h-[80vh] w-full overflow-y-auto rounded-t-3xl bg-white p-6 shadow-2xl sm:max-w-lg sm:rounded-3xl"
+        className="relative z-10 max-h-[80vh] w-full overflow-y-auto rounded-t-3xl bg-white p-6 shadow-float-lg sm:max-w-lg sm:rounded-3xl"
       >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex min-w-0 items-center gap-2.5">
@@ -80,7 +80,7 @@ export default function CategoryRoutesModal({ titleKey, routes, onClose }: Categ
                 key={r.slug}
                 href={`/routes/${r.slug}`}
                 onClick={onClose}
-                className="group flex items-center gap-3 rounded-2xl border border-slate-200 p-3 transition-colors hover:border-slate-300 hover:bg-slate-50"
+                className="group flex items-center gap-3 rounded-2xl border border-slate-200 p-3 transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:shadow-float motion-reduce:transition-none motion-reduce:hover:translate-y-0"
               >
                 <div className="h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-slate-900">
                   {r.thumbnail_url ? (

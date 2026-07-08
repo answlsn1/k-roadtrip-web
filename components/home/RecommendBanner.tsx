@@ -33,7 +33,7 @@ export default function RecommendBanner() {
             Quiet bordered pill, dark-section version of the original light card CTA. */}
         <Link
           href="/recommend?src=home_banner"
-          className="mt-1 rounded-full border border-white/25 bg-white/10 px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:border-white/40 hover:bg-white/15 active:scale-[0.99]"
+          className="mt-1 rounded-full border border-white/25 bg-white/10 px-6 py-3 text-sm font-extrabold text-white shadow-float-dark transition hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/15 active:scale-[0.99] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
         >
           30초 추천하러 가기 →
         </Link>

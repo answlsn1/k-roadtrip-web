@@ -103,7 +103,7 @@ export default function MapSection({ waypoints }: MapSectionProps) {
 
       {/* isolate: Leaflet 내부 z-index(pane 200~700, control 1000)가 루트 스태킹
           컨텍스트로 탈출해 고정 FAB(z-30)·Navbar(z-50)를 뚫는 것을 차단. */}
-      <div className="isolate overflow-hidden rounded-3xl border border-slate-200 shadow-xl">
+      <div className="isolate overflow-hidden rounded-3xl border border-slate-200 shadow-float">
         <div className="h-[420px] sm:h-[480px] w-full">
           <LeafletMap waypoints={waypoints} activeRegion={activeRegion} />
         </div>
