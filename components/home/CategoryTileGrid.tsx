@@ -24,7 +24,7 @@ export default function CategoryTileGrid({ groups }: { groups: CategoryGroup[] }
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 px-5 sm:grid-cols-3 sm:gap-5 sm:px-0 lg:grid-cols-4">
         {groups.map((g) => (
           <button
             key={g.id}
