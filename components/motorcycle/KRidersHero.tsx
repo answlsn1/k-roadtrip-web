@@ -6,9 +6,13 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /* ============================================================
  * 시네마틱 히어로 — 제네시스 공식 웹 벤치마킹.
- *   풀블리드 라이딩 이미지 슬라이드쇼(느린 크로스페이드 1.2s + 켄번즈
- *   8s) 위에 좌하단 타이틀 블록. 스크림 하단이 페이지 배경(#0c0e12)으로
+ *   풀블리드 라이딩 이미지 슬라이드쇼(느린 크로스페이드 1.2s + 켄번즈)
+ *   위에 좌하단 타이틀 블록. 스크림 하단이 페이지 배경(#0c0e12)으로
  *   완전히 수렴해 피드와 이음새 없이 이어진다.
+ *   켄번즈는 active 클래스로 애니메이션을 붙였다 뗐다 하지 않고, 항상
+ *   재생 중(22s alternate infinite)인 채로 active 여부에 따라 재생/일시
+ *   정지만 토글한다 — 애니메이션을 제거하면 transform 이 즉시 scale(1)로
+ *   리셋돼 크로스페이드 도중 화면이 훅 끊기므로(motorcycle.css 참조).
  *   이미지는 전부 실사진(Unsplash 핫링크, 배포 시점 HTTP 200 검증) —
  *   메인 사이트 HeroSlideshow 와 동일한 미디어 정책.
  *   reduced-motion: 회전·켄번즈 정지, 첫 장 고정(메인 사이트와 동일 규약).
@@ -17,32 +21,42 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 interface Slide {
   src: string;
   alt: string;
+  /** object-position — 세로로 매우 넓게 잘리는 데스크톱 레터박스에서도
+   *  라이더/피사체가 잘리지 않도록 사진마다 개별 지정(제네시스 히어로와
+   *  동일 기법, HeroSlideshow.tsx 참조). */
+  focus: string;
 }
 
 const SLIDES: Slide[] = [
   {
     src: "https://images.unsplash.com/photo-1771427795503-74fa80babf5d?auto=format&fit=crop&w=2000&q=75",
     alt: "구름 위 고갯길을 달리는 두 명의 모터사이클 라이더",
+    focus: "center 85%",
   },
   {
     src: "https://images.unsplash.com/photo-1763568088984-e6a507ab4219?auto=format&fit=crop&w=2000&q=75",
     alt: "",
+    focus: "center 40%",
   },
   {
     src: "https://images.unsplash.com/photo-1761415476148-4637cc80d5d0?auto=format&fit=crop&w=2000&q=75",
     alt: "",
+    focus: "center 35%",
   },
   {
     src: "https://images.unsplash.com/photo-1770614956862-a143fb5e4921?auto=format&fit=crop&w=2000&q=75",
     alt: "",
+    focus: "center 74%",
   },
   {
     src: "https://images.unsplash.com/photo-1582084770885-36767753763d?auto=format&fit=crop&w=2000&q=75",
     alt: "",
+    focus: "center 52%",
   },
   {
     src: "https://images.unsplash.com/photo-1768410318116-9b6bcb7ec927?auto=format&fit=crop&w=2000&q=75",
     alt: "",
+    focus: "center 55%",
   },
 ];
 
@@ -79,7 +93,7 @@ export default function KRidersHero({
           <div
             key={slide.src}
             aria-hidden={!isActive}
-            className={`absolute inset-0 transition-opacity duration-[1200ms] ease-in-out ${
+            className={`kr-hero-slide absolute inset-0 transition-opacity duration-[1200ms] ease-in-out ${
               isActive ? "kr-hero-slide-active opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
@@ -89,7 +103,8 @@ export default function KRidersHero({
               alt={slide.alt}
               loading={i === 0 ? "eager" : "lazy"}
               fetchPriority={i === 0 ? "high" : undefined}
-              className="h-full w-full object-cover object-center"
+              className="h-full w-full object-cover"
+              style={{ objectPosition: slide.focus }}
             />
           </div>
         );

@@ -162,13 +162,19 @@
       rgba(12, 14, 18, 0.2) 70%,
       rgba(12, 14, 18, 0.5) 100%);
 }
+/* alternate + infinite 로 끝점이 항상 이어지고, active 전환은 재생/일시정지로만
+   다뤄 애니메이션 자체를 추가·제거하지 않는다 — 클래스 토글로 인한 scale 리셋(끊김) 방지. */
 @keyframes kr-kenburns {
   from { transform: scale(1); }
   to { transform: scale(1.08); }
 }
 @media (prefers-reduced-motion: no-preference) {
+  .kr-hero-slide img {
+    animation: kr-kenburns 22s ease-in-out infinite alternate;
+    animation-play-state: paused;
+  }
   .kr-hero-slide-active img {
-    animation: kr-kenburns 8s linear forwards;
+    animation-play-state: running;
   }
 }
 
