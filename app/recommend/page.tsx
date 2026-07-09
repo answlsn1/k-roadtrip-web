@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "K-RoadTrip · 나만 아는 스팟 추천하기",
   description:
-    "혼자 만들고 있는 한국 지방 여행 앱. 당신이 다녀온 곳 중 진짜 좋았던 스팟 하나만 알려주세요. 30초면 끝나요.",
+    "한국 지방 여행 앱을 만들고 있어요. 당신이 다녀온 곳 중 진짜 좋았던 스팟 하나만 알려주세요. 30초면 끝나요.",
   robots: { index: false, follow: false },
 };
 

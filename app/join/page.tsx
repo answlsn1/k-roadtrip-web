@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "K-RoadTrip · 0기 동행단 초대",
   description:
-    "혼자 만들고 있는 한국 지방 여행 앱. 당신의 진짜 여행 경험이 필요해요. 30초만 도와줄래요?",
+    "한국 지방 여행 앱을 만들고 있어요. 당신의 진짜 여행 경험이 필요해요. 30초만 도와줄래요?",
   robots: { index: false, follow: false },
 };
 

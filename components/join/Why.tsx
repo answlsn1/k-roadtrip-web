@@ -26,13 +26,13 @@ export default function Why({
       ? {
           emoji: "⚡",
           title: "약속 잡을 필요 없어요",
-          body: "지금 여기서 3분이면 끝. 이동 시간도, 약속도 필요 없어요.",
+          body: "지금 여기서 3분이면 끝나요. 이동 시간도, 약속도 필요 없어요.",
           mint: true,
         }
       : {
           emoji: "☕",
           title: "커피는 제가 살게요",
-          body: `카페에서 30분, 편하게. ${reward} 대접할게요.`,
+          body: `카페에서 30분, 편하게 이야기 나눠요. ${reward} 대접할게요.`,
           mint: true,
         };
 
@@ -40,14 +40,14 @@ export default function Why({
     firstMerit,
     {
       emoji: "🗺️",
-      title: "추천이 ‘당신 별명’으로 앱에",
+      title: "추천이 ‘당신 별명’으로 남아요",
       body: aliasCredit,
       mint: false,
     },
     {
       emoji: "🏅",
       title: "‘0기 동행단’ 기록",
-      body: "활동 증명·추천서. 스펙·포트폴리오에 써요.",
+      body: "활동 증명서와 추천서로 받아, 스펙·포트폴리오에 활용해요.",
       mint: false,
     },
     {
@@ -63,7 +63,7 @@ export default function Why({
       <span className="join-kicker">왜 당신이냐면</span>
       <h2 className="join-h2">방금 그 한 줄이, 제일 정확한 나침반이에요.</h2>
       <p className="join-lead">
-        지도·블로그보다 진짜 여행자의 경험이 정확해요. 그래서 사방에서 긁어모으는
+        지도나 블로그보다 진짜 여행자의 경험이 정확해요. 그래서 여기저기서 긁어모으는
         대신, 당신에게 직접 물어요.
       </p>
 

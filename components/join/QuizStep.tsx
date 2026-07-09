@@ -13,13 +13,13 @@ import type { Plan, SpotPref, Region, Pain } from "@/lib/join/constants";
 import type { JoinAnswers, QuizStepIndex } from "./join.flow.types";
 
 const PLAN_COPY: Record<Plan, { title: string; sub: string }> = {
-  계획: { title: "계획 빡세게 짜는 편", sub: "동선·맛집 다 정해둠" },
-  즉흥: { title: "그냥 가서 즉흥으로", sub: "발길 닿는 대로" },
+  계획: { title: "계획을 꼼꼼히 짜는 편", sub: "동선과 맛집까지 미리 정해요" },
+  즉흥: { title: "즉흥으로 정하는 편", sub: "발길 닿는 대로" },
 };
 
 const SPOT_COPY: Record<SpotPref, { title: string; sub: string }> = {
-  핫플: { title: "다들 가는 핫플", sub: "유명한 덴 이유가 있지" },
-  로컬: { title: "아무도 모르는 로컬", sub: "숨은 곳 발굴이 재밌어" },
+  핫플: { title: "다들 가는 핫플", sub: "유명한 데는 이유가 있어요" },
+  로컬: { title: "아무도 모르는 로컬", sub: "숨은 곳 발굴이 재밌어요" },
 };
 
 export default function QuizStep({

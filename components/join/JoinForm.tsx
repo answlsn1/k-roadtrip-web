@@ -62,7 +62,7 @@ export default function JoinForm({
       <span className="join-kicker">거의 다 왔어요</span>
       <h2 className="join-h2">
         {isOnline
-          ? "이제 마지막! 어디로 연락드리면 될지 알려주세요."
+          ? "이제 마지막 단계예요! 어디로 연락드리면 될지 알려주세요."
           : "그럼, 커피 한 잔 하면서 더 들려주세요."}
       </h2>
       {!isOnline && (
@@ -85,7 +85,7 @@ export default function JoinForm({
           </div>
           <div className="join-toggle-body">
             {isOnline
-              ? `온라인 제출도 완전 좋지만, 혹시 만나서 더 들려주고 싶으면 체크해주세요. ${joinConfig.reward} 대접할게요.`
+              ? `온라인 제출만으로도 충분해요. 그래도 만나서 더 들려주고 싶다면 체크해주세요. ${joinConfig.reward} 대접할게요.`
               : `여행 경험 제대로 듣고 싶어요. ${joinConfig.reward} 대접할게요.`}
           </div>
         </div>

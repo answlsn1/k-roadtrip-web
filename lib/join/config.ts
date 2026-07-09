@@ -34,15 +34,15 @@ export const joinConfig: JoinConfig = {
   appName: 'K-RoadTrip',
   appUrl: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://k-roadtrip.app',
   mission:
-    '서울 너머, 한국 지방을 제대로 여행하는 길을 만들고 있어요. 당신의 진짜 경험이 그 지도를 채웁니다.',
-  reward: '커피 한 잔(제대로 된 이야기엔 식사까지)',
-  heroTeaser: '☕ 커피는 제가 살게요 · 퀴즈로 내 여행유형도 받고',
+    '서울 너머, 한국 지방을 제대로 여행하는 길을 만들고 있어요. 당신의 진짜 경험이 그 지도를 채워요.',
+  reward: '커피 한 잔(이야기가 길어지면 식사도 함께)',
+  heroTeaser: '☕ 커피는 제가 살게요 · 퀴즈로 내 여행 유형도 받고',
   aliasCredit:
-    '알려준 그 스팟이 ‘당신 별명’을 단 추천 코스로 실제 앱에 올라갈 수 있어요. ‘이거 내가 추천했어’ 하고 자랑할 수 있게.',
+    '알려준 스팟이 ‘당신 별명’을 달고 추천 코스로 실제 앱에 올라가요. ‘이거 내가 추천한 거예요’ 하고 자랑할 수 있어요.',
   contactBack:
-    '남겨주신 연락처로 며칠 안에 가볍게 연락드릴게요. 부담 없이 편한 시간에 만나요.',
+    '남겨주신 연락처로 며칠 안에 연락드릴게요. 편한 시간에 부담 없이 만나요.',
   founderName: 'K-RoadTrip',
-  founderTagline: '여행을 좋아하는 1인 개발자가 만들고 있어요.',
+  founderTagline: '여행을 좋아하는 개발자가 만들고 있어요.',
   founderInitial: 'K',
   govLine: '지방 여행 활성화 — 지자체와도 함께 이야기하고 있어요.',
 };
@@ -57,5 +57,5 @@ export const recommendConfig: JoinConfig = {
   ...joinConfig,
   heroTeaser: '🎫 30초 퀴즈로 내 여행 유형 받고 · 내 최애 스팟도 자랑하기',
   contactBack:
-    '알려주신 스팟은 실제 코스 기획에 참고할게요. 궁금한 점 있으면 남겨주신 연락처로 편하게 연락드릴 수도 있어요.',
+    '알려주신 스팟은 실제 코스 기획에 참고할게요. 궁금한 점이 있으면 남겨주신 연락처로 편하게 연락드릴게요.',
 };

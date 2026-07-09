@@ -27,7 +27,7 @@ export default function Ticket({
   // resolveTravelerType 은 둘 중 하나라도 null 이면 null → 안전 폴백.
   const emoji = type?.emoji ?? "🧳";
   const name = type?.name ?? "0기 동행단";
-  const desc = type?.desc ?? "당신만의 여행 스타일을 가진 타입";
+  const desc = type?.desc ?? "당신만의 여행 스타일을 담은 유형";
 
   const recRegion = answers.recRegion ?? "—";
   const myPick = answers.recSpot.trim() || "직접 만나서!";
@@ -70,7 +70,7 @@ export default function Ticket({
       </div>
 
       <p className="join-micro" style={{ textAlign: "center" }}>
-        당신이 알려준 이 스팟, 실제 {joinConfig.appName}에 <strong>‘내 별명’으로
+        당신이 알려준 스팟, 실제 {joinConfig.appName}에 <strong>‘내 별명’으로
         등록</strong>될 수도 있어요.
         <br />📸 캡처해서 자랑하기
       </p>

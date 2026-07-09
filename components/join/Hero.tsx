@@ -44,7 +44,7 @@ export default function Hero({
       </div>
 
       <h1 className="join-h1">
-        저, 이거 하나에 <span className="join-grad-text">진심으로</span> 매달리고
+        저, 이거 하나에 <span className="join-grad-text">진심으로</span> 몰두하고
         있어요.
       </h1>
 
@@ -52,7 +52,7 @@ export default function Hero({
         {mission}
         <br />
         <strong style={{ color: "var(--ink)" }}>
-          {appName}, 혼자 만들고 있어요.
+          {appName}, 직접 만들고 있어요.
         </strong>
       </p>
 
@@ -73,11 +73,11 @@ export default function Hero({
       </button>
 
       <p className="join-micro" style={{ textAlign: "center" }}>
-        팔려는 거 아니에요. 만들고 있는 걸 더 좋게 만들려고요.
+        팔려는 게 아니에요. 만들고 있는 서비스를 더 좋게 만들려고요.
       </p>
 
       <div className="join-trust">
-        <span>👤 1인 개발</span>
+        <span>✅ 직접 검증</span>
         <span>🏛 {govLine}</span>
         <span>🙌 {count > 0 ? `${count}명 참여` : "0기 동행단 모집 중"}</span>
       </div>

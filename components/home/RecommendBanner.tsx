@@ -23,7 +23,7 @@ export default function RecommendBanner() {
           당신의 로컬 지식이 필요해요
         </p>
         <h2 className="text-xl font-extrabold text-white sm:text-2xl">
-          나만 아는 그 곳, 여기 남겨주세요
+          나만 아는 그곳, 여기 남겨주세요
         </h2>
         <p className="max-w-xl text-sm leading-relaxed text-slate-400">
           외국인 여행자들에게 진짜 한국을 보여주고 싶어요. 다녀온 곳 중 딱 하나만
