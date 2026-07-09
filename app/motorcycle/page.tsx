@@ -10,6 +10,7 @@ import { ROUTE_TYPES } from "@/lib/motorcycle/routeTypes";
 import RouteCard from "@/components/motorcycle/RouteCard";
 import KRidersHero from "@/components/motorcycle/KRidersHero";
 import Reveal from "@/components/motorcycle/Reveal";
+import OAuthErrorBanner from "@/components/motorcycle/OAuthErrorBanner";
 
 type SortKey = "latest" | "popular" | "distance" | "winding";
 
@@ -72,6 +73,9 @@ export default function MotorcycleHomePage() {
 
   return (
     <div className="pb-24">
+      {/* 소셜 로그인 취소/실패 후 리다이렉트 안내 — 있을 때만 렌더 */}
+      <OAuthErrorBanner />
+
       {/* 시네마틱 히어로 — 풀블리드(제네시스 벤치마킹) */}
       <KRidersHero
         showAuthCta={!loading && !isLoggedIn}

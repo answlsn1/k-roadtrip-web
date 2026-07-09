@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/data/supabaseClient";
-import { getMyProfile } from "./auth";
+import { getMyProfile, ensureProfile, deriveOAuthNickname } from "./auth";
 import type { MotorcycleProfile } from "./types";
 
 /** Reactive auth session + rider profile — use in any client component under /motorcycle. */
@@ -48,7 +48,18 @@ export function useMotorcycleSession() {
       window.setTimeout(() => {
         if (cancelled) return;
         getMyProfile().then((p2) => {
-          if (!cancelled) setProfile(p2);
+          if (cancelled) return;
+          if (p2) {
+            setProfile(p2);
+            return;
+          }
+          // 최종 안전망 — OAuth(구글/카카오)로 처음 로그인한 유저는 로그인/가입
+          // 페이지의 수동 ensureProfile 호출을 거치지 않고 임의 페이지로
+          // 리다이렉트될 수 있다. session 은 있는데 재시도까지도 프로필이 없으면
+          // 여기서 직접 만든다(멱등이라 다른 경로와 겹쳐도 무해).
+          ensureProfile(session.user.id, deriveOAuthNickname(session.user)).then((p3) => {
+            if (!cancelled) setProfile(p3);
+          });
         });
       }, 1500);
     });

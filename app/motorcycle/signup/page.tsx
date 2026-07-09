@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signUp } from "@/lib/motorcycle/auth";
+import SocialAuthButtons from "@/components/motorcycle/SocialAuthButtons";
 
 export default function MotorcycleSignupPage() {
   const router = useRouter();
@@ -75,6 +76,8 @@ export default function MotorcycleSignupPage() {
         K-Riders
       </p>
       <h1 className="mb-8 text-2xl font-extrabold text-white">라이더 회원가입</h1>
+
+      <SocialAuthButtons redirectTo="/motorcycle" />
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>

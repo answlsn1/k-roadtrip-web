@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { logIn, getMyProfile, ensureProfile } from "@/lib/motorcycle/auth";
 import { getSupabaseBrowserClient } from "@/lib/data/supabaseClient";
+import SocialAuthButtons from "@/components/motorcycle/SocialAuthButtons";
 
 export default function MotorcycleLoginPage() {
   const router = useRouter();
@@ -54,6 +55,8 @@ export default function MotorcycleLoginPage() {
         K-Riders
       </p>
       <h1 className="mb-8 text-2xl font-extrabold text-white">로그인</h1>
+
+      <SocialAuthButtons redirectTo="/motorcycle" />
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
