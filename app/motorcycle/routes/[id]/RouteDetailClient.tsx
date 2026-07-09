@@ -22,6 +22,7 @@ import type {
 import { useMotorcycleSession } from "@/lib/motorcycle/useSession";
 import { relativeTimeKo } from "@/lib/motorcycle/relativeTime";
 import { routeTypeMeta } from "@/lib/motorcycle/routeTypes";
+import { formatDurationKo, displayDuration } from "@/lib/motorcycle/rideEstimate";
 import { windingGrade } from "@/lib/motorcycle/windingScore";
 import { downloadGpx } from "@/lib/motorcycle/gpx";
 import { buildNaverWebRouteUrl, type NaverRoutePoint } from "@/lib/domain/naverMapLink";
@@ -35,14 +36,6 @@ const RouteDetailMap = dynamic(() => import("@/components/motorcycle/RouteDetail
     </div>
   ),
 });
-
-function formatDurationKo(min: number): string {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  if (h === 0) return `${m}분`;
-  if (m === 0) return `${h}시간`;
-  return `${h}시간 ${m}분`;
-}
 
 export default function RouteDetailClient({ id }: { id: string }) {
   const router = useRouter();
@@ -177,6 +170,8 @@ export default function RouteDetailClient({ id }: { id: string }) {
   // winding_score 는 Postgres numeric — 문자열로 올 수 있어 Number() 로 강제.
   const windingScore = route.winding_score != null ? Number(route.winding_score) : null;
   const winding = windingScore != null ? windingGrade(windingScore) : null;
+  // 실측 duration_min 이 없으면 거리 기반 예상 시간(≈)으로 폴백 — DB 저장 없음.
+  const duration = displayDuration(route.duration_min, route.distance_km);
 
   const naverUrl =
     route.stops.length >= 2
@@ -245,10 +240,16 @@ export default function RouteDetailClient({ id }: { id: string }) {
               <span>{route.distance_km}km</span>
             </>
           )}
-          {route.duration_min != null && (
+          {duration && (
             <>
               <span aria-hidden="true">·</span>
-              <span>{formatDurationKo(route.duration_min)}</span>
+              <span title={duration.estimated ? "거리 기반 예상 시간" : undefined}>
+                {duration.estimated ? "≈ " : ""}
+                {formatDurationKo(duration.min)}
+                {duration.estimated && (
+                  <span className="sr-only"> (거리 기반 예상 시간)</span>
+                )}
+              </span>
             </>
           )}
         </div>

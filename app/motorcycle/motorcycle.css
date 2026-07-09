@@ -120,6 +120,64 @@
 }
 .krider-map-dark .leaflet-control-attribution a { color: #94a3b8 !important; }
 
+/* ── 핀 드롭 후보 도트(루트 등록 지도) ──
+   globals.css 의 .krt-pin-dot(메인 빌더)와 같은 구조의 라이더스 버전 —
+   공유 markerIcon.ts 는 수정 금지라 NewRouteMap 이 자체 divIcon 으로 사용. */
+.kr-pin-dot {
+  position: relative;
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: #f59e0b; /* 라이더스 앰버 — 번호 마커와 같은 브랜드 컬러 */
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+.kr-pin-dot-ring {
+  position: absolute;
+  inset: -3px; /* 흰 테두리 바깥 가장자리에서 링 시작 */
+  border-radius: 9999px;
+  border: 2px solid #f59e0b;
+  animation: kr-pin-pulse 1.6s ease-out infinite;
+}
+@keyframes kr-pin-pulse {
+  0%   { transform: scale(1);   opacity: 0.9; }
+  70%  { transform: scale(2.4); opacity: 0; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kr-pin-dot-ring {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* ── 다크 팝업(핀 드롭 확인 팝업) — 밝은 Leaflet 기본 팝업을 다크 서피스로 ── */
+.krider-map-dark .leaflet-popup-content-wrapper {
+  background: #1b2027; /* --kr-surface-2 계열 */
+  color: #f8fafc;
+  border: 1px solid var(--kr-line-strong);
+  border-radius: 0.875rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+.krider-map-dark .leaflet-popup-content {
+  margin: 12px 14px;
+  line-height: 1.4;
+}
+.krider-map-dark .leaflet-popup-content p {
+  margin: 0; /* Leaflet 기본 p 마진(18px) 제거 — Tailwind 간격만 사용 */
+}
+.krider-map-dark .leaflet-popup-tip {
+  background: #1b2027;
+  border: 1px solid var(--kr-line-strong);
+}
+.krider-map-dark .leaflet-popup-close-button {
+  color: #94a3b8;
+}
+.krider-map-dark .leaflet-popup-close-button:hover {
+  color: #f8fafc;
+}
+
 /* ── 스켈레톤(shimmer) ── */
 .kr-skeleton {
   position: relative;

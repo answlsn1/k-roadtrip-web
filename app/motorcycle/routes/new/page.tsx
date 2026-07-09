@@ -3,9 +3,28 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  DndContext,
+  KeyboardSensor,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useMotorcycleSession } from "@/lib/motorcycle/useSession";
 import { createRoute } from "@/lib/motorcycle/routes";
 import { ROUTE_TYPES } from "@/lib/motorcycle/routeTypes";
+import { straightKm, estimateRideMin, formatDurationKo } from "@/lib/motorcycle/rideEstimate";
 import type { DraftStop } from "@/components/motorcycle/NewRouteMap";
 
 const NewRouteMap = dynamic(() => import("@/components/motorcycle/NewRouteMap"), {
@@ -23,6 +42,90 @@ function nextTempId() {
   return `stop-${tempIdCounter}`;
 }
 
+/* 저장 로직(lib/motorcycle/routes.ts totalDistanceKm)과 동일 기준의 합계 —
+ * 직선거리 합을 0.1km 로 반올림. 등록 전 미리보기가 저장값과 일치해야 한다. */
+function draftTotalKm(stops: DraftStop[]): number {
+  let sum = 0;
+  for (let i = 1; i < stops.length; i++) sum += straightKm(stops[i - 1], stops[i]);
+  return Math.round(sum * 10) / 10;
+}
+
+function SortableStopItem({
+  stop,
+  index,
+  prev,
+  onRemove,
+}: {
+  stop: DraftStop;
+  index: number;
+  prev: DraftStop | null;
+  onRemove: (tempId: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: stop.tempId });
+  const segKm = prev ? straightKm(prev, stop) : null;
+
+  return (
+    <li>
+      {segKm !== null && (
+        <div className="my-1 flex items-center gap-2 pl-[22px]">
+          <span className="h-4 w-px bg-white/15" />
+          <span className="text-[11px] font-semibold text-slate-400">
+            🏍 ≈ {segKm.toFixed(1)}km · {formatDurationKo(estimateRideMin(segKm))}
+          </span>
+        </div>
+      )}
+      <div
+        ref={setNodeRef}
+        style={{ transform: CSS.Transform.toString(transform), transition }}
+        className={`flex items-center gap-2 rounded-xl border px-2 py-2 ${
+          isDragging
+            ? "border-amber-500/40 bg-[var(--kr-surface-2)] shadow-lg"
+            : "border-transparent bg-[var(--kr-bg)]"
+        }`}
+      >
+        {/* 드래그 핸들 — 터치 타깃 40px 이상(WCAG 2.5.8) */}
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="grid h-10 w-10 shrink-0 cursor-grab touch-none place-items-center text-slate-500 hover:text-slate-300 active:cursor-grabbing"
+          aria-label={`${stop.name} 순서 변경`}
+        >
+          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <circle cx="7" cy="5" r="1.4" />
+            <circle cx="13" cy="5" r="1.4" />
+            <circle cx="7" cy="10" r="1.4" />
+            <circle cx="13" cy="10" r="1.4" />
+            <circle cx="7" cy="15" r="1.4" />
+            <circle cx="13" cy="15" r="1.4" />
+          </svg>
+        </button>
+
+        <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-amber-500 text-xs font-extrabold text-ink">
+          {index + 1}
+        </span>
+
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-semibold text-white">{stop.name}</span>
+          <span className="block truncate text-[10px] tabular-nums text-slate-500">
+            {stop.latitude.toFixed(5)}, {stop.longitude.toFixed(5)}
+          </span>
+        </span>
+
+        <button
+          type="button"
+          onClick={() => onRemove(stop.tempId)}
+          aria-label={`${stop.name} 삭제`}
+          className="-my-1 grid min-h-[40px] shrink-0 place-items-center px-2.5 text-xs font-bold text-slate-400 hover:text-red-400"
+        >
+          삭제
+        </button>
+      </div>
+    </li>
+  );
+}
+
 export default function NewMotorcycleRoutePage() {
   const router = useRouter();
   const { isLoggedIn, loading } = useMotorcycleSession();
@@ -34,10 +137,15 @@ export default function NewMotorcycleRoutePage() {
   const [motoSafe, setMotoSafe] = useState(false);
   const [isPublic, setIsPublic] = useState(true);
   const [stops, setStops] = useState<DraftStop[]>([]);
-  const [pendingStop, setPendingStop] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [pendingName, setPendingName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 6 } }),
+    // 키보드 재정렬 — 핸들에 dnd-kit aria 안내가 나가는 이상 실제로 동작해야 한다.
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   useEffect(() => {
     if (!loading && !isLoggedIn) {
@@ -45,28 +153,51 @@ export default function NewMotorcycleRoutePage() {
     }
   }, [loading, isLoggedIn, router]);
 
-  const handleMapClick = (lat: number, lng: number) => {
-    setPendingStop({ latitude: lat, longitude: lng });
-    setPendingName("");
-  };
-
-  const confirmPendingStop = () => {
-    if (!pendingStop) return;
+  // 지도 팝업에서 확정된 경유지 — 이름 폴백은 NewRouteMap 쪽에서 처리된다.
+  const handleAddStop = (name: string, lat: number, lng: number) => {
     setStops((prev) => [
       ...prev,
-      {
-        tempId: nextTempId(),
-        name: pendingName.trim() || `장소 ${prev.length + 1}`,
-        latitude: pendingStop.latitude,
-        longitude: pendingStop.longitude,
-      },
+      { tempId: nextTempId(), name, latitude: lat, longitude: lng },
     ]);
-    setPendingStop(null);
-    setPendingName("");
   };
 
   const removeStop = (tempId: string) => {
     setStops((prev) => prev.filter((s) => s.tempId !== tempId));
+  };
+
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    setStops((prev) => {
+      const oldIndex = prev.findIndex((s) => s.tempId === active.id);
+      const newIndex = prev.findIndex((s) => s.tempId === over.id);
+      if (oldIndex < 0 || newIndex < 0) return prev;
+      return arrayMove(prev, oldIndex, newIndex);
+    });
+  };
+
+  const totalKm = stops.length >= 2 ? draftTotalKm(stops) : 0;
+
+  // dnd-kit 스크린리더 안내 한국어화 — 기본 안내는 영어라 한국어 UI 와 불일치.
+  const stopName = (id: unknown) =>
+    stops.find((s) => s.tempId === id)?.name ?? "경유지";
+  const dndAccessibility = {
+    screenReaderInstructions: {
+      draggable:
+        "스페이스바를 눌러 경유지를 들어 올리고, 화살표 키로 이동한 뒤 스페이스바로 놓으세요. 취소하려면 Esc 키를 누르세요.",
+    },
+    announcements: {
+      onDragStart: ({ active }: { active: { id: unknown } }) =>
+        `${stopName(active.id)}을(를) 들어 올렸어요.`,
+      onDragOver: ({ active, over }: { active: { id: unknown }; over: { id: unknown } | null }) =>
+        over ? `${stopName(active.id)}을(를) ${stopName(over.id)} 위치로 이동 중이에요.` : undefined,
+      onDragEnd: ({ active, over }: { active: { id: unknown }; over: { id: unknown } | null }) =>
+        over
+          ? `${stopName(active.id)}을(를) ${stopName(over.id)} 위치에 놓았어요.`
+          : `${stopName(active.id)} 이동을 취소했어요.`,
+      onDragCancel: ({ active }: { active: { id: unknown } }) =>
+        `${stopName(active.id)} 이동을 취소했어요.`,
+    },
   };
 
   const canSubmit = title.trim().length > 0 && stops.length >= 2;
@@ -248,28 +379,35 @@ export default function NewMotorcycleRoutePage() {
                 지도를 클릭해서 경유지를 추가해보세요
               </p>
             ) : (
-              <ul className="space-y-2">
-                {stops.map((s, i) => (
-                  <li
-                    key={s.tempId}
-                    className="flex items-center justify-between gap-3 rounded-xl bg-[var(--kr-bg)] px-3 py-2.5"
-                  >
-                    <span className="flex min-w-0 items-center gap-2.5">
-                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-amber-500 text-xs font-extrabold text-ink">
-                        {i + 1}
-                      </span>
-                      <span className="truncate text-sm font-semibold text-white">{s.name}</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeStop(s.tempId)}
-                      className="shrink-0 text-xs font-bold text-slate-400 hover:text-red-400"
-                    >
-                      삭제
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={onDragEnd}
+                accessibility={dndAccessibility}
+              >
+                <SortableContext
+                  items={stops.map((s) => s.tempId)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <ul>
+                    {stops.map((s, i) => (
+                      <SortableStopItem
+                        key={s.tempId}
+                        stop={s}
+                        index={i}
+                        prev={i > 0 ? stops[i - 1] : null}
+                        onRemove={removeStop}
+                      />
+                    ))}
+                  </ul>
+                </SortableContext>
+              </DndContext>
+            )}
+
+            {stops.length >= 2 && (
+              <p className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3.5 py-2.5 text-xs font-bold text-amber-400">
+                🏍 총 {totalKm}km · 예상 {formatDurationKo(estimateRideMin(totalKm))}
+              </p>
             )}
           </div>
 
@@ -290,40 +428,8 @@ export default function NewMotorcycleRoutePage() {
 
         <div className="order-1 lg:order-2">
           <div className="krider-map-dark relative h-[320px] overflow-hidden rounded-2xl border border-[var(--kr-line-strong)] sm:h-[420px] lg:sticky lg:top-20 lg:h-[560px]">
-            <NewRouteMap stops={stops} onMapClick={handleMapClick} />
+            <NewRouteMap stops={stops} onAddStop={handleAddStop} />
           </div>
-
-          {pendingStop && (
-            <div className="mt-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4">
-              <p className="mb-2 text-xs font-bold text-amber-400">
-                새 경유지 이름을 입력해주세요
-              </p>
-              <div className="flex gap-2">
-                <input
-                  autoFocus
-                  type="text"
-                  value={pendingName}
-                  onChange={(e) => setPendingName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      confirmPendingStop();
-                    }
-                  }}
-                  placeholder="예: 미시령 휴게소"
-                  maxLength={80}
-                  className="kr-input min-w-0 flex-1 px-3 py-2 text-sm"
-                />
-                <button
-                  type="button"
-                  onClick={confirmPendingStop}
-                  className="kr-btn-primary shrink-0 px-4 py-2 text-sm"
-                >
-                  추가
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </form>
     </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { MotorcycleRouteWithAuthor, RouteSocial } from "@/lib/motorcycle/types";
 import { relativeTimeKo } from "@/lib/motorcycle/relativeTime";
 import { routeTypeMeta } from "@/lib/motorcycle/routeTypes";
+import { formatDurationKo, displayDuration } from "@/lib/motorcycle/rideEstimate";
 import LikeButton from "@/components/motorcycle/LikeButton";
 
 interface RouteCardProps {
@@ -14,16 +15,13 @@ interface RouteCardProps {
   onDelete?: (id: string) => void;
 }
 
-function formatDurationKo(min: number): string {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  if (h === 0) return `${m}분`;
-  if (m === 0) return `${h}시간`;
-  return `${h}시간 ${m}분`;
-}
-
 export default function RouteCard({ route, social, showVisibility, onDelete }: RouteCardProps) {
   const typeMeta = routeTypeMeta(route.route_type);
+  // distance_km 는 Postgres numeric — 문자열로 올 수 있어 Number() 로 강제.
+  const distanceKm = route.distance_km != null ? Number(route.distance_km) : null;
+  const showDistance = distanceKm != null && Number.isFinite(distanceKm) && distanceKm > 0;
+  // 실측 duration_min 이 없으면 거리 기반 예상 시간(≈)으로 폴백.
+  const duration = displayDuration(route.duration_min, route.distance_km);
 
   return (
     <div className="kr-card kr-card-hover group relative flex flex-col p-5 sm:p-6">
@@ -77,6 +75,55 @@ export default function RouteCard({ route, social, showVisibility, onDelete }: R
         </p>
       )}
 
+      {/* 거리·시간 스탯 라인 — 비인터랙티브(오버레이 링크 클릭을 막지 않음). */}
+      {(showDistance || duration) && (
+        <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-bold text-slate-300">
+          {showDistance && (
+            <span className="flex items-center gap-1.5">
+              <svg
+                className="h-4 w-4 text-slate-400"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <circle cx="6" cy="19" r="2.5" />
+                <circle cx="18" cy="5" r="2.5" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.5 19h8a3.5 3.5 0 000-7h-9a3.5 3.5 0 010-7H15"
+                />
+              </svg>
+              {distanceKm}km
+            </span>
+          )}
+          {duration && (
+            // title 툴팁은 오버레이 링크가 hover 를 가로채 절대 뜨지 않는다 —
+            // 추정 표시는 "≈" + 스크린리더용 텍스트로 전달.
+            <span className="flex items-center gap-1.5">
+              <svg
+                className="h-4 w-4 text-slate-400"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" />
+              </svg>
+              {duration.estimated ? "≈ " : ""}
+              {formatDurationKo(duration.min)}
+              {duration.estimated && (
+                <span className="sr-only">(거리 기반 예상 시간)</span>
+              )}
+            </span>
+          )}
+        </div>
+      )}
+
       <div className="mt-auto flex items-center justify-between gap-3 pt-2 text-xs font-semibold text-slate-500">
         <Link
           href={`/motorcycle/riders/${route.user_id}`}
@@ -84,23 +131,7 @@ export default function RouteCard({ route, social, showVisibility, onDelete }: R
         >
           {route.author_nickname}
         </Link>
-        <span className="flex shrink-0 items-center gap-2">
-          {route.distance_km != null && (
-            <>
-              <span className="font-bold text-slate-300">{route.distance_km}km</span>
-              <span aria-hidden="true">·</span>
-            </>
-          )}
-          {route.duration_min != null && (
-            <>
-              <span className="font-bold text-slate-300">
-                {formatDurationKo(route.duration_min)}
-              </span>
-              <span aria-hidden="true">·</span>
-            </>
-          )}
-          <span>{relativeTimeKo(route.created_at)}</span>
-        </span>
+        <span className="shrink-0">{relativeTimeKo(route.created_at)}</span>
       </div>
 
       {social && (
