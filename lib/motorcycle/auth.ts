@@ -81,6 +81,12 @@ export async function signInWithGoogle(redirectTo: string): Promise<AuthResult> 
  * 카카오 소셜 로그인 — 인앱 웹뷰(카카오톡 포함) 제약이 없는 provider.
  * ⚠ signInWithGoogle 과 동일하게 Supabase 대시보드에서 Kakao provider 를
  * 활성화하고 Redirect URL 을 등록해야 동작한다.
+ * ⚠ scopes 를 반드시 명시한다 — Supabase 가 Kakao 에 기본 요청하는 스코프에는
+ * account_email 이 포함되는데, 이건 카카오 "비즈 앱"(사업자/본인인증 전환)만
+ * 쓸 수 있어 개인 개발자 앱에서는 KOE205(잘못된 요청)로 로그인 자체가 막힌다
+ * (Supabase 이슈 #36878). 우리는 이메일을 안 쓰므로(닉네임 우선, deriveOAuthNickname
+ * 참고) 애초에 요청하지 않는다 — signInWithOAuth 의 scopes 옵션은 기본값을
+ * 대체(override)하므로 이렇게 넘기면 account_email 이 요청에서 빠진다.
  */
 export async function signInWithKakao(redirectTo: string): Promise<AuthResult> {
   const supabase = getSupabaseBrowserClient();
@@ -88,7 +94,7 @@ export async function signInWithKakao(redirectTo: string): Promise<AuthResult> {
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "kakao",
-    options: { redirectTo },
+    options: { redirectTo, scopes: "profile_nickname profile_image" },
   });
   if (error) return { ok: false, error: error.message };
   return { ok: true };
