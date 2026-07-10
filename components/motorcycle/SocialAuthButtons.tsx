@@ -5,11 +5,19 @@
  *   메인 앱 AuthModal.tsx(components/auth) 의 구글 패턴을 참고했지만
  *   K-Riders 전용 다크 카드 위에 맞춰 새로 작성 — import 하지 않는다.
  *   Naver 는 이번 스코프 제외(별도 커스텀 브릿지 필요, 미승인).
+ *
+ *   ⚠ 카카오는 임시로 숨김(KAKAO_ENABLED=false) — 개인 개발자 앱은
+ *   account_email 스코프를 못 써서 KOE205 로 막힌다(auth.ts 의
+ *   signInWithKakao 주석 참고, scopes 를 profile_nickname/profile_image
+ *   로 제한해 코드는 고쳤지만 카카오 쪽 반영 확인 전까지 사용자에게는
+ *   숨겨둔다). 재확인되면 이 상수만 true 로 되돌리면 된다.
  * ============================================================ */
 
 import { useEffect, useState } from "react";
 import { isInAppBrowser } from "@/lib/browserEnv";
 import { signInWithGoogle, signInWithKakao } from "@/lib/motorcycle/auth";
+
+const KAKAO_ENABLED = false;
 
 interface SocialAuthButtonsProps {
   /** 로그인 후 도착해야 할 경로(예: "/motorcycle") — signInWithOAuth 는 풀 URL을 요구하므로
@@ -107,23 +115,26 @@ export default function SocialAuthButtons({ redirectTo }: SocialAuthButtonsProps
         )}
 
         {/* 카카오 — 공식 브랜드 색 고정(배경 #FEE500, 심볼 #000000, 레이블 rgba(0,0,0,.85) —
-            개발자 가이드 색상 규정 그대로. 다크 테마에 맞춘 임의 변형 금지). */}
-        <button
-          type="button"
-          onClick={handleKakao}
-          disabled={busy}
-          aria-label="카카오 계정으로 계속하기"
-          className="flex w-full items-center justify-center gap-3 rounded-2xl py-3.5 text-sm font-bold transition-all active:scale-[0.99] disabled:opacity-70"
-          style={{ backgroundColor: "#FEE500", color: "rgba(0,0,0,.85)" }}
-        >
-          <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              fill="#000000"
-              d="M12 3C6.48 3 2 6.58 2 11c0 2.86 1.87 5.37 4.69 6.79-.16.6-.99 3.62-1.02 3.85 0 0-.02.17.09.24.11.07.24.02.24.02.32-.04 3.69-2.42 4.28-2.84.55.08 1.12.12 1.72.12 5.52 0 10-3.58 10-8s-4.48-8-10-8z"
-            />
-          </svg>
-          {loadingProvider === "kakao" ? "여는 중…" : "카카오 계정으로 계속하기"}
-        </button>
+            개발자 가이드 색상 규정 그대로. 다크 테마에 맞춘 임의 변형 금지).
+            KOE205 재확인 전까지 KAKAO_ENABLED 로 숨김(파일 상단 주석 참고). */}
+        {KAKAO_ENABLED && (
+          <button
+            type="button"
+            onClick={handleKakao}
+            disabled={busy}
+            aria-label="카카오 계정으로 계속하기"
+            className="flex w-full items-center justify-center gap-3 rounded-2xl py-3.5 text-sm font-bold transition-all active:scale-[0.99] disabled:opacity-70"
+            style={{ backgroundColor: "#FEE500", color: "rgba(0,0,0,.85)" }}
+          >
+            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="#000000"
+                d="M12 3C6.48 3 2 6.58 2 11c0 2.86 1.87 5.37 4.69 6.79-.16.6-.99 3.62-1.02 3.85 0 0-.02.17.09.24.11.07.24.02.24.02.32-.04 3.69-2.42 4.28-2.84.55.08 1.12.12 1.72.12 5.52 0 10-3.58 10-8s-4.48-8-10-8z"
+              />
+            </svg>
+            {loadingProvider === "kakao" ? "여는 중…" : "카카오 계정으로 계속하기"}
+          </button>
+        )}
       </div>
 
       {error && (
