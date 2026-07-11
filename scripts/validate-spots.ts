@@ -1,0 +1,157 @@
+/* K-Riders 스팟 CSV 검증 CLI (Phase 0 · 4단계).
+ *   사용법: npm run spots:validate [-- 파일경로]   (기본: data/spots-template.csv)
+ *   검증 로직은 lib/motorcycle/spots/validate.ts(순수 모듈) — 여기는 파일
+ *   읽기/papaparse/DB 조회/출력만 담당한다.
+ *
+ *   기존 DB 교차 중복 검사(선택 동작): env 에 NEXT_PUBLIC_SUPABASE_URL +
+ *   SUPABASE_SERVICE_ROLE_KEY 가 있으면 motorcycle_spots 전체와 대조.
+ *   .env.local 은 자동 로드되지 않는다(dotenv 미사용 — 의존성 추가 금지
+ *   방침). 필요 시 셸에서 환경변수를 설정하고 실행할 것. */
+import { readFileSync } from "fs";
+import { resolve } from "path";
+import Papa from "papaparse";
+import { createClient } from "@supabase/supabase-js";
+import {
+  validateSpots,
+  SPOT_CSV_COLUMNS,
+  SPOT_REQUIRED_FIELDS,
+  type ExistingSpotRef,
+} from "../lib/motorcycle/spots/validate";
+
+const DEFAULT_CSV = "data/spots-template.csv";
+
+async function fetchExistingSpots(url: string, key: string): Promise<ExistingSpotRef[]> {
+  const supabase = createClient(url, key, { auth: { persistSession: false } });
+  const all: ExistingSpotRef[] = [];
+  const PAGE = 1000;
+  for (let from = 0; ; from += PAGE) {
+    // order 없이 range 만 쓰면 Postgres 가 페이지 간 순서를 보장하지 않아
+    // 1000건 초과 시 행이 누락/중복될 수 있다 — id 정렬로 고정.
+    const { data, error } = await supabase
+      .from("motorcycle_spots")
+      .select("name, lat, lng, slug")
+      .order("id")
+      .range(from, from + PAGE - 1);
+    if (error) throw new Error(`motorcycle_spots 조회 실패: ${error.message}`);
+    const page = (data ?? []) as ExistingSpotRef[];
+    all.push(...page);
+    if (page.length < PAGE) break;
+  }
+  return all;
+}
+
+async function main(): Promise<void> {
+  const target = process.argv[2] ?? DEFAULT_CSV;
+  const filePath = resolve(process.cwd(), target);
+  console.log(`[K-Riders 스팟 CSV 검증] 대상: ${target}`);
+
+  let content: string;
+  try {
+    content = readFileSync(filePath, "utf8");
+  } catch {
+    console.error(`FAIL - 파일을 읽을 수 없습니다: ${filePath}`);
+    process.exit(1);
+  }
+  // BOM(U+FEFF) 제거 — 엑셀 호환용으로 템플릿에 포함돼 있음
+  if (content.charCodeAt(0) === 0xfeff) content = content.slice(1);
+
+  const parsed = Papa.parse<Record<string, string>>(content, {
+    header: true,
+    skipEmptyLines: true,
+  });
+
+  const failures: string[] = [];
+
+  // papaparse 자체 오류(필드 수 불일치 등) — err.row 는 데이터 기준 0-base.
+  // 메시지는 영어 원문이라 운영자가 읽을 수 있게 코드별 한국어로 매핑.
+  const PAPA_ERROR_KO: Record<string, string> = {
+    TooManyFields: "컬럼 수가 헤더보다 많습니다 — 셀 안에 쉼표가 있으면 따옴표로 감싸주세요",
+    TooFewFields: "컬럼 수가 헤더보다 적습니다 — 중간에 빠진 셀이 없는지 확인하세요",
+    UndetectableDelimiter: "구분자를 인식할 수 없습니다 — 쉼표(,) 구분 CSV 인지 확인하세요",
+    MissingQuotes: "닫히지 않은 따옴표가 있습니다",
+    InvalidQuotes: "따옴표 처리가 잘못됐습니다",
+  };
+  // 파싱이 깨진 행은 값 신뢰가 안 되므로 통과 목록·요약에서도 제외한다.
+  const parseErrorRows = new Set<number>();
+  for (const err of parsed.errors) {
+    const humanRow = typeof err.row === "number" ? err.row + 2 : null;
+    if (humanRow !== null) parseErrorRows.add(humanRow);
+    const ko = PAPA_ERROR_KO[err.code] ?? err.message;
+    failures.push(`${humanRow !== null ? `${humanRow}행 ` : ""}CSV 파싱 오류: ${ko}`);
+  }
+
+  // 헤더 검사 — 필수 컬럼이 없으면 즉시 실패
+  const fields = parsed.meta.fields ?? [];
+  const missingRequired = SPOT_REQUIRED_FIELDS.filter((c) => !fields.includes(c));
+  if (missingRequired.length > 0) {
+    console.error(
+      `FAIL - 필수 컬럼 누락: ${missingRequired.join(", ")} — data/spots-template.csv 헤더를 그대로 사용하세요`
+    );
+    process.exit(1);
+  }
+  const unknownCols = fields.filter(
+    (f) => !(SPOT_CSV_COLUMNS as readonly string[]).includes(f)
+  );
+  if (unknownCols.length > 0) {
+    console.log(`주의 - 알 수 없는 컬럼(무시됨): ${unknownCols.join(", ")}`);
+  }
+  const missingOptional = SPOT_CSV_COLUMNS.filter((c) => !fields.includes(c));
+  if (missingOptional.length > 0) {
+    console.log(`주의 - 템플릿 대비 빠진 컬럼(빈 값으로 처리): ${missingOptional.join(", ")}`);
+  }
+
+  // 기존 DB 교차 중복 검사(선택 동작)
+  let existing: ExistingSpotRef[] | undefined;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (supabaseUrl && serviceKey) {
+    try {
+      existing = await fetchExistingSpots(supabaseUrl, serviceKey);
+      console.log(`DB 대조: motorcycle_spots ${existing.length}건과 교차 검사`);
+    } catch (e) {
+      console.error(`FAIL - DB 조회 실패: ${e instanceof Error ? e.message : String(e)}`);
+      process.exit(1);
+    }
+  } else {
+    console.log(
+      "(DB 대조 생략 — env 미설정: NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY. .env.local 은 자동 로드되지 않으니 필요 시 셸에서 환경변수를 설정하세요)"
+    );
+  }
+
+  const rawRows = parsed.data;
+  console.log(`데이터 ${rawRows.length}행 검사 (행 번호는 헤더=1행, 데이터=2행부터)`);
+
+  const result = validateSpots(rawRows, existing);
+  // 파싱 오류 행은 통과로 치지 않는다 — 요약·미리보기 모두에서 제외.
+  const validRows = result.valid.filter((v) => !parseErrorRows.has(v.row));
+
+  if (validRows.length > 0) {
+    console.log("\n[slug 미리보기]");
+    for (const v of validRows) {
+      console.log(
+        `  ok - ${v.row}행 ${v.spot.name} → ${v.spot.slug}${v.slugAutoGenerated ? " (자동 생성)" : " (입력값 유지)"}`
+      );
+    }
+  }
+
+  const sortedErrors = [...result.errors].sort((a, b) => a.row - b.row);
+  for (const e of sortedErrors) {
+    failures.push(`${e.row}행${e.field ? ` [${e.field}]` : ""} ${e.reason}`);
+  }
+
+  if (failures.length > 0) {
+    console.log("\n[실패 목록]");
+    for (const f of failures) console.error(`  FAIL - ${f}`);
+  }
+
+  console.log(
+    `\n통과 ${validRows.length}건 / 실패 ${rawRows.length - validRows.length}건 (에러 ${failures.length}개)`
+  );
+  console.log(failures.length === 0 ? "ALL ROWS PASSED" : "VALIDATION FAILED");
+  process.exit(failures.length > 0 ? 1 : 0);
+}
+
+main().catch((e) => {
+  console.error(`FAIL - 예기치 못한 오류: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}`);
+  process.exit(1);
+});

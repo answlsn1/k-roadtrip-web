@@ -1,0 +1,4 @@
+﻿name,category,lat,lng,region_sido,source,slug,alt_name,tags,address_road,region_sigungu,access_note,road_surface,parking_moto,winding_grade,senior_friendly,photo_spot,photo_note,best_season,best_time,stay_minutes,crowd_weekend,rating_personal,verified,source_url,memo,photos,status
+언덕끝 로스터리,카페,35.9873,128.6841,대구,직접방문,,,뷰맛집;테라스,대구 동구 팔공산로 1234,동구,오르막 진입로 폭 좁음 — 초행 주의,포장,양호,,true,true,테라스에서 팔공산 능선 뷰가 트인다,4;5;10;11,오후;일몰,40,붐빔,4,true,,주말 오후는 대기 줄 — 평일 방문 추천,,draft
+달빛재 전망쉼터,전망포토,36.1421,128.7563,경북,크루추천,달빛재-전망쉼터-경북,,노을;운해,,군위군,정상 직전 급커브 뒤 우측 공터,포장,보통,,true,true,일몰 30분 전 도착 추천 — 서쪽 능선 뷰,5;6;9;10,일몰;야간,20,한적,5,false,,새벽 운해는 가을에 확률 높음,,draft
+은행나무재 남측 진입점,와인딩진입점,36.3218,128.9847,경북,유튜브,,,와인딩;가로수길,,청송군,진입점 갓길 좁음 — 정차는 50m 아래 공터,포장,협소,4,false,false,,4;5;10,오전;오후,10,한적,,false,,낙엽 시즌 노면 주의,,draft
