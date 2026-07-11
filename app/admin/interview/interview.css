@@ -1,0 +1,252 @@
+/* ============================================================
+ * 동행단 카페 인터뷰 — /admin/interview 전용 보강 스타일.
+ *   join.css(.join-scope) 디자인 시스템 위에 인터뷰 화면에만 필요한
+ *   소품(질문 타이포·진행 팁·스팟 카드·세션 목록·리캡)을 얹는다.
+ *   ⚠️ 전부 `.join-scope.iv` 하위로 스코프 — /join·/recommend 에
+ *      절대 새지 않는다. 색·모서리·타이포 토큰은 join.css 변수 재사용.
+ * ============================================================ */
+
+/* ── 어드민 상단 바(브랜드 + 잠그기) ── */
+.join-scope.iv .iv-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.join-scope.iv .iv-brand {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--ink3);
+}
+.join-scope.iv .iv-lock {
+  min-height: 44px;
+  padding: 0 10px;
+  margin-right: -10px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink3);
+  cursor: pointer;
+}
+.join-scope.iv .iv-lock:hover {
+  color: var(--ink2);
+}
+
+/* ── 같이 읽는 질문 — 테이블 건너편에서도 읽히게 크게 ── */
+.join-scope.iv .iv-q {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.5;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.join-scope.iv .iv-q + .iv-q {
+  margin-top: 12px;
+}
+
+/* ── 진행 팁 — 숨기지 않되 조용하게(대상자도 보는 화면) ── */
+.join-scope.iv .iv-tip {
+  margin-top: 14px;
+}
+.join-scope.iv .iv-tip summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink3);
+}
+.join-scope.iv .iv-tip summary:hover {
+  color: var(--ink2);
+}
+.join-scope.iv .iv-tip-body {
+  padding: 0 2px 4px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink3);
+}
+.join-scope.iv .iv-guide-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+.join-scope.iv .iv-guide-list li {
+  margin-top: 4px;
+}
+
+/* ── 작은 보조 버튼(세션 목록·이어하기) ── */
+.join-scope.iv .iv-btn {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink2);
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.join-scope.iv .iv-btn:hover {
+  border-color: var(--c1);
+  color: var(--ink);
+}
+.join-scope.iv .iv-btn--primary {
+  border-color: var(--c1);
+  background: var(--coral-soft);
+  color: var(--c1);
+}
+.join-scope.iv .iv-row-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ── 지난 세션 목록 ── */
+.join-scope.iv .iv-sess {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line2);
+}
+.join-scope.iv .iv-sess:first-of-type {
+  border-top: none;
+}
+.join-scope.iv .iv-sess-name {
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.join-scope.iv .iv-sess-date {
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink3);
+}
+.join-scope.iv .iv-sess-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+/* ── 수집한 스팟 카드 + 카운트 ── */
+.join-scope.iv .iv-count {
+  margin: 2px 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.join-scope.iv .iv-spot {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.join-scope.iv .iv-spot-main {
+  flex: 1;
+  min-width: 0;
+}
+.join-scope.iv .iv-spot-place {
+  font-size: 15px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.join-scope.iv .iv-spot-region {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 7px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c1);
+  background: var(--coral-soft);
+  vertical-align: 1px;
+}
+.join-scope.iv .iv-spot-why {
+  margin-top: 3px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink2);
+  overflow-wrap: anywhere;
+}
+.join-scope.iv .iv-spot-x {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  margin: -6px -8px -6px 0;
+  border: none;
+  background: none;
+  border-radius: 12px;
+  font-size: 15px;
+  color: var(--ink3);
+  cursor: pointer;
+}
+.join-scope.iv .iv-spot-x:hover {
+  color: #b23b1d;
+  background: var(--coral-soft);
+}
+
+/* ── 요약 리캡 ── */
+.join-scope.iv .iv-recap-row {
+  display: flex;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px dashed var(--line2);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.join-scope.iv .iv-recap-row:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+.join-scope.iv .iv-recap-k {
+  flex: 0 0 88px;
+  padding-top: 1px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink3);
+}
+.join-scope.iv .iv-recap-v {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ── 공동 열람 화면 보정 — 터치 타깃 44px + 긴 입력 ── */
+.join-scope.iv .join-chip {
+  min-height: 44px;
+  padding: 10px 16px;
+}
+.join-scope.iv .join-back {
+  min-height: 44px;
+}
+.join-scope.iv textarea.join-input {
+  min-height: 92px;
+  line-height: 1.6;
+  resize: vertical;
+}
+.join-scope.iv .iv-add {
+  margin-top: 16px;
+}
+.join-scope.iv .iv-fallback {
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* 커스텀 버튼 focus 링 — join.css 의 코랄 포커스 규칙과 통일 */
+.join-scope.iv .iv-lock:focus-visible,
+.join-scope.iv .iv-btn:focus-visible,
+.join-scope.iv .iv-spot-x:focus-visible,
+.join-scope.iv .iv-tip summary:focus-visible {
+  outline: 2px solid var(--c1);
+  outline-offset: 2px;
+}
