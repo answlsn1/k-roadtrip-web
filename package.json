@@ -9,7 +9,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "smoke": "tsx scripts/smoke.test.ts",
-    "spots:validate": "tsx scripts/validate-spots.ts"
+    "spots:validate": "tsx scripts/validate-spots.ts",
+    "spots:import": "tsx scripts/import-spots.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
