@@ -39,8 +39,9 @@ export default function Navbar({ mode = "car" }: { mode?: "car" | "bike" }) {
           <div className="hidden items-center gap-6 text-sm font-semibold text-slate-600 md:flex">
             {isBike ? (
               <>
-                <a href="#routes" className="transition-colors hover:text-ink">{t("bike.nav.routes", lang)}</a>
-                <a href="#why"    className="transition-colors hover:text-ink">{t("bike.nav.why", lang)}</a>
+                {/* 루트 기준 앵커 — /privacy 등 서브페이지에서도 해당 화면으로 이동 */}
+                <a href="/bike#routes" className="transition-colors hover:text-ink">{t("bike.nav.routes", lang)}</a>
+                <a href="/bike#why"    className="transition-colors hover:text-ink">{t("bike.nav.why", lang)}</a>
                 <Link
                   href="/bike#passport"
                   className="rounded-full bg-ink px-3.5 py-1.5 text-white transition-colors hover:bg-slate-700"
@@ -52,10 +53,11 @@ export default function Navbar({ mode = "car" }: { mode?: "car" | "bike" }) {
               </>
             ) : (
               <>
-                {/* Tertiary: quiet text anchors — the primary CTA lives in BuildRouteFab. */}
-                <a href="#courses" className="transition-colors hover:text-ink">{t("nav.routes", lang)}</a>
-                <a href="#map"     className="transition-colors hover:text-ink">{t("nav.map",    lang)}</a>
-                <a href="#why"     className="transition-colors hover:text-ink">{t("nav.why",    lang)}</a>
+                {/* Tertiary: quiet text anchors — the primary CTA lives in BuildRouteFab.
+                    루트 기준(/#…) — /privacy 등 서브페이지에서도 홈 섹션으로 이동. */}
+                <a href="/#courses" className="transition-colors hover:text-ink">{t("nav.routes", lang)}</a>
+                <a href="/#map"     className="transition-colors hover:text-ink">{t("nav.map",    lang)}</a>
+                <a href="/#why"     className="transition-colors hover:text-ink">{t("nav.why",    lang)}</a>
                 {/* Utility cluster: one quiet visual unit, divided from the anchors. */}
                 <div className="flex items-center gap-3 border-l border-slate-200 pl-6">
                   <MyTripButton />
@@ -106,22 +108,22 @@ export default function Navbar({ mode = "car" }: { mode?: "car" | "bike" }) {
             <nav className="flex flex-col px-4 py-3">
               {isBike ? (
                 <>
-                  <a href="#routes" onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
+                  <a href="/bike#routes" onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
                     {t("bike.nav.routes", lang)}
                   </a>
-                  <a href="#why" onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
+                  <a href="/bike#why" onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
                     {t("bike.nav.why", lang)}
                   </a>
                 </>
               ) : (
                 <>
-                  <a href="#courses" onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
+                  <a href="/#courses" onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
                     {t("nav.routes", lang)}
                   </a>
-                  <a href="#map"     onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
+                  <a href="/#map"     onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
                     {t("nav.map", lang)}
                   </a>
-                  <a href="#why"     onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
+                  <a href="/#why"     onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">
                     {t("nav.why", lang)}
                   </a>
                   <Link href="/builder" onClick={close} className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100">

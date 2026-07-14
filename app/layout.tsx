@@ -47,6 +47,9 @@ export default function RootLayout({
       >
         <LangSync />
         {children}
+        {/* AdSense 로더는 여기(전 페이지)가 아니라 app/page.tsx(홈)에만 둔다 —
+            콘솔에서 자동광고가 실수로 켜져도 루트 상세·빌더 등 예약/핸드오프
+            funnel 페이지에는 광고가 주입될 수 없도록 코드 레벨에서 스코프. */}
       </body>
     </html>
   );

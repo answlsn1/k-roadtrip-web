@@ -12,6 +12,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: base, lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: `${base}/builder`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    // AdSense 심사자·크롤러가 방침 페이지에 도달할 수 있어야 한다(noindex 금지).
+    { url: `${base}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     ...routes.map((r) => ({
       url: `${base}/routes/${r.slug}`,
       lastModified: now,

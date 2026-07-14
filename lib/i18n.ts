@@ -103,6 +103,10 @@ export const dict = {
     en: "Contact: {email}",
     ko: "문의: {email}",
   },
+  "footer.privacy": { en: "Privacy Policy", ko: "개인정보처리방침" },
+
+  // ── Ads (Google AdSense slot label) ─────────────────────────
+  "ads.label": { en: "Advertisement", ko: "광고" },
 
   // ── Affiliate / sponsor disclosure ──────────────────────────
   "disclosure.affiliate": {

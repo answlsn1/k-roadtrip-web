@@ -51,3 +51,15 @@
 - C5 제휴 disclosure → 푸터 + 스폰서 행에 노출
 - i18n: 루트상세·빌더·모든 모달·지도섹션·에러/404 한국어 토글 동작 + 카드 배지/검색 placeholder 누출 수정
 - 첫인상: 브랜드 파비콘(SVG), 로딩 스켈레톤, robots.txt·sitemap.xml, 운영자 언어 노출 제거
+
+## M1 · 수익화 — AdSense 활성화 체크리스트 (2026-07-12 인프라 완성, env 게이트 대기)
+코드: `lib/config/ads.ts` · `components/ads/AdSlot.tsx` · `app/ads.txt/route.ts` · 홈 슬롯 2개(A: courses↔map, B: valueprops↔recommend). env 미설정 시 프로덕션 완전 무영향.
+- [ ] AdSense 가입·사이트 등록 → 게시자 ID(`ca-pub-…`) 발급
+- [ ] **광고 켜기 전 필수**: AdSense 콘솔 Privacy & messaging에서 EEA/UK 동의 메시지(Google CMP) 활성화 — /privacy가 "동의를 먼저 여쭙는다"고 약속함
+- [ ] AdSense 콘솔 **자동광고(Auto Ads) OFF 유지** — 로더가 홈에만 스코프되어 있지만 이중 안전장치
+- [ ] Vercel env 3종 설정: `NEXT_PUBLIC_ADSENSE_CLIENT`, `NEXT_PUBLIC_ADSENSE_SLOT_HOME_A`, `NEXT_PUBLIC_ADSENSE_SLOT_HOME_B` → **재배포 1회 필수**(NEXT_PUBLIC은 빌드타임 주입, ads.txt 404→200 전환도 재배포로)
+- [ ] 배포 후 확인: `/ads.txt` 200, 홈 슬롯 렌더, CLS 없음, 루트 상세·빌더에 광고 없음
+
+## M2 · 수익화 — 제휴 파트너 온보딩 시 주의
+- [ ] 렌터카/항공 제휴 링크 수령 후 연결 (Klook/Trip.com/Rentalcars 등 — 추적 파라미터 포함 확인)
+- [ ] ⚠️ SPONSORED_PLACES 활성화 시 AdSlot homeA 위치 재검토 — 스폰서 행(제휴 CTA) 바로 아래 광고가 인접하면 머니 클릭 희석·라벨 혼동 (map 섹션 뒤 이동 또는 조건부 비표시)

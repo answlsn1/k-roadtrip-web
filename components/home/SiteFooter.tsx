@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useLangStore } from "@/store/useLangStore";
 import { t, tf } from "@/lib/i18n";
 
@@ -38,6 +39,13 @@ export default function SiteFooter({ tone = "light" }: SiteFooterProps) {
             {CONTACT_EMAIL}
           </a>
           {contactSuffix}
+          {/* 개인정보처리방침 — AdSense 심사 요건이자 신뢰 요소, footer 전역 노출. */}
+          <span aria-hidden="true" className="mx-2">
+            ·
+          </span>
+          <Link href="/privacy" className="underline-offset-2 hover:underline">
+            {t("footer.privacy", lang)}
+          </Link>
         </p>
         <p
           className={`mt-4 text-center text-[11px] leading-relaxed sm:text-left ${

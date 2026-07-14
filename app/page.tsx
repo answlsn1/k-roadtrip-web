@@ -1,3 +1,4 @@
+import Script from "next/script";
 import CoursesSectionHeader from "@/components/home/CoursesSectionHeader";
 import HeroContent from "@/components/home/HeroContent";
 import HeroSlideshow from "@/components/home/HeroSlideshow";
@@ -9,6 +10,8 @@ import CategoryTileGrid from "@/components/home/CategoryTileGrid";
 import SiteFooter from "@/components/home/SiteFooter";
 import SponsoredCard from "@/components/home/SponsoredCard";
 import AffiliateDisclosure from "@/components/home/AffiliateDisclosure";
+import AdSlot from "@/components/ads/AdSlot";
+import { adsEnabled, ADSENSE_CLIENT } from "@/lib/config/ads";
 import ValueProps from "@/components/home/ValueProps";
 import RecommendBanner from "@/components/home/RecommendBanner";
 import { getPublishedRoutes, getAllWaypointsForMap } from "@/lib/data/queries";
@@ -94,6 +97,19 @@ export default async function HomePage() {
 
   return (
     <main>
+      {/* Google AdSense 로더 — 홈에만 둔다(레이아웃 금지). 콘솔에서 자동광고가
+          실수로 켜져도 루트 상세·빌더 등 예약/핸드오프 funnel 페이지에는 광고가
+          주입될 수 없도록 코드 레벨에서 스코프. env 미설정 시 출력 0(헌장 가드레일).
+          ⚠️ AdSense 콘솔: 자동광고(Auto Ads) OFF 유지 — 배치는 AdSlot 수동 슬롯만. */}
+      {adsEnabled && (
+        <Script
+          id="adsense-loader"
+          strategy="afterInteractive"
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+          crossOrigin="anonymous"
+        />
+      )}
+
       {/* ============ NAVBAR ============ */}
       <Navbar />
 
@@ -150,6 +166,11 @@ export default async function HomePage() {
         )}
       </section>
 
+      {/* ============ AD — slot A (홈 전용, env 미설정 시 null) ============ */}
+      {/* 배치 규칙: 광고는 홈 콘텐츠 섹션 사이(흰 배경)만 — 히어로·루트 상세·
+          예약/핸드오프 CTA 근처 금지(전환 funnel 보호). */}
+      <AdSlot slot="homeA" />
+
       {/* ============ MAP ============ */}
       {mapWaypoints.length > 0 && <MapSection waypoints={mapWaypoints} />}
 
@@ -158,6 +179,9 @@ export default async function HomePage() {
 
       {/* ============ VALUE PROPS ============ */}
       <ValueProps />
+
+      {/* ============ AD — slot B (홈 전용, env 미설정 시 null) ============ */}
+      <AdSlot slot="homeB" />
 
       {/* ============ RECOMMEND (KO only) ============ */}
       <RecommendBanner />
