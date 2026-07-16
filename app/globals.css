@@ -42,3 +42,10 @@ html {
     opacity: 0;
   }
 }
+
+/* AdSense 미채움 접힘 — 구글이 광고를 채우지 못하면(심사 기간·무채움)
+   슬롯 래퍼(라벨+예약 공간)를 통째로 숨긴다. 빈 광고 박스 노출 방지.
+   :has() 미지원 구형 브라우저는 예약 공간이 남는 것으로 우아하게 강등. */
+.ad-slot-wrap:has(ins[data-ad-status="unfilled"]) {
+  display: none;
+}

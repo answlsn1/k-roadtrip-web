@@ -47,7 +47,10 @@ export default function AdSlot({ slot }: { slot: AdSlotId }) {
   const isDev = process.env.NODE_ENV !== "production";
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-10">
+    // ad-slot-wrap: 구글이 광고를 못 채우면(data-ad-status="unfilled" — 심사
+    // 기간·무채움) 라벨·예약 공간까지 통째로 접는다(globals.css :has 규칙).
+    // 빈 광고 박스를 사용자에게 보여주지 않기 위함 — 구글 권장 패턴.
+    <div className="ad-slot-wrap mx-auto max-w-6xl px-5 py-10">
       <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
         {t("ads.label", lang)}
       </p>
