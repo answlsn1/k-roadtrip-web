@@ -800,7 +800,7 @@ export default function SpotForm({
           value={form.tags}
           onChange={(v) => set("tags", v)}
           placeholder="예: 뷰맛집; 테라스"
-          hint="쉼표(,) 또는 세미콜론(;)으로 구분해요."
+          hint="세미콜론(;)으로 구분해요 — CSV 규약과 동일."
         />
         <TextField
           id={`${uid}-source-url`}
