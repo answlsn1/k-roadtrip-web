@@ -3,6 +3,14 @@ import { getPublishedRoutes } from "@/lib/data/queries";
 
 const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://k-roadtrip.app";
 
+// Next.js metadata routes (sitemap.ts) are static by default — without this,
+// the file is generated once at build/deploy time and Vercel serves that same
+// snapshot indefinitely (found stale at 69h+ old, silently missing every route
+// published between deploys). `revalidate` alone still built as static (○) with
+// no ISR annotation for this route-handler convention file, so force it dynamic
+// like the homepage (same pattern, confirmed working via Cache-Control headers).
+export const dynamic = "force-dynamic";
+
 // Dynamic sitemap: home + builder + every published course, so crawlers can
 // reach the route-detail pages (the key landing pages for organic traffic).
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
