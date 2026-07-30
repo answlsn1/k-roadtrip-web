@@ -7,13 +7,13 @@
  *   그대로 다시 보여주는 콜백(라포의 핵심 순간).
  * ============================================================ */
 
-import { TRAVELER_TYPES } from "@/lib/join/constants";
+import { getTravelerType } from "@/lib/join/constants";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { StageProps } from "./interview.types";
 
 export default function WelcomeStage({ data, patch, onNext, onBack }: StageProps) {
   const reduced = useReducedMotion();
-  const type = data.travelerTypeKey ? TRAVELER_TYPES[data.travelerTypeKey] : null;
+  const type = getTravelerType(data.travelerTypeKey);
   const name = data.name.trim() || "동행자";
 
   return (
@@ -54,11 +54,9 @@ export default function WelcomeStage({ data, patch, onNext, onBack }: StageProps
       {type && (
         <div>
           <p className="join-label">지난번에 받은 탑승권, 기억나요?</p>
-          <div
-            className={`ticket${reduced ? "" : " ticket--pop"}`}
-            role="img"
-            aria-label={`여행자 유형 탑승권: ${type.name}`}
-          >
+          {/* role="img" 를 걸면 서브트리가 접근성 트리에서 지워져
+              유형 설명·탑승자 정보가 안 읽힌다(components/join/Ticket 과 동일 판단). */}
+          <div className={`ticket${reduced ? "" : " ticket--pop"}`}>
             <div className="ticket-header">
               <span className="ticket-brand">k—roadtrip</span>
               <span className="ticket-stamp">0기 동행단</span>

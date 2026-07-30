@@ -6,13 +6,13 @@
  *   진행 팁은 카드 안 <details> 로 조용히(대상자도 보는 화면).
  * ============================================================ */
 
-import { TRAVELER_TYPES } from "@/lib/join/constants";
+import { getTravelerType } from "@/lib/join/constants";
 import type { StageProps, TypeMatch } from "./interview.types";
 import { COMPANIONS, TYPE_MATCH } from "./interview.types";
 import { ChipGroup, QuestionCard, TipDetails, toggleValue } from "./ui";
 
 export default function WarmupStage({ data, patch, onNext, onBack }: StageProps) {
-  const type = data.travelerTypeKey ? TRAVELER_TYPES[data.travelerTypeKey] : null;
+  const type = getTravelerType(data.travelerTypeKey);
 
   const typeQuestion = type
     ? `퀴즈에서 ‘${type.name}’ 나왔었죠 — 진짜 그런 편이에요?`

@@ -264,8 +264,9 @@
   font-weight: 600;
 }
 
-/* ── 큰 선택 카드(quiz step1/2) ── */
+/* ── 큰 선택 카드(성향 문항) ── */
 .join-scope .join-optcard {
+  position: relative;
   display: block;
   width: 100%;
   text-align: left;
@@ -273,6 +274,7 @@
   background: var(--card);
   border-radius: 16px;
   padding: 18px;
+  padding-right: 46px; /* 선택 체크 자리 — 선택 전후로 글줄이 밀리지 않게 항상 확보 */
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.06s ease;
@@ -283,6 +285,29 @@
 }
 .join-scope .join-optcard:active {
   transform: translateY(1px);
+}
+/* 선택 상태 — 문항이 8개이고 선택 즉시 자동 진행이라 오탭이 난다.
+   뒤로 돌아왔을 때 "내가 뭘 골랐더라" 가 보이지 않으면 다시 찍어야 한다.
+   (.join-chip / .join-toggle 과 같은 관행. 색만으로 구분되지 않게 체크도 함께.) */
+.join-scope .join-optcard[aria-pressed="true"] {
+  border-color: var(--c1);
+  background: var(--coral-soft);
+}
+.join-scope .join-optcard[aria-pressed="true"]::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--c1);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 22px;
+  text-align: center;
 }
 .join-scope .join-optcard-title {
   display: block;
@@ -699,6 +724,211 @@
   100% {
     box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
   }
+}
+
+/* ============================================================
+ * 여행 유형 진단 — 진행률 / 유형 코드 / 코드 범례 / 메이트
+ *   문항이 8개로 늘면서 "얼마나 남았지?" 를 계속 보여줘야 한다.
+ * ============================================================ */
+
+/* ── quiz 진행률 (문항 스텝 상단) ── */
+.join-scope .quizprog {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 18px;
+}
+.join-scope .quizprog-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line2);
+  overflow: hidden;
+}
+.join-scope .quizprog-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--grad);
+  transition: width 0.28s cubic-bezier(0.22, 0.9, 0.32, 1);
+}
+.join-scope .quizprog-label {
+  flex: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  /* --ink3 는 --bg 위에서 2.9:1 로 야외에서 잘 안 보인다.
+     "몇 문항 남았나" 는 이탈을 막는 기능성 정보라 --ink2(5.9:1)로. */
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── MBTI 16개 그리드 선택기 ── */
+.join-scope .mbtigrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+@media (max-width: 359px) {
+  /* 아주 좁은 폰에서 4열은 글자가 눌린다 — 2열로 접는다. */
+  .join-scope .mbtigrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.join-scope .mbtigrid-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  /* 터치 타깃 최소 44px */
+  min-height: 56px;
+  padding: 8px 4px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.join-scope .mbtigrid-cell:hover {
+  border-color: var(--c1);
+}
+.join-scope .mbtigrid-cell[aria-pressed="true"] {
+  border-color: var(--c1);
+  background: var(--coral-soft);
+  box-shadow: 0 0 0 1px var(--c1) inset;
+}
+.join-scope .mbtigrid-code {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+.join-scope .mbtigrid-emoji {
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* ── 티켓: MBTI 코드 ── */
+.join-scope .ticket-code {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.34em;
+  /* letter-spacing 이 마지막 글자 뒤에도 붙어 시각적으로 왼쪽으로 쏠린다 */
+  text-indent: 0.34em;
+  color: var(--c1);
+  margin-bottom: 12px;
+}
+
+/* ── 티켓: 특징 칩 ── */
+.join-scope .ticket-traits {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.join-scope .ticket-trait {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink2);
+  background: var(--line2);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+/* ── 코드 범례(내 코드 읽는 법) ── */
+.join-scope .typelegend {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.join-scope .typelegend-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink3);
+  letter-spacing: 0.02em;
+  margin-bottom: 10px;
+}
+.join-scope .typelegend-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.join-scope .typelegend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* 여행 성향 값(계획/로컬/여유/미식…) — 한글 2글자라 고정 정사각형이 아니라
+   내용에 맞는 알약 형태로 둔다. */
+.join-scope .typelegend-letter {
+  flex: none;
+  min-width: 46px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--coral-soft);
+  color: var(--c1);
+  font-size: 12.5px;
+  font-weight: 800;
+  text-align: center;
+}
+.join-scope .typelegend-text {
+  font-size: 13.5px;
+  color: var(--ink);
+  min-width: 0;
+}
+.join-scope .typelegend-hint {
+  color: var(--ink3);
+  font-size: 12.5px;
+}
+
+/* ── 잘 맞는 여행 메이트 ── */
+.join-scope .typemate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--mint-soft);
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+.join-scope .typemate-emoji {
+  font-size: 26px;
+  line-height: 1;
+  flex: none;
+}
+.join-scope .typemate-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.join-scope .typemate-k {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--mint);
+  letter-spacing: 0.02em;
+}
+.join-scope .typemate-v {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.join-scope .typemate-code {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
 }
 
 /* reduced-motion: 애니메이션·트랜지션 전부 off */

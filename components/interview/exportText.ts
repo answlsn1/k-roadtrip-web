@@ -3,7 +3,7 @@
  *   운영자가 노션/메모 앱에 그대로 붙여 넣는 마크다운 형태.
  * ============================================================ */
 
-import { TRAVELER_TYPES } from "@/lib/join/constants";
+import { getTravelerType } from "@/lib/join/constants";
 import type { InterviewSessionData } from "./interview.types";
 
 /** ISO → "2026년 7월 12일 오후 02:30" 형태(실패 시 "—"). */
@@ -25,7 +25,7 @@ export function formatKoDateTime(iso: string | null): string {
 }
 
 export function buildExportText(s: InterviewSessionData): string {
-  const type = s.travelerTypeKey ? TRAVELER_TYPES[s.travelerTypeKey] : null;
+  const type = getTravelerType(s.travelerTypeKey);
   const L: string[] = [];
 
   L.push(`# K-RoadTrip 동행단 인터뷰 — ${s.name.trim() || "(이름 없음)"}님`);

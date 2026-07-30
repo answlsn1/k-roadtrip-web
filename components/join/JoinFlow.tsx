@@ -14,10 +14,15 @@
  *   두 화면 모두 같은 컴포넌트/로직을 재사용 — 텍스트만 variant/config 로 분기.
  * ============================================================ */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { submitJoin } from "@/app/actions/submit-join";
 import { trackEvent, type AppEventType } from "@/lib/analytics/events";
-import { resolveTravelerType } from "@/lib/join/constants";
+import {
+  formatTravelTypeForStorage,
+  getTravelerType,
+  type MbtiCode,
+} from "@/lib/join/constants";
+import { buildQuizSteps, scoreMbti, scoreTravel } from "@/lib/join/quiz";
 import { joinConfig, recommendConfig } from "@/lib/join/config";
 import type { Stage, QuizStepIndex, JoinAnswers } from "./join.flow.types";
 import RouteBar from "./RouteBar";
@@ -32,8 +37,14 @@ const SESSION_STORAGE_KEY = "krt-session";
 
 function initialAnswers(variant: "offline" | "online"): JoinAnswers {
   return {
+    mbti: null,
+    mbtiUnknown: false,
+    mbtiPicks: {},
     plan: null,
     spotPref: null,
+    pace: null,
+    focus: null,
+    travelPicks: {},
     recRegion: null,
     recSpot: "",
     pain: null,
@@ -71,11 +82,11 @@ const GENERIC_ERROR =
   "앗, 전송이 잘 안 됐어요. 잠시 후 다시 시도해 주세요. (입력은 그대로 남아 있어요)";
 
 /** RouteBar 현재 역 인덱스: 출발·나 알기·탑승권·함께·탑승. */
-function routeIndex(stage: Stage, quizStep: QuizStepIndex): number {
+function routeIndex(stage: Stage, isCollectStep: boolean): number {
   switch (stage) {
     case "quiz":
-      // 출발(0) = 성향 스텝, 나 알기(1) = 추천/불편 스텝.
-      return quizStep <= 2 ? 0 : 1;
+      // 출발(0) = MBTI·성향 문항, 나 알기(1) = 추천/불편 수집 스텝.
+      return isCollectStep ? 1 : 0;
     case "ticket":
       return 2;
     case "why":
@@ -99,11 +110,24 @@ export default function JoinFlow({
 }) {
   const config = variant === "online" ? recommendConfig : joinConfig;
   const [stage, setStage] = useState<Stage>("hero");
-  const [quizStep, setQuizStep] = useState<QuizStepIndex>(1);
+  /** 0-based 인덱스 into steps(아래 useMemo). */
+  const [quizStep, setQuizStep] = useState<QuizStepIndex>(0);
   const [answers, setAnswers] = useState<JoinAnswers>(() => initialAnswers(variant));
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const topRef = useRef<HTMLDivElement>(null);
+
+  // 스텝 구성은 "MBTI 를 모른다" 를 골랐는지에 따라 달라진다(추정 4문항 삽입).
+  // 인덱스 산술 대신 목록을 만들어 쓴다 — 경계 계산 실수가 안 나게.
+  const steps = useMemo(
+    () => buildQuizSteps(answers.mbtiUnknown),
+    [answers.mbtiUnknown],
+  );
+  // 목록이 줄어드는 순간(모름→직접선택 변경)에도 인덱스가 넘치지 않게 clamp.
+  const stepIndex = Math.min(quizStep, steps.length - 1);
+  const currentStep = steps[stepIndex];
+  const isCollectStep =
+    currentStep.kind === "rec" || currentStep.kind === "pain";
 
   // ── 퍼널 계측(Phase 4a) ──
   // 각 이벤트는 정확히 1번만 발화. useRef 기반 "발화 완료" 집합으로
@@ -167,48 +191,85 @@ export default function JoinFlow({
     setAnswers((prev) => ({ ...prev, ...p }));
   }, []);
 
-  // quiz step1/2: 선택 즉시 자동 진행. step4 마지막 → ticket.
-  const quizPick = useCallback(
-    (p: Partial<JoinAnswers>) => {
-      setAnswers((prev) => ({ ...prev, ...p }));
-      setQuizStep((s) => {
-        const next = (s + 1) as QuizStepIndex;
-        return next;
+  /**
+   * MBTI 직접 선택. code=null 이면 "잘 모르겠어요" → 추정 문항이 끼어든다.
+   * 어느 쪽이든 바로 다음 스텝(index 1)으로 — 스텝 목록이 이 선택으로
+   * 바뀌므로 s+1 이 아니라 1 로 고정해야 목록과 인덱스가 어긋나지 않는다.
+   */
+  const pickMbti = useCallback(
+    (code: MbtiCode | null) => {
+      setAnswers((prev) => ({
+        ...prev,
+        mbti: code,
+        mbtiUnknown: code === null,
+        // 직접 고른 순간 추정 문항 답은 의미가 없어지므로 비운다
+        // (남겨두면 나중에 "모름"으로 되돌렸을 때 옛 답이 되살아난다).
+        mbtiPicks: code === null ? prev.mbtiPicks : {},
+      }));
+      setQuizStep(1);
+      scrollTop();
+    },
+    [scrollTop],
+  );
+
+  /** MBTI 추정 문항: 선택 즉시 자동 진행. 매번 다시 채점해 덮어쓴다. */
+  const pickMbtiAnswer = useCallback(
+    (questionIndex: number, value: string) => {
+      setAnswers((prev) => {
+        const mbtiPicks = { ...prev.mbtiPicks, [questionIndex]: value };
+        return { ...prev, mbtiPicks, mbti: scoreMbti(mbtiPicks) };
       });
+      setQuizStep((s) => s + 1);
+      scrollTop();
+    },
+    [scrollTop],
+  );
+
+  /** 여행 성향 문항: 선택 즉시 자동 진행. 매번 다시 채점해 덮어쓴다
+   *  (뒤로 가서 답을 바꿔도 결과가 항상 현재 선택과 일치하도록). */
+  const pickTravel = useCallback(
+    (questionIndex: number, value: string) => {
+      setAnswers((prev) => {
+        const travelPicks = { ...prev.travelPicks, [questionIndex]: value };
+        return { ...prev, travelPicks, ...scoreTravel(travelPicks) };
+      });
+      setQuizStep((s) => s + 1);
       scrollTop();
     },
     [scrollTop],
   );
 
   const quizNext = useCallback(() => {
-    setQuizStep((s) => {
-      if (s >= 4) return s;
-      return (s + 1) as QuizStepIndex;
-    });
-    if (quizStep >= 4) {
+    if (stepIndex >= steps.length - 1) {
       goStage("ticket");
-    } else {
-      scrollTop();
+      return;
     }
-  }, [quizStep, goStage, scrollTop]);
+    setQuizStep(stepIndex + 1);
+    scrollTop();
+  }, [stepIndex, steps.length, goStage, scrollTop]);
 
   const quizBack = useCallback(() => {
-    if (quizStep === 1) {
+    if (stepIndex === 0) {
       goStage("hero");
       return;
     }
-    setQuizStep((s) => (s - 1) as QuizStepIndex);
+    setQuizStep(stepIndex - 1);
     scrollTop();
-  }, [quizStep, goStage, scrollTop]);
+  }, [stepIndex, goStage, scrollTop]);
 
   const handleSubmit = useCallback(
     async (company: string) => {
       setSubmitting(true);
       setErrorMessage(null);
 
-      // 산출된 여행자 유형명을 travelType 으로 저장(둘 중 하나 null 이면 null).
-      const travelType =
-        resolveTravelerType(answers.plan, answers.spotPref)?.name ?? null;
+      // 형식: 'ENFP · 즉흥 감성 유랑러 (여유·미식)'
+      // plan/spot_pref 는 전용 컬럼에 따로 들어가지만 MBTI·pace·focus 는
+      // 컬럼이 없어서 이 문자열이 유일한 보존 경로다.
+      const travelType = formatTravelTypeForStorage(
+        getTravelerType(answers.mbti),
+        answers.pace,
+        answers.focus,
+      );
 
       const res = await submitJoin({
         name: answers.name,
@@ -248,7 +309,7 @@ export default function JoinFlow({
     stage === "join";
 
   // key: 화면/스텝 전환마다 바뀌어 slideIn 을 재생.
-  const screenKey = stage === "quiz" ? `quiz-${quizStep}` : stage;
+  const screenKey = stage === "quiz" ? `quiz-${stepIndex}` : stage;
 
   // ── 포커스 이동(a11y) ──
   // 화면/스텝 전환 시 새 화면의 제목(heading)으로 포커스를 옮겨
@@ -276,7 +337,7 @@ export default function JoinFlow({
 
   return (
     <div className="join-container" ref={topRef}>
-      {showRouteBar && <RouteBar current={routeIndex(stage, quizStep)} />}
+      {showRouteBar && <RouteBar current={routeIndex(stage, isCollectStep)} />}
 
       <div className="join-screen" key={screenKey} ref={screenRef}>
         {stage === "hero" && (
@@ -285,9 +346,13 @@ export default function JoinFlow({
 
         {stage === "quiz" && (
           <QuizStep
-            step={quizStep}
+            step={currentStep}
+            stepNumber={stepIndex + 1}
+            totalSteps={steps.length}
             answers={answers}
-            onPick={quizPick}
+            onPickMbti={pickMbti}
+            onPickMbtiAnswer={pickMbtiAnswer}
+            onPickTravel={pickTravel}
             onChange={patch}
             onBack={quizBack}
             onNext={quizNext}

@@ -250,3 +250,13 @@
   outline: 2px solid var(--c1);
   outline-offset: 2px;
 }
+
+/* 유형 칩 안의 4글자 코드 — 16유형이라 이름만으론 헷갈려서
+   대상자 탑승권에 찍힌 코드로 바로 찾을 수 있게 함께 노출. */
+.join-scope.iv .iv-typecode {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ink3);
+}

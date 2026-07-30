@@ -35,7 +35,7 @@ export default function RecommendBanner() {
           href="/recommend?src=home_banner"
           className="mt-1 rounded-full border border-white/25 bg-white/10 px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:border-white/40 hover:bg-white/15 active:scale-[0.99]"
         >
-          30초 추천하러 가기 →
+          1분 추천하러 가기 →
         </Link>
       </div>
     </section>

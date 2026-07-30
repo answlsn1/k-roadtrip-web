@@ -104,7 +104,10 @@ export default function SetupStage({
                 }))
               }
             >
-              {TRAVELER_TYPES[key].emoji} {TRAVELER_TYPES[key].name}
+              {TRAVELER_TYPES[key].emoji} {TRAVELER_TYPES[key].name}{" "}
+              {/* 대상자가 보여주는 탑승권엔 4글자 코드가 크게 찍혀 있어
+                  이름보다 코드로 찾는 게 빠르다(16유형이라 이름은 비슷비슷). */}
+              <span className="iv-typecode">{TRAVELER_TYPES[key].code}</span>
             </button>
           ))}
           <button

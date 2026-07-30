@@ -8,7 +8,7 @@
  * ============================================================ */
 
 import type { ReactNode } from "react";
-import { TRAVELER_TYPES } from "@/lib/join/constants";
+import { getTravelerType } from "@/lib/join/constants";
 import type { InterviewSessionData } from "./interview.types";
 import { buildExportText } from "./exportText";
 import { TipDetails, useClipboard } from "./ui";
@@ -32,7 +32,7 @@ export default function SummaryStage({
   onReset: () => void;
 }) {
   const { copiedKey, fallbackText, copy, liveMessage } = useClipboard();
-  const type = data.travelerTypeKey ? TRAVELER_TYPES[data.travelerTypeKey] : null;
+  const type = getTravelerType(data.travelerTypeKey);
   const name = data.name.trim() || "동행자";
 
   // 어떤 메모가 담겼는지(내용 자체는 복사본에 — 리캡엔 존재 여부만).
