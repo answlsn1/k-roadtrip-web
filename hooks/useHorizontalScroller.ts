@@ -23,6 +23,10 @@ export function useHorizontalScroller<T extends HTMLElement = HTMLDivElement>() 
   const [totalPages, setTotalPages] = useState(1);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
+  /** Content is wider than the track — i.e. there is actually something to
+   *  scroll to. Callers use this to center a short list instead of leaving
+   *  it hugging the left edge with dead space beside it. */
+  const [isOverflowing, setIsOverflowing] = useState(false);
 
   const updateState = useCallback(() => {
     const el = scrollRef.current;
@@ -33,6 +37,23 @@ export function useHorizontalScroller<T extends HTMLElement = HTMLDivElement>() 
     setCurrentPage(Math.min(cur, total - 1));
     setCanPrev(el.scrollLeft > 4);
     setCanNext(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+
+    // ⚠️ Do NOT derive this from scrollWidth. The caller applies
+    // `justify-content: center` when this is false, and a centered flex
+    // container overflows in BOTH directions — which makes scrollWidth
+    // under-report to roughly clientWidth. Deriving overflow from
+    // scrollWidth therefore self-locks: it reads "fits", stays centered,
+    // and never recovers even as more cards render.
+    // Measuring the laid-out children instead is independent of alignment.
+    const first = el.firstElementChild;
+    const last = el.lastElementChild;
+    const contentWidth =
+      first && last
+        ? last.getBoundingClientRect().right - first.getBoundingClientRect().left
+        : el.scrollWidth;
+    // 1px slack: sub-pixel widths would otherwise report a permanent 0.x px
+    // overflow and suppress centering on lists that visibly fit.
+    setIsOverflowing(contentWidth > el.clientWidth + 1);
   }, []);
 
   useEffect(() => {
@@ -73,5 +94,5 @@ export function useHorizontalScroller<T extends HTMLElement = HTMLDivElement>() 
     el.scrollTo({ left: index * el.clientWidth, behavior: scrollBehavior() });
   }, []);
 
-  return { scrollRef, currentPage, totalPages, canPrev, canNext, scroll, scrollToPage };
+  return { scrollRef, currentPage, totalPages, canPrev, canNext, isOverflowing, scroll, scrollToPage };
 }

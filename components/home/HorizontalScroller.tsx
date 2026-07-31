@@ -47,7 +47,7 @@ export default function HorizontalScroller({
   pageNavLabel,
   pageLabel,
 }: HorizontalScrollerProps) {
-  const { scrollRef, currentPage, totalPages, canPrev, canNext, scroll, scrollToPage } =
+  const { scrollRef, currentPage, totalPages, canPrev, canNext, isOverflowing, scroll, scrollToPage } =
     useHorizontalScroller<HTMLDivElement>();
 
   return (
@@ -55,7 +55,14 @@ export default function HorizontalScroller({
       <div className="relative">
         <div
           ref={scrollRef}
-          className={`flex overflow-x-auto snap-x snap-mandatory scroll-smooth motion-reduce:scroll-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${trackClassName}`}
+          // justify-center ONLY when the content fits — a short list (2 cards)
+          // otherwise sits left-aligned with dead space beside it. Never apply
+          // it while overflowing: centering an overflowing flex scroll
+          // container pushes the first item into negative scroll space that
+          // can't be scrolled back to.
+          className={`flex overflow-x-auto snap-x snap-mandatory scroll-smooth motion-reduce:scroll-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+            isOverflowing ? "" : "justify-center"
+          } ${trackClassName}`}
         >
           {children}
         </div>

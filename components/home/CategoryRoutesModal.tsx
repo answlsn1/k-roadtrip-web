@@ -184,13 +184,16 @@ export default function CategoryRoutesModal({ titleKey, image, routes, onClose }
               </svg>
             </button>
           </div>
-          {/* Netflix-row strip: -mx-6 bleeds the track past the dialog's own
-              padding so the last card visibly peeks off the edge (scroll
-              affordance), while px-6 on the track keeps the first/last card
-              aligned with the header above instead of touching the dialog wall. */}
+          {/* Netflix-row strip. The track deliberately does NOT bleed past the
+              dialog's p-6 — it sits inside it, so its own border box clips the
+              cards at exactly 24px from both walls no matter where you've
+              scrolled. Bleeding it (-mx-6 + px-6 on the track) made the visible
+              margin swing with scroll position (24px left / 8px right on page
+              one, then the reverse on page two), which read as broken padding.
+              Peek still works: a partly-scrolled card is clipped at that same
+              24px line rather than at the dialog wall. */}
           <HorizontalScroller
-            className="-mx-6"
-            trackClassName="gap-3 px-6 pb-1 scroll-pl-6 scroll-pr-6"
+            trackClassName="gap-3 pb-1"
             // Low alpha, not a color match — this fade double-composites on
             // top of the dialog's own bg-slate-950/65 scrim (the fade wrapper
             // only spans the card row, not the full dialog height), so a
