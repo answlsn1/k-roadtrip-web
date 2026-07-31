@@ -125,6 +125,10 @@ export const dict = {
   "common.copied":     { en: "✓ Copied!",       ko: "✓ 복사됨!" },
   "common.clearAll":   { en: "Clear all",       ko: "모두 지우기" },
   "common.loadingMap": { en: "Loading map…",    ko: "지도 불러오는 중…" },
+  "common.previous":   { en: "Previous",        ko: "이전" },
+  "common.next":       { en: "Next",            ko: "다음" },
+  "common.scrollPages": { en: "Scroll pages",   ko: "페이지 이동" },
+  "common.pageN":       { en: "Page {n}",       ko: "{n}페이지" },
 
   // ── Live Map section ────────────────────────────────────────
   "map.label":   { en: "Live Map",                   ko: "전체 지도" },

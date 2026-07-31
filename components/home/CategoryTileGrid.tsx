@@ -70,7 +70,12 @@ export default function CategoryTileGrid({ groups }: { groups: CategoryGroup[] }
         ))}
       </div>
       {openGroup && (
-        <CategoryRoutesModal titleKey={openGroup.titleKey} routes={openGroup.routes} onClose={() => setOpenId(null)} />
+        <CategoryRoutesModal
+          titleKey={openGroup.titleKey}
+          image={openGroup.image}
+          routes={openGroup.routes}
+          onClose={() => setOpenId(null)}
+        />
       )}
     </>
   );
